@@ -1,0 +1,1 @@
+ALTER TABLE `items` ADD COLUMN `faction` int(11) UNSIGNED DEFAULT '0' NOT NULL after `flags`;

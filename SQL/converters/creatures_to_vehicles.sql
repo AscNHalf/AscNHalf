@@ -1,0 +1,2 @@
+UPDATE creature_proto set vehicle_entry = 1 where entry in (select entry from creature_names where info_str = "vehichleCursor");
+UPDATE creature_spawns set vehicle = 1 where entry in (select entry from creature_names where info_str = "vehichleCursor");

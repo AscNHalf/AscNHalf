@@ -1,0 +1,3 @@
+/* AscNHalf */
+
+#include "StdAfx.h"
