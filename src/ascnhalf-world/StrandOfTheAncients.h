@@ -8,6 +8,12 @@ static const float SOTAStartLocations[2][3] = {
 	{ 1209.1f, -65.562363f, 70.2f }, //defenders
 };
 
+enum SOTA_SPAWNTYPES
+{
+	SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED	= 3,
+	SOTA_SPAWN_TYPE_HORDE_CONTROLLED		= 4,
+};
+
 enum SOTA_GAMEOBJECTS
 {
 	SOTA_GAMEOBJECT_GATE					= 192549
@@ -43,6 +49,9 @@ public:
 	void HookOnPlayerKill(Player* plr, Unit* pVictim);
 	void HookOnHK(Player* plr);
 	void HookOnShadowSight();
+	void SpawnControlPoint(uint32 Id, uint32 Type);
+	void CaptureControlPoint(uint32 Id, uint32 Team);
+	void SOTARebuild(bool m_reliccaptured);
 	void OnPlatformTeleport(Player* plr);
 	void Respawn();
 	LocationVector GetStartingCoords(uint32 Team);
@@ -72,16 +81,18 @@ protected:
 	uint32 RoundTime;
 	Creature* m_cannons[10];
 	Creature* m_npcs[2];
-	Creature* m_demolisher[4];
+	Creature* m_demolisher[6];
+	Creature* m_spiritGuides[3];
 	GameObject* m_relic;
 	GameObject* m_endgate;
 	GameObject* m_gates[5];
 	GameObject* m_gateSigils[5];
 	GameObject* m_gateTransporters[5];
 	GameObject* m_boats[2];
-	GameObject* m_buffs[3];
+	GameObject* m_controlPoint[3];
 	uint8 hordewins;
 	uint8 allywins;
+	int32 m_basesOwnedBy[3];
 };
 
 #endif		// _SOTA_H

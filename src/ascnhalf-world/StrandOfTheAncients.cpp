@@ -59,11 +59,11 @@ const float sotaTransporterDestination[5][4] = {
 	{ 1193.857f, 69.9f, 58.046f, 5.7245f },
 };
 const float sotaRepop[5][4] = {
-	{ 962.52f, -184.76f, 91.47f, 0.9f },	
-	{ 1446.87f, -54.35f, 5.88f, 0.25f },	// Attackers
+	{ 1221.38f, -69.61f, 70.08f, 3.16f },	// south graveyard
 	{ 1347.20f, -161.15f, 31.24f, 2.56f },	// east graveyard
 	{ 1316.39f, 11.36f, 31.19f, 2.91f },	// west graveyard
-	{ 1221.38f, -69.61f, 70.08f, 3.16f },	// south graveyard
+	{ 962.52f, -184.76f, 91.47f, 0.9f },	
+	{ 1446.87f, -54.35f, 5.88f, 0.25f },
 	
 };
 
@@ -96,11 +96,38 @@ const float demolisherSalesman[2][5] = {
 	{29262, 1367.82f, 220.55f, 37.06f, 4.45f},		// Gorgril Rigspark
 };
 
-const float demolisherLocations[4][4] = {
+const float demolisherLocations[6][4] = {
 	{1327.34f, -257.86f, 32.61f, 0.26f},
 	{1318.58f, 181.75f, 32.07f, 5.69f},
 	{1564.84f, 112.20f, 2.90f, 3.59f},
-	{1569.93f, -168.21, 5.46f, 3.40f},
+	{1569.93f, -168.21f, 5.46f, 3.40f},
+	{1610.25f, -116.32f, 8.81f, 2.44f},
+	{1617.97f, 62.39f, 7.17f, 3.85f},
+};
+
+static uint32 ControlPointGoIds[3][2] = { /* ALLIANCE-CONTROLLED    HORDE_CONTROLLED*/
+		{ 180076,    180078 },	
+		{ 180076,    180078 },
+		{ 180076,    180078 },
+};
+
+const float ControlPointCoordinates[3][4] = {
+	{1341.15f, -154.83f, 30.90f, 0.01f},		// South Graveyard
+	{1315.13f, 11.74f, 31.12f, 0.01f},			// East Graveyard
+	{1217.88f, -68.01f, 70.08f, 0.01f},			// West Graveyard
+
+};
+
+const uint32 capturedStates[3][2] = {		/* [alliance][horde]*/
+	{ WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, WORLDSTATE_SOTA_SOUTH_GRAVEYARD_HORDE_CONTROLLED},
+	{ WORLDSTATE_SOTA_EAST_GRAVEYARD_ALLIANCE_CONTROLLED, WORLDSTATE_SOTA_EAST_GRAVEYARD_HORDE_CONTROLLED},
+	{ WORLDSTATE_SOTA_WEST_GRAVEYARD_ALLIANCE_CONTROLLED, WORLDSTATE_SOTA_WEST_GRAVEYARD_HORDE_CONTROLLED}, 
+};
+
+static const char * ControlPointNames[3] = {
+	"South Graveyard",
+	"East Graveyard",
+	"West Graveyard",
 };
 	
 float CalculateDistance(float x1, float y1, float z1, float x2, float y2, float z2)
@@ -245,7 +272,7 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	}
 	
 	// Spawn demolishers
-	for(uint32 dem =0; dem < 4; dem++)
+	for(uint32 dem =0; dem < 6; dem++)
 	{
 		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 	}
@@ -253,25 +280,37 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	// Spawn spirit guids
 	if(Attackers == ALLIANCE)
 	{
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[1][0], sotaRepop[1][1], sotaRepop[1][2], sotaRepop[1][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[0][0], sotaRepop[0][1], sotaRepop[0][2], sotaRepop[0][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[2][0], sotaRepop[2][1], sotaRepop[2][2], sotaRepop[2][3], 0));
+		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 1));
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[3][0], sotaRepop[3][1], sotaRepop[3][2], sotaRepop[3][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 0));
+		for(uint32 repop = 0; repop < 3; repop++)
+		{
+			AddSpiritGuide(m_spiritGuides[repop] = SpawnSpiritGuide(sotaRepop[repop][0], sotaRepop[repop][1], sotaRepop[repop][2], sotaRepop[repop][3], 0));
+		}
 	}
 	else
 	{
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[1][0], sotaRepop[1][1], sotaRepop[1][2], sotaRepop[1][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[0][0], sotaRepop[0][1], sotaRepop[0][2], sotaRepop[0][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[2][0], sotaRepop[2][1], sotaRepop[2][2], sotaRepop[2][3], 1));
+		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 0));
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[3][0], sotaRepop[3][1], sotaRepop[3][2], sotaRepop[3][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 1));
+		for(uint32 repop = 0; repop < 3; repop++)
+		{
+			AddSpiritGuide(m_spiritGuides[repop] = SpawnSpiritGuide(sotaRepop[repop][0], sotaRepop[repop][1], sotaRepop[repop][2], sotaRepop[repop][3], 1));
+		}
 	}
+	
+	// Spawn graveyards controlpoints
+	for(uint32 gcp = 0; gcp < 3; gcp++)
+	{
+		if(Attackers == ALLIANCE)
+			SpawnControlPoint(gcp, 0);
+		else
+			SpawnControlPoint(gcp, 1);
+	}
+	
 }
 
 StrandOfTheAncients::~StrandOfTheAncients()
 {
-	delete m_mapMgr;
+
 }
 
 bool StrandOfTheAncients::HookHandleRepop(Player* plr)
@@ -302,6 +341,71 @@ bool StrandOfTheAncients::HookHandleRepop(Player* plr)
 
 	plr->SafeTeleport(plr->GetMapId(), plr->GetInstanceID(), dest);
 	return true;
+}
+
+void StrandOfTheAncients::SpawnControlPoint(uint32 Id, uint32 Type)
+{
+	GameObjectInfo * gi;
+	gi = GameObjectNameStorage.LookupEntry(ControlPointGoIds[Id][Type]);
+	if(gi == NULL)
+		return;
+
+	if(m_controlPoint[Id] != NULL)
+		return;
+	
+	m_controlPoint[Id] = SpawnGameObject(gi->ID, ControlPointCoordinates[Id][0], ControlPointCoordinates[Id][1], ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 1.0f);
+
+	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, gi->Type);
+	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+	m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_DYNAMIC, 1);
+	m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_DISPLAYID, gi->DisplayID);
+
+	switch(Type)
+	{
+	case 1:
+		m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_1);
+		break;
+
+	case 0:
+		m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_2);
+		break;
+	}
+
+	m_controlPoint[Id]->PushToWorld(m_mapMgr);
+}
+
+void StrandOfTheAncients::CaptureControlPoint(uint32 Id, uint32 Team)
+{
+	m_basesOwnedBy[Id] = Team;
+
+	if(m_spiritGuides[Id] != NULL)
+	{
+		RemoveSpiritGuide(m_spiritGuides[Id]);
+		m_spiritGuides[Id]->Despawn(0,0);
+	}
+
+	// spawn the spirit guide for our faction
+	m_spiritGuides[Id] = SpawnSpiritGuide(sotaRepop[Id][0], sotaRepop[Id][1], sotaRepop[Id][2], 0.0f, Team);
+	AddSpiritGuide(m_spiritGuides[Id]);
+
+	// send the chat message/sounds out
+	PlaySoundToAll(Team ? SOUND_HORDE_SCORES : SOUND_ALLIANCE_SCORES);
+	SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
+	
+	SpawnControlPoint(Id, Team ? SOTA_SPAWN_TYPE_HORDE_CONTROLLED : SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED);
+	
+	if(Team == ALLIANCE)
+	{
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][HORDE], 0);
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Team], 1);
+	}
+	else
+	{
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][ALLIANCE], 0);
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Team], 1);
+	}
+	
 }
 
 void StrandOfTheAncients::HookOnAreaTrigger(Player* plr, uint32 id)
@@ -347,46 +451,98 @@ void StrandOfTheAncients::HookFlagStand(Player* plr, GameObject* obj)
 {
 }
 
-bool StrandOfTheAncients::HookSlowLockOpen(GameObject* pGo, Player* pPlayer, Spell* pSpell)
-{	
-	Respawn();
-	OnStart();
-	if(BattleRound == 1)
+// Rebuild the whole shit for the second round 
+void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
+{
+	if(m_ended)
+		return;
+		
+	if(m_reliccaptured)		// Attackers won the round
 	{
-		sEventMgr.RemoveEvents(this, EVENT_SOTA_TIMER);
-		PlaySoundToAll( 8212 );
-		pPlayer->CastSpell(pPlayer,52459,true);
-		if(pPlayer->GetTeam() == Attackers)
+		if(Attackers == ALLIANCE)
+			allywins++;
+		else
+			hordewins++;
+	}
+	else
+	{
+		if(Attackers == ALLIANCE)
+			hordewins++;
+		else
+			allywins++;
+	}
+	
+	if(BattleRound == 2 )	// Game Over
+	{
+		m_ended = true;
+		EndGame();
+	}
+	else if(BattleRound == 1)	// Prepare second round
+	{
+		if(Attackers == ALLIANCE)
 		{
-			pPlayer->SetTeam(1);
-			pPlayer->SafeTeleport(pPlayer->GetMapId(),pPlayer->GetInstanceID(),SOTAStartLocations[0][0],SOTAStartLocations[0][1],SOTAStartLocations[0][2],0.0f);
+			Attackers = HORDE;
+			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
+			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 0);	
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_FROSTBREAKER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_GRACEFUL_MAIDEN, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_HORDE_CONTROLLED, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_HORDE_CONTROLLED, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_HORDE_CONTROLLED, 1);
 		}
 		else
 		{
-			pPlayer->SetTeam(0);
-			pPlayer->SafeTeleport(pPlayer->GetMapId(),pPlayer->GetInstanceID(),SOTAStartLocations[1][0],SOTAStartLocations[1][1],SOTAStartLocations[1][2],0.0f);
-		}
-		if(Attackers == ALLIANCE)
-		{
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
-			hordewins++;
-			Attackers = HORDE;
-		}
-		else if(Attackers == HORDE)
-		{
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
-			allywins++;
 			Attackers = ALLIANCE;
+			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
+			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 1);	
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_FROSTBREAKER, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_GRACEFUL_MAIDEN, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_HORDE_CONTROLLED, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_HORDE_CONTROLLED, 0);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_HORDE_CONTROLLED, 0);
+		}
+		
+		Respawn();
+		sEventMgr.RemoveEvents(this, EVENT_SOTA_TIMER);
+		PlaySoundToAll( 8212 );
+		for(uint32 i = 0; i < 2; ++i)
+		{
+			for(set<Player*  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			{
+				(*itr)->CastSpell((*itr),52459,true);
+				if(Attackers == ALLIANCE)
+				{	
+					if((*itr)->GetTeam() == ALLIANCE)
+						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[0][0],SOTAStartLocations[0][1],SOTAStartLocations[0][2],0.0f);
+					else
+						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[1][0],SOTAStartLocations[1][1],SOTAStartLocations[1][2],0.0f);
+				}
+				else
+				{
+					if((*itr)->GetTeam() == HORDE)
+						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[1][0],SOTAStartLocations[1][1],SOTAStartLocations[1][2],0.0f);
+					else
+						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[0][0],SOTAStartLocations[0][1],SOTAStartLocations[0][2],0.0f);
+				}
+			}
 		}
 		BattleRound = 2;
 		OnStart();
 	}
-	else if(BattleRound == 2)
-	{
-		EndGame();
-	}
+}	
+
+bool StrandOfTheAncients::HookSlowLockOpen(GameObject* pGo, Player* pPlayer, Spell* pSpell)
+{	
 	return true;
 }
 
@@ -403,15 +559,23 @@ void StrandOfTheAncients::Respawn()
 				/*m_boats[z]->Delete();*/
 				m_npcs[z]->Delete();
 			}
+			for(uint32 s = 0; s < 6; s++)
+			{
+				m_demolisher[s]->Delete();
+			}
+			/*for(uint32 gcp = 0; gcp < 3; gcp++)
+			{
+				m_controlPoint[gcp]->Delete();
+			}*/
 		}
 	
 		m_gates[y]->Delete();
 		m_gateSigils[y]->Delete();
 		m_gateTransporters[y]->Delete();
-		m_demolisher[y]->Delete();
 	}
 
 	m_endgate->Delete();
+	m_relic->Delete();
 	
 	// spawn the boats
 	/*for(uint32 boats = 0; boats < 2; boats++)
@@ -522,8 +686,24 @@ void StrandOfTheAncients::Respawn()
 		m_gateSigils[sigils]->PushToWorld(m_mapMgr);
 	}
 	
+	// Spawn Relic
+	m_relic = m_mapMgr->CreateGameObject(SOTA_RELIC);
+	if(m_relic == NULL || !m_relic->CreateFromProto(SOTA_RELIC, m_mapMgr->GetMapId() , 836.5f , -108.8f , 150.0f , 0.0f , 0 , 0 , 0 , 0))
+	{
+		Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "SOTA is being created and you are missing gameobjects. Terminating.");
+		abort();
+		return;
+	}
+	// No suecide
+	if(Attackers == ALLIANCE)
+		m_relic->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_2);
+	else
+		m_relic->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_1);
+
+	m_relic->PushToWorld(m_mapMgr);
+	
 	// Spawn demolishers
-	for(uint32 dem =0; dem < 4; dem++)
+	for(uint32 dem =0; dem < 6; dem++)
 	{
 		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 	}
@@ -545,6 +725,15 @@ void StrandOfTheAncients::Respawn()
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[3][0], sotaRepop[3][1], sotaRepop[3][2], sotaRepop[3][3], 1));
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 1));
 	}
+	
+	// Spawn controlpoints
+	/*for(uint32 gcp = 0; gcp < 3; gcp++)
+	{
+		if(Attackers == ALLIANCE)
+			SpawnControlPoint(ControlPointGoIds[gcp][1], 1);
+		else
+			SpawnControlPoint(ControlPointGoIds[gcp][0], 0);
+	}*/
 }
 
 void StrandOfTheAncients::HookOnMount(Player* plr)
@@ -583,6 +772,11 @@ void StrandOfTheAncients::OnCreate()
 		sm.CreateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
 		sm.CreateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
 		sm.CreateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
+		sm.CreateWorldState( WORLDSTATE_SOTA_THE_FROSTBREAKER, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_THE_GRACEFUL_MAIDEN, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_HORDE_CONTROLLED, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_HORDE_CONTROLLED, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_HORDE_CONTROLLED, 0);
 	}
 	else
 	{
@@ -593,6 +787,11 @@ void StrandOfTheAncients::OnCreate()
 		sm.CreateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_HORDE_CONTROLLED, 1);
 		sm.CreateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_HORDE_CONTROLLED, 1);
 		sm.CreateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_HORDE_CONTROLLED, 1);
+		sm.CreateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 0);	
+		sm.CreateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_EAST_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
+		sm.CreateWorldState( WORLDSTATE_SOTA_WEST_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
 	}
 	PrepareRound();
 	sm.CreateWorldState( WORLDSTATE_SOTA_BONUS_TIME, 0 );
@@ -628,6 +827,13 @@ void StrandOfTheAncients::OnStart()
 
 	m_started = true;
 	sEventMgr.AddEvent( this, &StrandOfTheAncients::TimeTick, EVENT_SOTA_TIMER, MSTIME_SECOND , 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+	for(uint32 i = 0; i < 2; ++i)
+	{
+		for(set<Player*  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		{
+			(*itr)->RemoveAura(BG_PREPARATION);
+		}
+	}
 }
 
 void StrandOfTheAncients::HookGenerateLoot(Player* plr, Corpse* pCorpse)
@@ -703,12 +909,7 @@ void StrandOfTheAncients::PrepareRound()
 	{
 		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
 		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
-	}
-	else
-	{
-		Attackers = RandomUInt(2)-1;
-		PrepareRound();
-	}
+	}	
 };
 
 void StrandOfTheAncients::TimeTick()
@@ -716,56 +917,13 @@ void StrandOfTheAncients::TimeTick()
 	SetTime(GetRoundTime() - 1, NULL);
 	if(GetRoundTime() == 0)
 	{
-		sEventMgr.RemoveEvents(this, EVENT_SOTA_TIMER);
-		if(BattleRound == 1)
-		{
-			for(uint32 i = 0; i < 2; ++i)
-			{
-				for(std::set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
-				{
-					//Player* pPlayer;
-					
-					PlaySoundToAll( 8212 );
-					(*itr)->CastSpell((*itr), 52459, true);
-					if((*itr)->GetTeam() == Attackers)
-					{
-						(*itr)->SetTeam(1);
-						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[0][0],SOTAStartLocations[0][1],SOTAStartLocations[0][2],0.0f);
-					}
-					else
-					{
-						(*itr)->SetTeam(0);
-						(*itr)->SafeTeleport((*itr)->GetMapId(),(*itr)->GetInstanceID(),SOTAStartLocations[1][0],SOTAStartLocations[1][1],SOTAStartLocations[1][2],0.0f);
-					}
-					Respawn();
-					OnStart();
-					if(Attackers == ALLIANCE)
-					{
-						m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
-						m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
-						Attackers = HORDE;
-					}
-					else if(Attackers == HORDE)
-					{
-						m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
-						m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
-						Attackers = ALLIANCE;
-					}
-					BattleRound = 2;
-					OnStart();
-				}
-			}
-		}
-		else if(BattleRound == 2)
-		{
-			EndGame();
-		}
+		bool captured = false;
+		SOTARebuild(captured);
 	}
 };
 
 void StrandOfTheAncients::EndGame()
 {
-	m_ended = true;
 	if(hordewins > allywins)
 		m_losingteam = HORDE;
 	else if(allywins > hordewins)

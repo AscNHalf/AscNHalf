@@ -1200,8 +1200,8 @@ enum Opcodes
     CMSG_QUERY_VEHICLE_STATUS                       = 0x4A4, // not found
     UMSG_UNKNOWN_1189                               = 0x4A5, // not found, old SMSG_PET_GUIDS
     SMSG_UNKNOWN_1190                               = 0x4A6, // smsg unk, "You can't do that yet"
-    SMSG_UNKNOWN_1191                               = 0x4A7, // smsg guid+uint32 (vehicle)
-    CMSG_UNKNOWN_1192                               = 0x4A8, // cmsg uint64
+	SMSG_CONVERT_VEHICLE                            = 0x4A7, // smsg guid+uint32 (vehicle)
+	CMSG_BOARD_PLAYER_VEHICLE                       = 0x4A8, // cmsg uint64
     CMSG_EJECT_PASSENGER                            = 0x4A9, // cmsg uint64
     SMSG_PET_GUIDS                                  = 0x4AA, // shifted+5
     SMSG_CLIENTCACHE_VERSION                        = 0x4AB, // shifted+5
@@ -1372,6 +1372,7 @@ enum NPCFlags {
 	UNIT_NPC_FLAG_STABLEMASTER		= 0x00400000,	//4194304,		22	(MSG_LIST_STABLED_PETS (0x026F))
 	UNIT_NPC_FLAG_GUILD_BANK		= 0x00800000,	//8388608,		23
 	UNIT_NPC_FLAG_SPELLCLICK		= 0x01000000,   //16777216,		24 */
+	UNIT_NPC_FLAG_PLAYERVEHICLE     = 0x02000000,   //33554432
 };
 
 enum GossipIcons {

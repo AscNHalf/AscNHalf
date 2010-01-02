@@ -3103,6 +3103,12 @@ uint8 Spell::CanCast(bool tolerate)
 					StrandOfTheAncients * sota = (StrandOfTheAncients *)p_caster->m_bg;
 					sota->OnPlatformTeleport(p_caster);
 				}
+				else if(m_spellInfo->Id == 1634)
+				{
+					bool captured = true;
+					StrandOfTheAncients * sota = (StrandOfTheAncients *)p_caster->m_bg;
+					sota->SOTARebuild(captured);
+				}
 		}
 		
 		// Requires ShapeShift (stealth only atm, need more work)
@@ -3264,7 +3270,7 @@ uint8 Spell::CanCast(bool tolerate)
 					p_caster->RemoveAura( p_caster->m_MountSpellId );
 
 				if( p_caster->m_CurrentVehicle )
-					p_caster->m_CurrentVehicle->RemovePassenger( p_caster );
+					p_caster->m_CurrentVehicle->RemovePassenger(p_caster);
 
 				if( p_caster->m_stealth )
 				{
