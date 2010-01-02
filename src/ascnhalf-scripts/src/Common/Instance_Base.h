@@ -103,7 +103,8 @@ typedef std::set< uint32 >										IdSet;
 typedef std::map< uint32, IdVector >							EntryIdMap;
 typedef std::pair< int32, int32 >								TimerPair;
 typedef std::vector< TimerPair >								TimerArray;
-typedef std::tr1::hash_map< uint32, GameObject * >			GameObjectMap;
+typedef boost::unordered_map< uint32, GameObject * >			GameObjectMap;
+
 typedef boost::unordered_set< Unit* >					UnitSet;
 typedef boost::unordered_set< Player* >				PlayerSet;
 typedef boost::unordered_set< Creature* >				CreatureSet;
