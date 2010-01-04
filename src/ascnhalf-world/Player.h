@@ -347,9 +347,11 @@ struct PlayerCreateInfo{
 	float   mindmg;
 	float   maxdmg;
 	std::list<CreateInfo_ItemStruct> items;
+	
 	std::list<CreateInfo_SkillStruct> skills;
 	std::list<CreateInfo_ActionBarStruct> actionbars;
 	std::set<uint32> spell_list;
+	
 	//uint32 item[10];
 	//uint8 item_slot[10];
 	//uint16 spell[10];
@@ -743,6 +745,7 @@ typedef std::map<uint32, OnHitSpell >               StrikeSpellDmgMap;
 typedef std::map<uint32, PlayerSkill>				SkillMap;
 typedef std::set<Player* *>					ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
+
 
 //#define OPTIMIZED_PLAYER_SAVING
 

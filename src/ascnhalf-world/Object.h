@@ -33,6 +33,7 @@ class SERVER_DECL Object : public EventableObject
 {
 public:
 	typedef UNORDERED_SET< Object* > InRangeSet;
+
 	typedef std::map<string, void*> ExtensionSet;
 
 	virtual ~Object ( );
