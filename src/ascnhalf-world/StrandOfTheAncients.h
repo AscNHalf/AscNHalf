@@ -3,14 +3,15 @@
 #ifndef _SOTA_H
 #define _SOTA_H
 
-static const float SOTAStartLocations[2][3] = {
-	{ 1601.004395f, -105.182663f, 8.873691f }, //attackers
-	{ 1209.1f, -65.562363f, 70.2f }, //defenders
+static const float SOTAStartLocations[3][3] = {
+	{ 1601.004395f, -105.182663f, 8.873691f },	//attackers
+	{ 1607.7517f, 48.6505f, 7.5799f }, 			//attackers
+	{ 1209.1f, -65.562363f, 70.2f },			//defenders
 };
 
 enum SOTA_SPAWNTYPES
 {
-	SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED	= 3,
+	SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED		= 3,
 	SOTA_SPAWN_TYPE_HORDE_CONTROLLED		= 4,
 };
 
@@ -21,6 +22,8 @@ enum SOTA_GAMEOBJECTS
 
 enum SOTA_FACTION
 {
+	SOTA_CREATURE_FACTION_1						= 1,		// alliance
+	SOTA_CREATURE_FACTION_2						= 2,		// horde
 	SOTA_GAMEOBJECT_FACTION_1					= 1,		// alliance
 	SOTA_GAMEOBJECT_FACTION_2					= 2,		// horde
 	SOTA_GAMEOBJECT_FACTION_3					= 35,		// netural
@@ -28,7 +31,7 @@ enum SOTA_FACTION
 };
 
 #define SOTA_CANNON					27894
-#define SOTA_RELIC					192834
+#define SOTA_RELIC					192829
 #define BG_DEMOLISHER				28781
 
 class SERVER_DECL StrandOfTheAncients : public CBattleground
