@@ -53,7 +53,7 @@ class IsleOfConquest;
 #define TO_EYEOFTHESTORM(ptr) ((EyeOfTheStorm*)ptr)
 #define TO_WARSONGGULCH(ptr) ((WarsongGulch*)ptr)
 #define TO_SOTA(ptr) ((StrandOfTheAncients*)ptr)
-#define TO_ICO(ptr) ((IsleOfConquest*)ptr)
+#define TO_IOC(ptr) ((IsleOfConquest*)ptr)
 #define TO_ARENA(ptr) ((Arena*)ptr)
 #define TO_ARATHIBASIN(ptr) ((ArathiBasin*)ptr)
 #define TO_TRANSPORT(ptr) ((Transporter*)ptr)
@@ -120,7 +120,7 @@ typedef WarsongGulch* WarsongGulchPointer;
 typedef WeatherInfo* WeatherInfoPointer;
 typedef World* WorldPointer;
 typedef StrandOfTheAncients* SotaPointer;
-typedef IsleOfConquest* IcoPointer;
+typedef IsleOfConquest* IocPointer;
 
 #define object_shared_from_this() TO_OBJECT(this)
 #define obj_shared_from_this() TO_OBJECT(this)
