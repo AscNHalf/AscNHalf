@@ -201,7 +201,7 @@ public:
 	void AddAverageQueueTime(uint32 BgType, uint32 queueTime);
 };
 
-class CBattleground : public EventableObject
+class SERVER_DECL CBattleground : public EventableObject
 {
 protected:
 	/* Groups */
