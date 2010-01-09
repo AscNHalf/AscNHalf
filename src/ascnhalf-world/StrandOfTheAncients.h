@@ -31,7 +31,7 @@ enum SOTA_FACTION
 #define SOTA_RELIC					192834
 #define BG_DEMOLISHER				28781
 
-class StrandOfTheAncients : public CBattleground
+class SERVER_DECL StrandOfTheAncients : public CBattleground
 {
 public:
 	StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t);
