@@ -1242,7 +1242,7 @@ public:
     }
  };
 
- class SacredFireofLife : public GameObjectAIScript
+class SacredFireofLife : public GameObjectAIScript
 {
 public:
 	SacredFireofLife(GameObject * goinstance) : GameObjectAIScript(goinstance) {}
@@ -1272,7 +1272,18 @@ public:
 		 if(pPlayer->m_bg && pPlayer->m_bg->GetType() == BATTLEGROUND_STRAND_OF_THE_ANCIENTS)
 		 {
 			StrandOfTheAncients* sota = (StrandOfTheAncients*)pPlayer->m_bg;
-			sota->SOTARebuild(true);
+			
+			if(sota && sota != NULL)
+			{
+				sLog.outColor(TGREEN, "\nSOTA: OnActivate() called, relic clicked. SOTA is not NULL. Executing SOTARebuild().");
+				sLog.outColor(TBLUE, "\nPlayer GUID:%u\n", pPlayer->GetGUID());
+				
+				sota->SOTARebuild(true);
+			}
+			else
+			{
+				sLog.outColor(TRED, "\nSOTA OnActivate() called, relic clicked. SOTA is NULL! Report!");
+			}
 		 }
 	 }
  };
