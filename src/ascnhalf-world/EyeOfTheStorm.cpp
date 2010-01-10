@@ -39,10 +39,24 @@ static const float EOTSGraveyardLocations[EOTS_TOWER_COUNT][3] = {
 };
 
 static const float EOTSCPLocations[EOTS_TOWER_COUNT][3] = {
-	{ 2048.290039f, 1393.757690f, 1194.363525f },			// BE Tower
-	{ 2043.571533f, 1729.117310f, 1189.911865f },			// Fel Reaver Ruins
-	{ 2284.930664f, 1731.128488f, 1189.874512f },			// Mage Tower
-	{ 2285.848877f, 1402.939575f, 1197.128540f },			// Draenei Ruins
+	{ 2047.19f, 1349.19f, 1189.0f },			// BE Tower
+	{ 2057.46f, 1735.07f, 1187.91f },			// Fel Reaver Ruins
+	{ 2270.84f, 1784.08f, 1186.76f },			// Mage Tower
+	{ 2276.8f, 1400.41f, 1196.33f },			// Draenei Ruins
+};
+ 
+static const float EOTSCPLocations2[EOTS_TOWER_COUNT][3] = {
+	{ 2074.32f, 1385.78f, 1194.72f },			// BE Tower 2
+	{ 2032.25f, 1729.53f, 1190.33f },			// Fel Reaver Ruins 2
+	{ 2269.13f, 1737.7f, 1186.66f },			// Mage Tower 2
+	{ 2305.78f, 1404.56f, 1199.38f },			// Draenei Ruins 2
+};
+
+static const float EOTSCPLocations3[EOTS_TOWER_COUNT][3] = {
+	{ 2025.13f, 1386.12f, 1192.74f },			// BE Tower 3
+	{ 2092.35f, 1775.46f, 1187.08f },			// Fel Reaver Ruins 3
+	{ 2300.86f, 1741.25f, 1187.7f },			// Mage Tower 3
+	{ 2245.4f, 1366.41f, 1195.28f },			// Draenei Ruins 3
 };
 
 static const float EOTSFlagLocation[3] = { 2174.718750f, 1568.766113f, 1159.958740f };
@@ -105,7 +119,9 @@ static const uint32 EOTSHordeDisplayFields[EOTS_TOWER_COUNT] = {
 #define EOTS_CAPTURE_DISTANCE 900 /*30*/
 const uint32 EOTSTowerIds[EOTS_TOWER_COUNT] = { EOTS_GO_BE_TOWER, EOTS_GO_FELREAVER, EOTS_GO_MAGE_TOWER, EOTS_GO_DRAENEI_TOWER };
 
-/*** WorldStates ***/
+/**
+    * WorldStates 
+    */
 #define EOTS_NETHERWING_FLAG_SPELL 34976
 //#define EOTS_CAPTURE_RATE 20
 
@@ -559,6 +575,44 @@ void EyeOfTheStorm::OnCreate()
 
 		m_CPBanner[i] = m_mapMgr->CreateGameObject(EOTS_BANNER_NEUTRAL);
 		if( m_CPBanner[i] == NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+		{
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects %u",EOTS_BANNER_NEUTRAL);
+			abort();
+			return;
+		}
+		m_CPBanner[i]->PushToWorld( m_mapMgr );
+
+		// 2
+		m_CPStatusGO[i] = m_mapMgr->CreateGameObject(EOTSTowerIds[i]);
+		if(m_CPStatusGO[i] == NULL || !m_CPStatusGO[i]->CreateFromProto( EOTSTowerIds[i], m_mapMgr->GetMapId(), EOTSCPLocations2[i][0], EOTSCPLocations2[i][1], EOTSCPLocations2[i][2], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+		{
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u.", EOTSTowerIds[i]);
+			abort();
+			return;
+		}
+		m_CPStatusGO[i]->PushToWorld( m_mapMgr );
+
+		m_CPBanner[i] = m_mapMgr->CreateGameObject(EOTS_BANNER_NEUTRAL);
+		if( m_CPBanner[i] == NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations2[i][0], EOTSCPLocations2[i][1], EOTSCPLocations2[i][2], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+		{
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects %u",EOTS_BANNER_NEUTRAL);
+			abort();
+			return;
+		}
+		m_CPBanner[i]->PushToWorld( m_mapMgr );
+
+		// 3
+		m_CPStatusGO[i] = m_mapMgr->CreateGameObject(EOTSTowerIds[i]);
+		if(m_CPStatusGO[i] == NULL || !m_CPStatusGO[i]->CreateFromProto( EOTSTowerIds[i], m_mapMgr->GetMapId(), EOTSCPLocations3[i][0], EOTSCPLocations3[i][1], EOTSCPLocations3[i][2], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+		{
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u.", EOTSTowerIds[i]);
+			abort();
+			return;
+		}
+		m_CPStatusGO[i]->PushToWorld( m_mapMgr );
+
+		m_CPBanner[i] = m_mapMgr->CreateGameObject(EOTS_BANNER_NEUTRAL);
+		if( m_CPBanner[i] == NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations3[i][0], EOTSCPLocations3[i][1], EOTSCPLocations3[i][2], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
 		{
 			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects %u",EOTS_BANNER_NEUTRAL);
 			abort();
