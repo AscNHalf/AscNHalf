@@ -257,14 +257,14 @@ public:
         // Check if the player can be entered into the bg or not.
         if(plr->getLevel() < 71)
         {
-            uint32 FactMessages[2] = { 7599, 7688 };	// need to fix them
+            uint32 FactMessages[2] = { 14669, 14669 };
 
             // Send "you cannot enter" message.
             objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), FactMessages[Team], plr);
         }
         else
         {
-            uint32 FactMessages[2] = { 7689, 7705 }; // need to fix them
+            uint32 FactMessages[2] = { 14670, 7705 };
 
             // Send "you cannot enter" message.
             objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), FactMessages[Team], plr);
@@ -281,7 +281,7 @@ public:
 		if(pObject->GetTypeId()!=TYPEID_UNIT)
 			return;
 
-        plr->GetSession()->SendBattlegroundList((TO_CREATURE(pObject)), 10);  // IOC = 10
+        plr->GetSession()->SendBattlegroundList((TO_CREATURE(pObject)), 30);  // IOC = 30
     }
 
     void Destroy()
