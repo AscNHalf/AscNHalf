@@ -240,9 +240,9 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 		
 		//Change Factions Of Cannons.
 		if(Attackers == ALLIANCE)
-			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_GAMEOBJECT_FACTION_1);
+			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
 		else if(Attackers == HORDE)
-			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_GAMEOBJECT_FACTION_2);
+			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
 	}
 	
 	//Spawn Teleporters
@@ -272,9 +272,14 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	}
 	
 	// Spawn demolishers
-	for(uint32 dem =0; dem < 6; dem++)
+	for(uint32 dem = 0; dem < 6; dem++)
 	{
 		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
+
+		if(Attackers == ALLIANCE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
+		else if(Attackers == HORDE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
 	}
 	
 	// Spawn spirit guids
@@ -482,8 +487,8 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 		if(Attackers == ALLIANCE)
 		{
 			Attackers = HORDE;
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 0);	
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 0);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
@@ -498,8 +503,8 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 		else
 		{
 			Attackers = ALLIANCE;
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
-			m_mapMgr->GetStateManager().UpdateWorldState(WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 1);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 1);	
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 1);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
@@ -598,9 +603,9 @@ void StrandOfTheAncients::Respawn()
 		
 		//Change Factions Of Cannons.
 		if(Attackers == ALLIANCE)
-			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_GAMEOBJECT_FACTION_1);
+			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
 		else if(Attackers == HORDE)
-			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_GAMEOBJECT_FACTION_2);
+			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
 	}
 
 	//Spawn Teleporters
@@ -703,9 +708,14 @@ void StrandOfTheAncients::Respawn()
 	m_relic->PushToWorld(m_mapMgr);
 	
 	// Spawn demolishers
-	for(uint32 dem =0; dem < 6; dem++)
+	for(uint32 dem = 0; dem < 6; dem++)
 	{
 		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
+
+		if(Attackers == ALLIANCE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
+		else if(Attackers == HORDE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
 	}
 	
 	// Spawn spirit guids
@@ -756,6 +766,10 @@ void StrandOfTheAncients::OnCreate()
 	WorldStateManager& sm = m_mapMgr->GetStateManager();
 	sm.CreateWorldState( WORLDSTATE_SOTA_CAPTURE_BAR_DISPLAY, 0 );
 	sm.CreateWorldState( WORLDSTATE_SOTA_CAPTURE_BAR_VALUE, 0 );
+	sm.CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
+	sm.CreateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 0 );
+	sm.CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
+	sm.CreateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 0 );
 	// gates
 	sm.CreateWorldState( WORLDSTATE_SOTA_CHAMBER_OF_THE_ANCIENT_RELICS, 1);
 	sm.CreateWorldState( WORLDSTATE_SOTA_GATES_OF_THE_BLUE_SAPPHIRE, 1);
