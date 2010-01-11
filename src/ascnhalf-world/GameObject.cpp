@@ -78,6 +78,19 @@ GameObject::~GameObject()
 		}
 		m_battleground = NULLBATTLEGROUND;
 	}
+
+	if( m_battleground != NULL )
+	{
+		if( m_battleground->GetType() == BATTLEGROUND_ISLE_OF_CONQUEST )
+		{
+			if( bannerslot >= 0 && TO_IOC(m_battleground)->m_ioccontrolPoints[bannerslot] == TO_GAMEOBJECT(this) )
+				TO_IOC(m_battleground)->m_ioccontrolPoints[bannerslot] = NULLGOB;
+
+			if( bannerauraslot >= 0 && TO_IOC(m_battleground)->m_ioccontrolPointAuras[bannerauraslot] == TO_GAMEOBJECT(this) )
+				TO_IOC(m_battleground)->m_ioccontrolPointAuras[bannerauraslot] = NULLGOB;
+		}
+		m_battleground = NULLBATTLEGROUND;
+	}
 }
 
 void GameObject::Init()

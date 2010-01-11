@@ -3098,7 +3098,8 @@ uint8 Spell::CanCast(bool tolerate)
 		}
 		
 		if( p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_STRAND_OF_THE_ANCIENTS)
-		{		if(m_spellInfo->Id == 54640)
+		{		
+				if(m_spellInfo->Id == 54640)
 				{
 					StrandOfTheAncients * sota = (StrandOfTheAncients *)p_caster->m_bg;
 					sota->OnPlatformTeleport(p_caster);
@@ -3109,6 +3110,15 @@ uint8 Spell::CanCast(bool tolerate)
 					StrandOfTheAncients * sota = (StrandOfTheAncients *)p_caster->m_bg;
 					sota->SOTARebuild(captured);
 				}
+		}
+		
+		if( p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_ISLE_OF_CONQUEST)
+		{
+			if(m_spellInfo->Id == 54640)
+			{
+				IsleOfConquest * ioc = (IsleOfConquest *)p_caster->m_bg;
+				ioc->OnPlatformTeleport(p_caster);
+			}
 		}
 		
 		// Requires ShapeShift (stealth only atm, need more work)

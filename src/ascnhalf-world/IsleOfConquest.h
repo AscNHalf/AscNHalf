@@ -10,18 +10,44 @@ enum IOCControlPoints
 	IOC_CONTROL_POINT_DOCKS						= 2,
 	IOC_CONTROL_POINT_AIRSHIPHANGAR				= 3,
 	IOC_CONTROL_POINT_SIEGEWORKSHOP				= 4,
-	IOC_NUM_CONTROL_POINTS				= 5,
+	IOC_CONTROL_POINT_ALLIANCE_KEEP				= 5,
+	IOC_CONTROL_POINT_HORDE_KEEP				= 6,
+	IOC_NUM_CONTROL_POINTS						= 7,
 };
 
-enum IOCNodeStates
+enum IOCSpawnTypes
 {
-	IOC_NODE_STATE_NEUTRAL_CONTROLLED		= 0,
-	IOC_NODE_STATE_ALLIANCE_ASSAULTING		= 1,
-	IOC_NODE_STATE_ALLIANCE_CONTROLLED		= 2,
-	IOC_NODE_STATE_HORDE_ASSAULTING			= 3,
-	IOC_NODE_STATE_HORDE_CONTROLLED			= 4,
-	IOC_NODE_STATE_COUNT						= 5,
+	IOC_SPAWN_TYPE_NEUTRAL				= 0,
+	IOC_SPAWN_TYPE_ALLIANCE_ASSAULT		= 1,
+	IOC_SPAWN_TYPE_HORDE_ASSAULT		= 2,
+	IOC_SPAWN_TYPE_ALLIANCE_CONTROLLED	= 3,
+	IOC_SPAWN_TYPE_HORDE_CONTROLLED		= 4,
+	IOC_NODE_STATE_COUNT				= 5,
 };
+
+enum IOCvehicles
+{
+	KEEP_CANNON					= 34944,
+	CATAPULT					= 34793,
+	DEMOLISHER					= 34775,
+	FLAME_TURRET_A				= 34778,
+	FLAME_TURRET_H				= 36356,
+	GLAIVE_THROWER_A			= 34802,
+	GLAIVE_THROWER_H			= 35273,
+	ALLIANCE_GUNSHIP_CANNON		= 34929,
+	HORDE_GUNSHIP_CANNON		= 34935,
+	SIEGE_ENGINE_A				= 34776,
+	SIEGE_ENGINE_H				= 35069,
+	SIEGE_TURRET_A				= 34777,
+	SIEGE_TURRET_H				= 36355,
+};
+
+#define IOC_TRANSPORTER		195313
+#define TELEPORTER_EFFECT_A		195701
+#define TELEPORTER_EFFECT_H		195702
+#define IOC_FLAGPOLE 	191311
+#define IOC_DYNAMIC_DOOR_A		195703
+#define IOC_DYNAMIC_DOOR_H		195491
 
 struct IOCLocation { float x; float y; float z; };
 struct IOCSpawnLocation { float x; float y; float z; float o; };
@@ -45,81 +71,34 @@ struct IOCNodeTemplate
 	const uint32 m_defaultState;							// State of the node when battleground is spawned
 };
 
-class IsleOfConquest;
-class IOCNode
-{
-	IsleOfConquest* m_bg;
-	IOCNodeTemplate *m_template;
-
-	// boss, changes ownership upon death?
-	Creature* m_boss;
-
-	// guards, need to be respawned when changes ownership
-	vector<Creature*> m_guards;
-
-	// peon locations, used in mines (todo)
-	vector<Creature*> m_peonLocations;
-
-	// control point (capturable)
-	GameObject* m_flag;
-
-	// aura (light-shiny stuff)
-	GameObject* m_aura;
-	GameObject* m_glow;
-
-	// home NPc
-	Creature* m_homeNPC;
-
-	// destroyed flag (prevent all actions)
-	bool m_destroyed;
-
-	// state
-	uint32 m_state;
-	uint32 m_lastState;
-	uint32 m_nodeId;
-
-	// spirit guides
-	Creature* m_spiritGuide;
-
-public:
-	friend class IsleOfConquest;
-
-	// constructor
-	IOCNode(IsleOfConquest* parent, IOCNodeTemplate *tmpl, uint32 node_id);
-	~IOCNode();
-
-	// initial spawn
-	void Spawn();
-
-	// assault
-	void Assault(Player* plr);
-
-	// capture event
-	void Capture();
-
-	// spawn guards
-	void SpawnGuards(uint32 x);
-
-	// state change
-	void ChangeState(uint32 new_state);
-
-	// spawn home buff guard
-	void SpawnHomeGuard();
-
-	uint32 GetState() { return m_state; }
-
-	bool IsGraveyard() { return m_template->m_isGraveyard; }
-};
 
 class IsleOfConquest : public CBattleground
 {
+public:
+	GameObject* m_ioccontrolPoints[IOC_NUM_CONTROL_POINTS];
+	GameObject* m_ioccontrolPointAuras[IOC_NUM_CONTROL_POINTS];
+
 protected:
 	list< GameObject* > m_gates;
 	uint32 m_reinforcements[2];
 	bool m_nearingVictory[2];
-	IOCNode *m_nodes[IOC_NUM_CONTROL_POINTS];
 	bool m_LiveCaptain[2];
 	int m_bonusHonor;
+	Creature* cannons[8];
+	GameObject* m_flagpole[IOC_NUM_CONTROL_POINTS];
+	GameObject* m_teleporters[12];
+	GameObject* m_teleeffect[12];
+	GameObject* m_desgates[6];
+	GameObject* m_ogates[6];
+	Creature* m_spiritGuides[IOC_NUM_CONTROL_POINTS];
+	Creature* m_salesman;
+	uint32 m_resources[2];
+	uint32 m_capturedBases[2];
+	uint32 m_lastHonorGainResources[2];
+	int32 m_basesLastOwnedBy[IOC_NUM_CONTROL_POINTS];
+	int32 m_basesOwnedBy[IOC_NUM_CONTROL_POINTS];
+	int32 m_basesAssaultedBy[IOC_NUM_CONTROL_POINTS];
+	bool m_flagIsVirgin[IOC_NUM_CONTROL_POINTS];
 
 public:
     IsleOfConquest(MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t);
@@ -130,18 +109,22 @@ public:
 	void HookFlagDrop(Player* plr, GameObject* obj);
 	void HookFlagStand(Player* plr, GameObject* obj);
 	void HookOnMount(Player* plr);
+	void SpawnControlPoint(uint32 Id, uint32 Type);
+	void CaptureControlPoint(uint32 Id, uint32 Team);
+	void Updateworkshop(uint32 Team);
+	void AssaultControlPoint(Player* pPlayer, uint32 Id);
 	void HookOnAreaTrigger(Player* plr, uint32 id);
 	bool HookHandleRepop(Player* plr);
+	void OnPlatformTeleport(Player* plr);
 	void OnAddPlayer(Player* plr);
 	void OnRemovePlayer(Player* plr);
 	void OnCreate();
 	void HookOnPlayerKill(Player* plr, Unit* pVictim);
 	void HookOnHK(Player* plr);
 	void HookOnShadowSight();
-	void OnPlatformTeleport(Player* plr);
 	void Respawn();
-	void IsleOfConquest::AddReinforcements(uint32 teamId, uint32 amt);
-	void IsleOfConquest::RemoveReinforcements(uint32 teamId, uint32 amt);
+	void AddReinforcements(uint32 teamId, uint32 amt);
+	void RemoveReinforcements(uint32 teamId, uint32 amt);
 	LocationVector GetStartingCoords(uint32 Team);
 
 	static CBattleground* Create(MapMgr* m, uint32 i, uint32 l, uint32 t) { return new IsleOfConquest(m, i, l, t); }
@@ -156,8 +139,9 @@ public:
 	void HookGenerateLoot(Player* plr, Corpse* pCorpse);
 
 	void SetIsWeekend(bool isweekend);
-    void IsleOfConquest::HookOnUnitKill(Player* plr, Unit* pVictim);
+    void HookOnUnitKill(Player* plr, Unit* pVictim);
 	void Herald(const char *format, ...);
+	void Finish(uint32 losingTeam);
 
 private:
 
