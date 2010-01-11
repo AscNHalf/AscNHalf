@@ -236,7 +236,7 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	//Spawn the Cannons
 	for(uint32 x = 0; x < 10; x++)
 	{
-		m_cannons[x] = SpawnCreature(SOTA_CANNON,m_cannonsLocations[x][0], m_cannonsLocations[x][1], m_cannonsLocations[x][2], m_cannonsLocations[x][3]);
+		m_cannons[x] = SpawnVehicle(SOTA_CANNON,m_cannonsLocations[x][0], m_cannonsLocations[x][1], m_cannonsLocations[x][2], m_cannonsLocations[x][3]);
 		
 		//Change Factions Of Cannons.
 		if(Attackers == ALLIANCE)
@@ -274,12 +274,12 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	// Spawn demolishers
 	for(uint32 dem = 0; dem < 6; dem++)
 	{
-		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
+		m_demolisher[dem] = SpawnVehicle(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 
 		if(Attackers == ALLIANCE)
-			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
-		else if(Attackers == HORDE)
 			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
+		else if(Attackers == HORDE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
 	}
 	
 	// Spawn spirit guids
@@ -599,7 +599,7 @@ void StrandOfTheAncients::Respawn()
 	//Spawn the Cannons
 	for(uint32 x = 0; x < 10; x++)
 	{
-		m_cannons[x] = SpawnCreature(SOTA_CANNON,m_cannonsLocations[x][0], m_cannonsLocations[x][1], m_cannonsLocations[x][2], m_cannonsLocations[x][3]);
+		m_cannons[x] = SpawnVehicle(SOTA_CANNON,m_cannonsLocations[x][0], m_cannonsLocations[x][1], m_cannonsLocations[x][2], m_cannonsLocations[x][3]);
 		
 		//Change Factions Of Cannons.
 		if(Attackers == ALLIANCE)
@@ -710,12 +710,12 @@ void StrandOfTheAncients::Respawn()
 	// Spawn demolishers
 	for(uint32 dem = 0; dem < 6; dem++)
 	{
-		m_demolisher[dem] = SpawnCreature(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
+		m_demolisher[dem] = SpawnVehicle(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 
 		if(Attackers == ALLIANCE)
-			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
-		else if(Attackers == HORDE)
 			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_2);
+		else if(Attackers == HORDE)
+			m_demolisher[dem]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
 	}
 	
 	// Spawn spirit guids

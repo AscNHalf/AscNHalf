@@ -358,6 +358,7 @@ public:
 
 	GameObject* SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
 	Creature* SpawnCreature(uint32 entry,float x, float y, float z, float o);
+	Vehicle* SpawnVehicle(uint32 entry, float x, float y, float z, float o);
 	void UpdatePvPData();
 
 	INLINE uint32 GetStartTime() { return m_startTime; }

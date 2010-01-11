@@ -1377,6 +1377,23 @@ Creature* CBattleground::SpawnCreature(uint32 entry, float x, float y, float z, 
 	return c;
 }
 
+Vehicle* CBattleground::SpawnVehicle(uint32 entry, float x, float y, float z, float o)
+{
+	CreatureProto *cp = CreatureProtoStorage.LookupEntry(entry);
+	CreatureInfo *ci = CreatureNameStorage.LookupEntry(entry);
+	Vehicle* v = NULLVEHICLE;
+	if (cp && ci)
+	{
+		v = m_mapMgr->CreateVehicle(entry);
+		if (v != NULLVEHICLE)
+		{
+			v->Load(cp,x, y, z, o);
+			v->PushToWorld(m_mapMgr);
+		}
+	}
+	return v;
+}
+
 void CBattleground::SendChatMessage(uint32 Type, uint64 Guid, const char * Format, ...)
 {
 	char msg[500];

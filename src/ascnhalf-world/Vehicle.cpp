@@ -356,10 +356,6 @@ void Vehicle::RemovePassenger(Unit* pPassenger)
 		//and respawn at spawn point.
 		//Well actually this is how blizz wanted it
 		//but they couldnt get it to work xD
-		if( m_spawn )
-			GetAIInterface()->MoveTo(m_spawn->x, m_spawn->y, m_spawn->z, m_spawn->o);
-		else //we're a temp spawn
-			SafeDelete();
 
 		m_controllingUnit = NULL;
 		for(uint8 i = 0; i < m_maxPassengers; i++)
@@ -453,7 +449,7 @@ void Vehicle::_AddToSlot(Unit* pPassenger, uint8 slot)
 		data << GetPositionZ();									// position vector 
 		data << GetOrientation();								// orientaion
 		// transport part
-		data << GetGUID();										// transport guid
+		data << GetNewGUID();									// transport guid
 		data << v.x;											// transport offsetX
 		data << v.y;											// transport offsetY
 		data << v.z;											// transport offsetZ
@@ -475,7 +471,7 @@ void Vehicle::_AddToSlot(Unit* pPassenger, uint8 slot)
 		data << GetPositionZ();									// position vector 
 		data << GetOrientation();								// orientaion
 		// transport part
-		data << GetGUID();										// transport guid
+		data << GetNewGUID();									// transport guid
 		data << v.x;											// transport offsetX
 		data << v.y;											// transport offsetY
 		data << v.z;											// transport offsetZ
