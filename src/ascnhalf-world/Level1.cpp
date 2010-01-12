@@ -8,11 +8,6 @@
 
 bool ChatHandler::HandleAnnounceCommand(const char* args, WorldSession *m_session)
 {
-	if( !*args || strlen(args) < 4 || strchr(args, '%'))
-	{
-		m_session->SystemMessage("Announces cannot contain the %% character and must be at least 4 characters.");
-		return true;
-	}
 
 	char msg[1024];
 	string input2;
