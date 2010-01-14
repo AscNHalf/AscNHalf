@@ -59,15 +59,15 @@ const float sotaTransporterDestination[5][4] = {
 	{ 1193.857f, 69.9f, 58.046f, 5.7245f },
 };
 const float sotaRepop[5][4] = {
-	{ 1221.38f, -69.61f, 70.08f, 3.16f },	// south graveyard
-	{ 1347.20f, -161.15f, 31.24f, 2.56f },	// east graveyard
-	{ 1316.39f, 11.36f, 31.19f, 2.91f },	// west graveyard
+	{ 1109.52f, 6.13f, 69.38f, 5.94f, },	// South graveyard
+	{ 1405.45f, -301.34f, 32.18f, 2.21f },	// East graveyard
+	{ 1390.89f, 204.84f, 32.12f, 5.65f },	// West graveyard
 	{ 962.52f, -184.76f, 91.47f, 0.9f },	
 	{ 1446.87f, -54.35f, 5.88f, 0.25f },
 	
 };
 
-const float sotaBoatids[4][4] = {	/*[boatids][captinids(on boats)] */
+const float sotaBoatids[4][2] = {	/*[boatids][captinids(on boats)] */
 	{193183, 32660},	// The Blightbringer, Dread Captain
 	{193185, 32657},	// The Frostbreaker, Privateer Stonemantle
 	{193184, 32659},	// The Coffin Carrier, Dread Captain Winge
@@ -92,17 +92,19 @@ const float sotaStopBoatsPlayer[2][4] = {
 };
 
 const float demolisherSalesman[2][5] = {
-	{29260, 1355.71f, -320.68f, 36.83f, 2.01f},		// Rigger Sparkligh
-	{29262, 1367.82f, 220.55f, 37.06f, 4.45f},		// Gorgril Rigspark
+	{29260, 1360.54f, -320.08f, 36.83f, 0.18f},		// Rigger Sparkligh
+	{29262, 1363.08f, 219.07f, 37.07f, 2.71f},		// Gorgril Rigspark
 };
 
-const float demolisherLocations[6][4] = {
-	{1327.34f, -257.86f, 32.61f, 0.26f},
-	{1318.58f, 181.75f, 32.07f, 5.69f},
+const float demolisherLocations[8][4] = {
 	{1564.84f, 112.20f, 2.90f, 3.59f},
 	{1569.93f, -168.21f, 5.46f, 3.40f},
 	{1610.25f, -116.32f, 8.81f, 2.44f},
 	{1617.97f, 62.39f, 7.17f, 3.85f},
+	{1353.65f, 224.56f, 35.20f, 4.31f},
+	{1371.41f, -317.01f, 34.99f, 1.92f},
+	{1347.26f, 205.47f, 33.04f, 4.44f},
+	{1363.59f, -300.13f, 33.19f, 1.87f},
 };
 
 static uint32 ControlPointGoIds[3][2] = { /* ALLIANCE-CONTROLLED    HORDE_CONTROLLED*/
@@ -111,11 +113,22 @@ static uint32 ControlPointGoIds[3][2] = { /* ALLIANCE-CONTROLLED    HORDE_CONTRO
 		{ 180076,    180078 },
 };
 
-const float ControlPointCoordinates[3][4] = {
-	{1341.15f, -154.83f, 30.90f, 0.01f},		// South Graveyard
-	{1315.13f, 11.74f, 31.12f, 0.01f},			// East Graveyard
-	{1217.88f, -68.01f, 70.08f, 0.01f},			// West Graveyard
+const uint32 m_banners[3] = {
+	{0},
+	{1},
+	{2},
+};
 
+const float ControlPointFlagpole[3][4] = {
+	{1217.88f, -68.01f, 70.08f, 0.01f},			// South Graveyard
+	{1341.15f, -154.83f, 30.90f, 0.01f},		// East Graveyard
+	{1315.13f, 11.74f, 31.12f, 0.01f},			// West Graveyard
+};
+
+const float ControlPointCoordinates[3][4] = {
+	{1217.88f, -68.01f, 70.08f, 0.01f},			// South Graveyard
+	{1341.15f, -154.83f, 30.90f, 0.01f},		// East Graveyard
+	{1315.13f, 11.74f, 31.12f, 0.01f},			// West Graveyard
 };
 
 const uint32 capturedStates[3][2] = {		/* [alliance][horde]*/
@@ -129,7 +142,7 @@ static const char * ControlPointNames[3] = {
 	"East Graveyard",
 	"West Graveyard",
 };
-	
+
 float CalculateDistance(float x1, float y1, float z1, float x2, float y2, float z2)
 {
 	float dx = x1 - x2;
@@ -144,6 +157,17 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	hordewins = 0;
 	allywins = 0;
 
+	for(uint32 i = 0; i < 3; ++i)
+	{
+		m_sotacontrolPointAuras[i] = NULLGOB;
+		m_sotacontrolPoint[i] = NULLGOB;
+		m_spiritGuides[i] = NULLCREATURE;
+		m_basesAssaultedBy[i] = -1;
+		m_basesOwnedBy[i] = -1;
+		m_basesLastOwnedBy[i] = -1;
+		m_flagIsVirgin[i] = true;
+	}
+
 	// spawn the boats
 	/*for(uint32 boats = 0; boats < 2; boats++)
 	{
@@ -156,8 +180,8 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 		}
 		m_boats[boats]->PushToWorld(m_mapMgr);
 
-	}*/		// removed because boats arent working well
-	
+	}*/ // removed because boats arent working well
+
 	//Begin Gate Spawning.
 	for(uint32 gates = 0; gates < 5; gates++)
 	{
@@ -237,7 +261,7 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	for(uint32 x = 0; x < 10; x++)
 	{
 		m_cannons[x] = SpawnVehicle(SOTA_CANNON,m_cannonsLocations[x][0], m_cannonsLocations[x][1], m_cannonsLocations[x][2], m_cannonsLocations[x][3]);
-		
+
 		//Change Factions Of Cannons.
 		if(Attackers == ALLIANCE)
 			m_cannons[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, SOTA_CREATURE_FACTION_1);
@@ -272,7 +296,7 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	}
 	
 	// Spawn demolishers
-	for(uint32 dem = 0; dem < 6; dem++)
+	for(uint32 dem = 0; dem < 8; dem++)
 	{
 		m_demolisher[dem] = SpawnVehicle(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 
@@ -306,16 +330,41 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	for(uint32 gcp = 0; gcp < 3; gcp++)
 	{
 		if(Attackers == ALLIANCE)
-			SpawnControlPoint(gcp, 0);
+			SpawnControlPoint(m_banners[gcp], 0);
 		else
-			SpawnControlPoint(gcp, 1);
+			SpawnControlPoint(m_banners[gcp], 1);
 	}
-	
+
+	// Flagpole
+	for(uint32 i = 0; i < 3; ++i)
+	{
+		m_flagpole[i] = SpawnGameObject(SOTA_FLAGPOLE, ControlPointFlagpole[i][0], ControlPointFlagpole[i][1], ControlPointFlagpole[i][2], ControlPointFlagpole[i][3], 0, 35, 1.0f);
+		m_flagpole[i]->PushToWorld(m_mapMgr);
+	}
 }
 
 StrandOfTheAncients::~StrandOfTheAncients()
 {
+	for(uint32 i = 0; i < 3; ++i)
+	{
+		if(m_sotacontrolPoint[i] != NULL)
+		{
+			m_sotacontrolPoint[i]->m_battleground = NULLBATTLEGROUND;
+			if( !m_sotacontrolPoint[i]->IsInWorld() )
+			{
+				m_sotacontrolPoint[i]->Destructor();
+			}
+		}
 
+		if(m_sotacontrolPointAuras[i])
+		{
+			m_sotacontrolPointAuras[i]->m_battleground = NULLBATTLEGROUND;
+			if( !m_sotacontrolPointAuras[i]->IsInWorld() )
+			{
+				m_sotacontrolPointAuras[i]->Destructor();
+			}
+		}
+	}
 }
 
 bool StrandOfTheAncients::HookHandleRepop(Player* plr)
@@ -350,39 +399,118 @@ bool StrandOfTheAncients::HookHandleRepop(Player* plr)
 
 void StrandOfTheAncients::SpawnControlPoint(uint32 Id, uint32 Type)
 {
-	GameObjectInfo * gi;
+	GameObjectInfo * gi, * gi_aura;
 	gi = GameObjectNameStorage.LookupEntry(ControlPointGoIds[Id][Type]);
 	if(gi == NULL)
 		return;
 
-	if(m_controlPoint[Id] != NULL)
-		return;
-	
-	m_controlPoint[Id] = SpawnGameObject(gi->ID, ControlPointCoordinates[Id][0], ControlPointCoordinates[Id][1], ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 1.0f);
+	gi_aura = gi->sound3 ? GameObjectNameStorage.LookupEntry(gi->sound3) : NULL;
 
-	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, gi->Type);
-	m_controlPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-	m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_DYNAMIC, 1);
-	m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_DISPLAYID, gi->DisplayID);
-
-	switch(Type)
+	if(m_sotacontrolPoint[Id] == NULL)
 	{
-	case 1:
-		m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_1);
-		break;
+		m_sotacontrolPoint[Id] = SpawnGameObject(gi->ID, ControlPointCoordinates[Id][0], ControlPointCoordinates[Id][1],
+			ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 1.0f);
 
-	case 0:
-		m_controlPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_2);
-		break;
+		m_sotacontrolPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+		m_sotacontrolPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, gi->Type);
+		m_sotacontrolPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+		m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_DYNAMIC, 1);
+		m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_DISPLAYID, gi->DisplayID);
+
+		switch(Type)
+		{
+		case SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED:
+			m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_2);
+			break;
+
+		case SOTA_SPAWN_TYPE_HORDE_CONTROLLED:
+			m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_1);
+			break;
+		}
+
+		m_sotacontrolPoint[Id]->bannerslot = Id;
+		m_sotacontrolPoint[Id]->PushToWorld(m_mapMgr);
+	}
+	else
+	{
+		if(m_sotacontrolPoint[Id]->IsInWorld())
+			m_sotacontrolPoint[Id]->RemoveFromWorld(false);
+
+		// assign it a new guid (client needs this to see the entry change?)
+		m_sotacontrolPoint[Id]->SetNewGuid(m_mapMgr->GenerateGameobjectGuid());
+		m_sotacontrolPoint[Id]->SetUInt32Value(OBJECT_FIELD_ENTRY, gi->ID);
+		m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_DISPLAYID, gi->DisplayID);
+		m_sotacontrolPoint[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, gi->Type);
+
+		switch(Type)
+		{
+		case SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED:
+			m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_2);
+			break;
+
+		case SOTA_SPAWN_TYPE_HORDE_CONTROLLED:
+			m_sotacontrolPoint[Id]->SetUInt32Value(GAMEOBJECT_FACTION, SOTA_GAMEOBJECT_FACTION_1);
+			break;
+		}
+
+		m_sotacontrolPoint[Id]->SetInfo(gi);
+		m_sotacontrolPoint[Id]->PushToWorld(m_mapMgr);
 	}
 
-	m_controlPoint[Id]->PushToWorld(m_mapMgr);
+	if(gi_aura==NULL)
+	{
+		// remove it if it exists
+		if(m_sotacontrolPointAuras[Id]!=NULL && m_sotacontrolPointAuras[Id]->IsInWorld())
+			m_sotacontrolPointAuras[Id]->RemoveFromWorld(false);
+			
+		return;
+	}
+
+	if(m_sotacontrolPointAuras[Id] == NULL)
+	{
+		m_sotacontrolPointAuras[Id] = SpawnGameObject(gi_aura->ID, ControlPointCoordinates[Id][0], ControlPointCoordinates[Id][1],
+			ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 5.0f);
+
+		m_sotacontrolPointAuras[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+		m_sotacontrolPointAuras[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, 6);
+		m_sotacontrolPointAuras[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+		m_sotacontrolPointAuras[Id]->bannerauraslot = Id;
+		m_sotacontrolPointAuras[Id]->PushToWorld(m_mapMgr);
+	}
+	else
+	{
+		if(m_sotacontrolPointAuras[Id]->IsInWorld())
+			m_sotacontrolPointAuras[Id]->RemoveFromWorld(false);
+
+		// re-spawn the aura
+		m_sotacontrolPointAuras[Id]->SetNewGuid(m_mapMgr->GenerateGameobjectGuid());
+		m_sotacontrolPointAuras[Id]->SetUInt32Value(OBJECT_FIELD_ENTRY, gi_aura->ID);
+		m_sotacontrolPointAuras[Id]->SetUInt32Value(GAMEOBJECT_DISPLAYID, gi_aura->DisplayID);
+		m_sotacontrolPointAuras[Id]->SetInfo(gi_aura);
+		m_sotacontrolPointAuras[Id]->PushToWorld(m_mapMgr);
+	}	
 }
 
 void StrandOfTheAncients::CaptureControlPoint(uint32 Id, uint32 Team)
 {
+	if(m_basesOwnedBy[Id] != -1)
+	{
+		// there is a very slim chance of this happening, 2 teams evnets could clash..
+		// just in case...
+		return;
+	}
+
+	// anticheat, not really necessary because this is a server method but anyway
+	if(m_basesAssaultedBy[Id] != (int32)Team)
+		return;
+
+	
+	m_basesLastOwnedBy[Id] = Team;
+
+	m_flagIsVirgin[Id] = false;
+
 	m_basesOwnedBy[Id] = Team;
+	m_basesAssaultedBy[Id]=-1;
 
 	if(m_spiritGuides[Id] != NULL)
 	{
@@ -396,7 +524,7 @@ void StrandOfTheAncients::CaptureControlPoint(uint32 Id, uint32 Team)
 
 	// send the chat message/sounds out
 	PlaySoundToAll(Team ? SOUND_HORDE_SCORES : SOUND_ALLIANCE_SCORES);
-	SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
+	SendChatMessage(CHAT_MSG_SYSTEM, 0, "The %s has been captured by the %s!", ControlPointNames[Id], Team ? "Horde" : "Alliance");
 	
 	SpawnControlPoint(Id, Team ? SOTA_SPAWN_TYPE_HORDE_CONTROLLED : SOTA_SPAWN_TYPE_ALLIANCE_CONTROLLED);
 	
@@ -410,8 +538,100 @@ void StrandOfTheAncients::CaptureControlPoint(uint32 Id, uint32 Team)
 		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][ALLIANCE], 0);
 		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Team], 1);
 	}
-	
 }
+
+void StrandOfTheAncients::AssaultControlPoint(Player* pPlayer, uint32 Id)
+{
+#if defined(BG_ANTI_CHEAT) && !defined(_DEBUG)
+	if(!m_started)
+	{
+		SendChatMessage(CHAT_MSG_BG_SYSTEM_NEUTRAL, pPlayer->GetGUID(), "%s has been removed from the game for cheating.", pPlayer->GetName());
+		pPlayer->SoftDisconnect();
+		return;
+	}
+#endif
+
+	bool isVirgin = false;
+
+	uint32 Team = pPlayer->m_bgTeam;
+	uint32 Owner;
+
+	if(m_basesOwnedBy[Id] != -1)
+	{
+		Owner = m_basesOwnedBy[Id];
+
+		// set it to uncontrolled for now
+		m_basesOwnedBy[Id] = -1;
+
+		// this control point just got taken over by someone! oh noes!
+		if( m_spiritGuides[Id] != NULL )
+		{
+			map<Creature*,set<uint32> >::iterator itr = m_resurrectMap.find(m_spiritGuides[Id]);
+			if( itr != m_resurrectMap.end() )
+			{
+				for( set<uint32>::iterator it2 = itr->second.begin(); it2 != itr->second.end(); ++it2 )
+				{
+					Player* r_plr = m_mapMgr->GetPlayer( *it2 );
+					if( r_plr != NULL && r_plr->isDead() )
+					{
+						HookHandleRepop( r_plr );
+						QueueAtNearestSpiritGuide(r_plr, itr->first);
+					}
+				}
+			}
+			m_resurrectMap.erase( itr );
+			m_spiritGuides[Id]->Despawn( 0, 0 );
+			m_spiritGuides[Id] = NULLCREATURE;
+		}
+
+		// reset the world states
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Owner], 0);
+
+		// modify the resource update time period
+		if(m_capturedBases[Owner]==0)
+			this->event_RemoveEvents(EVENT_SOTA_RESOURCES_UPDATE_TEAM_0+Owner);
+	}
+
+	// nigga stole my flag!
+	if(m_basesAssaultedBy[Id] != -1)
+	{
+		Owner = m_basesAssaultedBy[Id];
+
+		// woah! vehicle hijack!
+		m_basesAssaultedBy[Id] = Team;
+		m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Owner], 0);
+
+		// make sure the event does not trigger
+		sEventMgr.RemoveEvents(this, EVENT_SOTA_CAPTURE_CP_1 + Id);
+
+		// no need to remove the spawn, SpawnControlPoint will do this.
+	}
+
+	m_basesAssaultedBy[Id] = Team;
+
+	// guessed
+	PlaySoundToAll(Team ? SOUND_ALLIANCE_CAPTURE : SOUND_HORDE_CAPTURE);
+
+	// update the client's map with the new assaulting field
+	m_mapMgr->GetStateManager().UpdateWorldState(capturedStates[Id][Team], 1);
+
+	// create the 0 second event.
+	sEventMgr.AddEvent(TO_SOTA(this), &StrandOfTheAncients::CaptureControlPoint, Id, Team, EVENT_SOTA_CAPTURE_CP_1 + Id, 0, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+
+	// update players info
+	pPlayer->m_bgScore.MiscData[BG_SCORE_SOTA_BASE_ASSAULTED]++;
+	UpdatePvPData();
+}
+
+/*void StrandOfTheAncients::SpawnSalesman(uint8 Id)
+{
+	if(m_npcs[Id] != NULL)
+		m_npcs[Id]->Despawn(0,0);
+
+	m_npcs[Id] = SpawnCreature(demolisherSalesman[Id][0], demolisherSalesman[Id][1], demolisherSalesman[Id][2], demolisherSalesman[Id][3], demolisherSalesman[Id][4]);
+
+	m_npcs[Id]->PushToWorld(m_mapMgr);
+}*/
 
 void StrandOfTheAncients::HookOnAreaTrigger(Player* plr, uint32 id)
 {
@@ -487,8 +707,8 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 		if(Attackers == ALLIANCE)
 		{
 			Attackers = HORDE;
-			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 1);
-			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1);
+			/*m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 1);*/
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 0);	
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 0);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 0);
@@ -503,8 +723,8 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 		else
 		{
 			Attackers = ALLIANCE;
-			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1);
-			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 1);
+			/*m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 1);
+			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1);*/
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_BLIGHTBRINGER, 1);	
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_THE_CASKET_CARRIER, 1);
 			m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_SOTA_SOUTH_GRAVEYARD_ALLIANCE_CONTROLLED, 1);
@@ -547,7 +767,18 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 }	
 
 bool StrandOfTheAncients::HookSlowLockOpen(GameObject* pGo, Player* pPlayer, Spell* pSpell)
-{	
+{
+	if( pPlayer->m_bgFlagIneligible )
+		return false;
+
+	// burlex todo: find a cleaner way to do this that doesnt waste memory.
+	if(pGo->bannerslot >= 0 && pGo->bannerslot < 3)
+	{
+		// TODO: anticheat here
+		AssaultControlPoint(pPlayer,pGo->bannerslot);
+		return true;
+	}
+
 	return true;
 }
 
@@ -564,14 +795,18 @@ void StrandOfTheAncients::Respawn()
 				/*m_boats[z]->Delete();*/
 				m_npcs[z]->Delete();
 			}
-			for(uint32 s = 0; s < 6; s++)
+			for(uint32 s = 0; s < 8; s++)
 			{
 				m_demolisher[s]->Delete();
 			}
 			/*for(uint32 gcp = 0; gcp < 3; gcp++)
 			{
-				m_controlPoint[gcp]->Delete();
+				m_banners[gcp]->Delete();
 			}*/
+			for(uint32 i = 0; i < 3; ++i)
+			{
+				m_flagpole[i]->Delete();
+			}
 		}
 	
 		m_gates[y]->Delete();
@@ -708,7 +943,7 @@ void StrandOfTheAncients::Respawn()
 	m_relic->PushToWorld(m_mapMgr);
 	
 	// Spawn demolishers
-	for(uint32 dem = 0; dem < 6; dem++)
+	for(uint32 dem = 0; dem < 8; dem++)
 	{
 		m_demolisher[dem] = SpawnVehicle(BG_DEMOLISHER, demolisherLocations[dem][0], demolisherLocations[dem][1], demolisherLocations[dem][2], demolisherLocations[dem][3]);
 
@@ -721,29 +956,38 @@ void StrandOfTheAncients::Respawn()
 	// Spawn spirit guids
 	if(Attackers == ALLIANCE)
 	{
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[1][0], sotaRepop[1][1], sotaRepop[1][2], sotaRepop[1][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[0][0], sotaRepop[0][1], sotaRepop[0][2], sotaRepop[0][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[2][0], sotaRepop[2][1], sotaRepop[2][2], sotaRepop[2][3], 0));
+		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 1));
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[3][0], sotaRepop[3][1], sotaRepop[3][2], sotaRepop[3][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 0));
+		for(uint32 repop = 0; repop < 3; repop++)
+		{
+			AddSpiritGuide(m_spiritGuides[repop] = SpawnSpiritGuide(sotaRepop[repop][0], sotaRepop[repop][1], sotaRepop[repop][2], sotaRepop[repop][3], 0));
+		}
 	}
 	else
 	{
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[1][0], sotaRepop[1][1], sotaRepop[1][2], sotaRepop[1][3], 0));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[0][0], sotaRepop[0][1], sotaRepop[0][2], sotaRepop[0][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[2][0], sotaRepop[2][1], sotaRepop[2][2], sotaRepop[2][3], 1));
+		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 0));
 		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[3][0], sotaRepop[3][1], sotaRepop[3][2], sotaRepop[3][3], 1));
-		AddSpiritGuide(SpawnSpiritGuide(sotaRepop[4][0], sotaRepop[4][1], sotaRepop[4][2], sotaRepop[4][3], 1));
+		for(uint32 repop = 0; repop < 3; repop++)
+		{
+			AddSpiritGuide(m_spiritGuides[repop] = SpawnSpiritGuide(sotaRepop[repop][0], sotaRepop[repop][1], sotaRepop[repop][2], sotaRepop[repop][3], 1));
+		}
 	}
 	
 	// Spawn controlpoints
-	/*for(uint32 gcp = 0; gcp < 3; gcp++)
+	for(uint32 gcp = 0; gcp < 3; gcp++)
 	{
 		if(Attackers == ALLIANCE)
-			SpawnControlPoint(ControlPointGoIds[gcp][1], 1);
+			SpawnControlPoint(m_banners[gcp], 0);
 		else
-			SpawnControlPoint(ControlPointGoIds[gcp][0], 0);
-	}*/
+			SpawnControlPoint(m_banners[gcp], 1);
+	}
+
+	// Flagpole
+	for(uint32 i = 0; i < 3; ++i)
+	{
+		m_flagpole[i] = SpawnGameObject(SOTA_FLAGPOLE, ControlPointFlagpole[i][0], ControlPointFlagpole[i][1], ControlPointFlagpole[i][2], ControlPointFlagpole[i][3], 0, 35, 1.0f);
+		m_flagpole[i]->PushToWorld(m_mapMgr);
+	}
 }
 
 void StrandOfTheAncients::HookOnMount(Player* plr)
@@ -766,10 +1010,6 @@ void StrandOfTheAncients::OnCreate()
 	WorldStateManager& sm = m_mapMgr->GetStateManager();
 	sm.CreateWorldState( WORLDSTATE_SOTA_CAPTURE_BAR_DISPLAY, 0 );
 	sm.CreateWorldState( WORLDSTATE_SOTA_CAPTURE_BAR_VALUE, 0 );
-	sm.CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
-	sm.CreateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 0 );
-	sm.CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
-	sm.CreateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 0 );
 	// gates
 	sm.CreateWorldState( WORLDSTATE_SOTA_CHAMBER_OF_THE_ANCIENT_RELICS, 1);
 	sm.CreateWorldState( WORLDSTATE_SOTA_GATES_OF_THE_BLUE_SAPPHIRE, 1);
@@ -828,7 +1068,12 @@ void StrandOfTheAncients::HookOnHK(Player* plr)
 
 LocationVector StrandOfTheAncients::GetStartingCoords(uint32 Team)
 {
-	uint32 sTeam = ( Team == Attackers ? 1 : 0 );
+	uint32 sTeam;
+	if(Team == Attackers)
+		sTeam = RandomUInt(2)-1;
+	else
+		sTeam = 2;
+
 	return LocationVector( SOTAStartLocations[sTeam][0], 
 		SOTAStartLocations[sTeam][1],
 		SOTAStartLocations[sTeam][2] );
@@ -914,16 +1159,20 @@ void StrandOfTheAncients::SetTime(uint32 secs, uint32 WorldState)
 
 void StrandOfTheAncients::PrepareRound()
 {
-	if(Attackers == ALLIANCE)
+/*	if(Attackers == ALLIANCE)
 	{
-		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 0 );
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 1 );
 		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 0 );
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 1 );
 	}
 	else if(Attackers == HORDE)
 	{
-		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
 		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_ATTACKER, 1 );
-	}	
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_ALLIANCE_DEFENDER, 0 );
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_HORDE_ATTACKER, 0 );
+		m_mapMgr->GetStateManager().CreateWorldState( WORLDSTATE_SOTA_HORDE_DEFENDER, 1 );
+	}*/
 };
 
 void StrandOfTheAncients::TimeTick()
@@ -947,7 +1196,7 @@ void StrandOfTheAncients::EndGame()
 	m_nextPvPUpdateTime = 0;
 
 	sEventMgr.RemoveEvents(this);
-	sEventMgr.AddEvent( (CBattleground*)this, &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+	sEventMgr.AddEvent( (CBattleground*)this, &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1, 0);
 
 	m_mainLock.Acquire();
 	// Honor is added?

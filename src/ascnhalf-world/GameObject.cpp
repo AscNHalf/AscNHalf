@@ -91,6 +91,19 @@ GameObject::~GameObject()
 		}
 		m_battleground = NULLBATTLEGROUND;
 	}
+
+	if( m_battleground != NULL )
+	{
+		if( m_battleground->GetType() == BATTLEGROUND_STRAND_OF_THE_ANCIENTS )
+		{
+			if( bannerslot >= 0 && TO_SOTA(m_battleground)->m_sotacontrolPoint[bannerslot] == TO_GAMEOBJECT(this) )
+				TO_SOTA(m_battleground)->m_sotacontrolPoint[bannerslot] = NULLGOB;
+
+			if( bannerauraslot >= 0 && TO_SOTA(m_battleground)->m_sotacontrolPointAuras[bannerauraslot] == TO_GAMEOBJECT(this) )
+				TO_SOTA(m_battleground)->m_sotacontrolPointAuras[bannerauraslot] = NULLGOB;
+		}
+		m_battleground = NULLBATTLEGROUND;
+	}
 }
 
 void GameObject::Init()

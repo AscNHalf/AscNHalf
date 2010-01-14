@@ -67,7 +67,7 @@ protected:
 	GameObject* m_CPStatusGO[EOTS_TOWER_COUNT];
 	GameObject* m_CPBanner[EOTS_TOWER_COUNT];
 	GameObject* m_bubbles[2];
-	GameObject* m_EOTSbuffs[4];
+	GameObject* m_EOTSbuffs[EOTS_TOWER_COUNT];
 
 	typedef map<uint32, uint32> EOTSStoredPlayerMap;
 	EOTSStoredPlayerMap m_CPStored[EOTS_TOWER_COUNT];
