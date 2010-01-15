@@ -136,6 +136,14 @@ struct CreatureProto
 	uint32	auraimmune_flag;
 	int32 vehicle_entry;
 	uint8 CanMove;
+	uint32 spell1;
+	uint32 spell2;
+	uint32 spell3;
+	uint32 spell4;
+	uint32 spell5;
+	uint32 spell6;
+	uint32 spell7;
+	uint32 spell8;
 
 	/* AI Stuff */
 	bool m_canRangedAttack;

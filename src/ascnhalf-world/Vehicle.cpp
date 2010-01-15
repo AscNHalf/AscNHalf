@@ -139,7 +139,7 @@ bool Vehicle::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	return Creature::Load(spawn, mode, info);
 }
 
-void Vehicle::SendSpells(uint32 entry, Player* plr)
+void Vehicle::SendSpells(uint32 entry, uint8 slot, Player* plr)
 {
 	list<uint32> avail_spells;
 	for(list<AI_Spell*>::iterator itr = GetAIInterface()->m_spells.begin(); itr != GetAIInterface()->m_spells.end(); ++itr)
@@ -156,6 +156,8 @@ void Vehicle::SendSpells(uint32 entry, Player* plr)
 	data << uint32(0x00000101);//bar type
 
 	// Send the actionbar
+	CreatureProto* cp = CreatureProtoStorage.LookupEntry(entry);
+	uint16 spell = cp->spell1;
 	for(uint8 i = 1; i < 10; ++i)
 	{
 		if(itr != avail_spells.end())
@@ -164,8 +166,39 @@ void Vehicle::SendSpells(uint32 entry, Player* plr)
 			++itr;
 		}
 		else
-			data << uint16(0) << uint8(0) << uint8(i+8);
+		{
+			switch(i)
+			{
+			case 1:
+				spell = cp->spell1;
+			break;
+			case 2:
+				spell = cp->spell2;
+			break;
+			case 3:
+				spell = cp->spell3;
+			break;
+			case 4:
+				spell = cp->spell4;
+			break;
+			case 5:
+				spell = cp->spell5;
+			break;
+			case 6:
+				spell = cp->spell6;
+			break;
+			case 7:
+				spell = cp->spell7;
+			break;
+			case 8:
+				spell = cp->spell8;
+			break;
+			default: spell = 0;
+			}
+		data << uint16(spell) << uint8(0) << uint8(i+8);
+		}
 	}
+
 
 	// Send the rest of the spells.
 	data << uint8(avail_spells.size());
@@ -175,6 +208,7 @@ void Vehicle::SendSpells(uint32 entry, Player* plr)
 	data << uint8(0);
 
 	plr->GetSession()->SendPacket(&data);
+	
 }
 
 void Vehicle::Despawn(uint32 delay, uint32 respawntime)
@@ -507,7 +541,7 @@ void Vehicle::_AddToSlot(Unit* pPassenger, uint8 slot)
 			_setFaction();
 			UpdateOppFactionSet();
 
-			SendSpells(GetEntry(), pPlayer);
+			SendSpells(GetEntry(), slot, pPlayer);
 		}
 
 		data.Initialize(SMSG_PET_DISMISS_SOUND);
