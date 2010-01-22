@@ -203,46 +203,56 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 {
-	DEBUG_LOG("WORLD","HandleCorpseQueryOpcode Received MSG_CORPSE_QUERY");
+	OUT_DEBUG("WORLD: Received MSG_CORPSE_QUERY");
 
-	Corpse* pCorpse;
+	Corpse *pCorpse;
 	//WorldPacket data(MSG_CORPSE_QUERY, 21);
 	uint8 databuffer[100];
 	StackPacket data(MSG_CORPSE_QUERY, databuffer, 100);
+	MapInfo *pMapinfo;
 
-	if(_player->isDead())
-		_player->BuildPlayerRepop();
-
-	pCorpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
+	pCorpse = objmgr.GetCorpseByOwner(GetPlayer()->GetLowGUID());
 	if(pCorpse)
 	{
-		MapInfo *pPMapinfo = NULL;
-		pPMapinfo = WorldMapInfoStorage.LookupEntry(pCorpse->GetMapId());
-		if(pPMapinfo == NULL)
+		pMapinfo = WorldMapInfoStorage.LookupEntry(pCorpse->GetMapId());
+		if(pMapinfo)
+ 		{
+			if(pMapinfo->type == INSTANCE_NULL || pMapinfo->type == INSTANCE_PVP)
+			{
+				data << uint8(0x01); //show ?
+				data << pCorpse->GetMapId(); // mapid (that tombstones shown on)
+				data << pCorpse->GetPositionX();
+				data << pCorpse->GetPositionY();
+				data << pCorpse->GetPositionZ();
+				data << pCorpse->GetMapId(); //instance mapid (needs to be same as mapid to be able to recover corpse)
+				SendPacket(&data);
+			}
+			else
+			{
+				data << uint8(0x01); //show ?
+				data << pMapinfo->repopmapid; // mapid (that tombstones shown on)
+				data << pMapinfo->repopx;
+				data << pMapinfo->repopy;
+				data << pMapinfo->repopz;
+				data << pCorpse->GetMapId(); //instance mapid (needs to be same as mapid to be able to recover corpse)
+				data << uint32(0); // 3.2.2
+				SendPacket(&data);
+			}
+ 		}
+ 		else
+ 		{
+
 			data.Initialize(MSG_CORPSE_QUERY);
-
-		data << uint8(0x01); //show ?
-
-		if(pPMapinfo != NULL && !(pPMapinfo->type == INSTANCE_NULL || pPMapinfo->type == INSTANCE_PVP))
-		{
-			data << pPMapinfo->repopmapid; // mapid (that tombstones shown on)
-			data << pPMapinfo->repopx;
-			data << pPMapinfo->repopy;
-			data << pPMapinfo->repopz;
+			data << uint8(0x01); //show ?
+ 			data << pCorpse->GetMapId(); // mapid (that tombstones shown on)
+ 			data << pCorpse->GetPositionX();
+ 			data << pCorpse->GetPositionY();
+ 			data << pCorpse->GetPositionZ();
+			data << pCorpse->GetMapId(); //instance mapid (needs to be same as mapid to be able to recover corpse)
 			data << uint32(0); // 3.2.2
-		}
-		else
-		{
-			data << pCorpse->GetMapId(); // mapid (that tombstones shown on)
-			data << pCorpse->GetPositionX();
-			data << pCorpse->GetPositionY();
-			data << pCorpse->GetPositionZ();
-			data << uint32(0); // 3.2.2
-		}
+			SendPacket(&data);
 
-		data << pCorpse->GetMapId(); //instance mapid (needs to be same as mapid to be able to recover corpse)
-
-		SendPacket(&data);
+ 		}
 	}
 }
 

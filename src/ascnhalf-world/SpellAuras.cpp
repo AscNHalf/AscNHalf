@@ -6806,9 +6806,20 @@ void Aura::SpellAuraGhost(bool apply)
 	{
 		SpellAuraWaterWalk( apply );
 		m_target->m_invisible = apply;
+		
+		if(m_target->GetMapId() == 571 && m_target->GetZoneId() == 67 || m_target->GetZoneId() == 210 || m_target->GetZoneId() == 65)
+			m_target->CastSpell(m_target, 55164, true);
 
 		if(apply)
+		{	
 			SetNegative(2);//we picked up one extra from calling SpellAuraWaterWalk ;)
+		}
+		else
+		{
+			if(m_target->HasActiveAura(55164))
+			m_target->RemoveAura(55164);
+		}
+
 	}
 	//m_target->SendPowerUpdate();
 }
