@@ -23,7 +23,7 @@
 class ClientMgr : public Singleton<ClientMgr>
 {
 public:
-	typedef std::tr1::unordered_map<string, RPlayerInfo*> ClientStringMap;
+	typedef boost::unordered_map<string, RPlayerInfo*> ClientStringMap;
 	typedef HM_NAMESPACE::hash_map<uint32, RPlayerInfo*> ClientMap;
 	typedef HM_NAMESPACE::hash_map<uint32, Session*> SessionMap;
 	ClientMap m_clients;
