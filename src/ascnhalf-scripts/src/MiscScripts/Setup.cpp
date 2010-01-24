@@ -34,6 +34,7 @@ extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)	// Comment any 
 	SetupRandomScripts(mgr);
 	SetupMiscCreatures(mgr);
 	SetupDarkmoonFaireObjects(mgr);
+	SetupBGScripts(mgr);
 }
 
 #ifdef WIN32

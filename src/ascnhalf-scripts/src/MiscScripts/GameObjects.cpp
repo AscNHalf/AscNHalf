@@ -1261,7 +1261,7 @@ public:
 	}
 };
 
- class TitanRelic : public GameObjectAIScript
+ /*class TitanRelic : public GameObjectAIScript
  {
  public:
 	 TitanRelic(GameObject* goinstance) : GameObjectAIScript(goinstance) { }
@@ -1286,7 +1286,7 @@ public:
 			}
 		 }
 	 }
- };
+ };*/
 
 void SetupGoHandlers(ScriptMgr * mgr)
 {
@@ -1344,6 +1344,6 @@ void SetupGoHandlers(ScriptMgr * mgr)
 	mgr->register_gameobject_script(191539, &DeathGate2::Create);
 	mgr->register_gameobject_script(190942, &DeathGate3::Create);
 	mgr->register_gameobject_script(175944, &SacredFireofLife::Create);
-	mgr->register_gameobject_script(192829, &TitanRelic::Create);
+	//mgr->register_gameobject_script(192829, &TitanRelic::Create);
 
 }
