@@ -293,7 +293,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 	MapInfo * inf = WorldMapInfoStorage.LookupEntry(BGMapIds[bgtype]);
 	if(inf->minlevel > m_session->GetPlayer()->getLevel())
 	{
-		m_session->GetPlayer()->GetSession()->SendNotification("You have to reach level %u before you can join this instance.",inf->minlevel);
+		m_session->GetPlayer()->GetSession()->SendNotification("You have to reach level %u before you can join this battleground.",inf->minlevel);
 		return;
 	}
 
