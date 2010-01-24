@@ -1261,32 +1261,6 @@ public:
 	}
 };
 
- /*class TitanRelic : public GameObjectAIScript
- {
- public:
-	 TitanRelic(GameObject* goinstance) : GameObjectAIScript(goinstance) { }
-	 static GameObjectAIScript * Create(GameObject* GO) { return new TitanRelic(GO); }
-
-	 void OnActivate(Player* pPlayer)
-	 {
-		 if(pPlayer->m_bg && pPlayer->m_bg->GetType() == BATTLEGROUND_STRAND_OF_THE_ANCIENTS)
-		 {
-			StrandOfTheAncients* sota = (StrandOfTheAncients*)pPlayer->m_bg;
-			
-			if(sota && sota != NULL)
-			{
-				sLog.outColor(TGREEN, "\nSOTA: OnActivate() called, relic clicked. SOTA is not NULL. Executing SOTARebuild().");
-				sLog.outColor(TBLUE, "\nPlayer GUID:%u\n", pPlayer->GetGUID());
-				
-				sota->SOTARebuild(true);
-			}
-			else
-			{
-				sLog.outColor(TRED, "\nSOTA OnActivate() called, relic clicked. SOTA is NULL! Report!");
-			}
-		 }
-	 }
- };*/
 
 void SetupGoHandlers(ScriptMgr * mgr)
 {
@@ -1344,6 +1318,5 @@ void SetupGoHandlers(ScriptMgr * mgr)
 	mgr->register_gameobject_script(191539, &DeathGate2::Create);
 	mgr->register_gameobject_script(190942, &DeathGate3::Create);
 	mgr->register_gameobject_script(175944, &SacredFireofLife::Create);
-	//mgr->register_gameobject_script(192829, &TitanRelic::Create);
 
 }
