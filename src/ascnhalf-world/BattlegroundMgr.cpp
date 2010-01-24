@@ -290,6 +290,13 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 		return;
 	}
 
+	MapInfo * inf = WorldMapInfoStorage.LookupEntry(BGMapIds[bgtype]);
+	if(inf->minlevel > m_session->GetPlayer()->getLevel())
+	{
+		m_session->GetPlayer()->GetSession()->SendNotification("You have to reach level %u before you can join this instance.",inf->minlevel);
+		return;
+	}
+
 	if( joinasgroup && m_session->GetPlayer()->GetGroup() == NULL ) 
 	{
 		//Correct? is there any message here at blizz?
