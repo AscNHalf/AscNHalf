@@ -231,10 +231,10 @@ void WorldSocket::OnConnect()
 	WorldPacket data (SMSG_AUTH_CHALLENGE, 25);
 	data << uint32(1);			// Unk
 	data << mSeed;
-	data << uint32(0xF3539DA3);	// Generated Random.
-	data << uint32(0x6E8547B9);	// 3.2.2
-	data << uint32(0x9A6AA2F8);	// 3.2.2
-	data << uint32(0xA4F170F4);	// 3.2.2
+	data << uint32(0xC0FFEEEE);	// Generated Random.
+	data << uint32(0x00BABE00);	// 3.2.2
+	data << uint32(0xDF1697E5);	// 3.2.2
+	data << uint32(0x1234ABCD);	// 3.2.2
 	SendPacket(&data);
 }
 

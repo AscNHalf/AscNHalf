@@ -2321,6 +2321,6 @@ void WorldSession::HandleRemoveGlyph(WorldPacket & recv_data)
 void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& recv_data)
 {
 	WorldPacket data(SMSG_WORLD_STATE_UI_TIMER_UPDATE, 4);
-	data << (uint32)UNIXTIME;;
+	data << uint32(UNIXTIME);
 	SendPacket(&data);
 }

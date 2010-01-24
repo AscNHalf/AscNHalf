@@ -155,8 +155,8 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			}
 
 			data << uint32(0);					//Added in 3.0.2
-			data << fields[14].GetUInt8();		// Rest State
-			//data << uint8(0); -- No longer used in last build of 3.2.2.					// Added in 3.2
+			//data << fields[14].GetUInt8();		// Rest State
+			data << uint8(0);
 
 			if( Class == WARLOCK || Class == HUNTER )
 			{
@@ -843,11 +843,12 @@ void WorldSession::FullLogin(Player* plr)
 		delete data;
 	}
 
+	SendAccountDataTimes(GLOBAL_CACHE_MASK);
+
 	if(enter_world && !_player->GetMapMgr())
 		plr->AddToWorld();
 
 	objmgr.AddPlayer(_player);
-	SendAccountDataTimes(GLOBAL_CACHE_MASK);
 }
 
 bool ChatHandler::HandleRenameCommand(const char * args, WorldSession * m_session)
