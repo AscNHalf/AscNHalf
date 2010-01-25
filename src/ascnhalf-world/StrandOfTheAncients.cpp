@@ -131,9 +131,9 @@ static uint32 ControlPointGoIds[3][2] = { /* ALLIANCE-CONTROLLED    HORDE_CONTRO
 };
 
 const uint32 m_banners[3] = {
-	{0},
-	{1},
-	{2},
+	0,
+	1,
+	2,
 };
 
 const float ControlPointFlagpole[3][4] = {
