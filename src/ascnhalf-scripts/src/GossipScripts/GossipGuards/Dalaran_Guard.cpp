@@ -35,31 +35,31 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object *pObject, Player *Plr, bool AutoSend)
+    void GossipHello(Object* pObject, Player* Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50000, Plr);
 
-        Menu->AddItem(0, "Arena", 1);
-        Menu->AddItem(0, "Auction House", 2);
-        Menu->AddItem(0, "Bank", 3);
-        Menu->AddItem(0, "Barber", 4);
-        Menu->AddItem(0, "Battlemasters", 5);    
-        Menu->AddItem(0, "Capital Portals", 6);
-        Menu->AddItem(0, "Flight Master", 7);
-        Menu->AddItem(0, "Guild Master", 8);
-        Menu->AddItem(0, "Inn", 9);
-        Menu->AddItem(0, "Mailbox", 10);
-        Menu->AddItem(0, "Points of Interest", 11);
-        Menu->AddItem(0, "Stable Master", 12);
-        Menu->AddItem(0, "Trainers", 13);
-        Menu->AddItem(0, "Vendors", 14);
+        Menu->AddItem(0, "Arena",				1);
+        Menu->AddItem(0, "Auction House",		2);
+        Menu->AddItem(0, "Bank",				3);
+        Menu->AddItem(0, "Barber",				4);
+        Menu->AddItem(0, "Battlemasters",		5);    
+        Menu->AddItem(0, "Capital Portals",		6);
+        Menu->AddItem(0, "Flight Master",		7);
+        Menu->AddItem(0, "Guild Master",		8);
+        Menu->AddItem(0, "Inn",					9);
+        Menu->AddItem(0, "Mailbox",				10);
+        Menu->AddItem(0, "Points of Interest",	11);
+        Menu->AddItem(0, "Stable Master",		12);
+        Menu->AddItem(0, "Trainers",			13);
+        Menu->AddItem(0, "Vendors",				14);
 
         if(AutoSend)
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object *pObject, Player *Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -67,26 +67,26 @@ public:
         case 1:     // Arena
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50001, Plr);
-                Menu->AddItem( 0, "Eastern Sewer Entrance"          , 15);
-                Menu->AddItem( 0, "Western Sewer Entrance"         , 16);
-                Menu->AddItem( 0, "Well Entrance"         , 17);
+                Menu->AddItem( 0, "Eastern Sewer Entrance"	, 15);
+                Menu->AddItem( 0, "Western Sewer Entrance"	, 16);
+                Menu->AddItem( 0, "Well Entrance"			, 17);
                 Menu->SendTo(Plr);
             }break;
 
         case 2:     // Auction House
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50002, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-                Menu->AddItem( 0, "The Horde Quarter"         , 19);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+                Menu->AddItem( 0, "The Horde Quarter"		, 19);
                 Menu->SendTo(Plr);
             }break;
 
         case 3:     // Bank
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50003, Plr);
-                Menu->AddItem( 0, "Northern Bank"          , 20);
-                Menu->AddItem( 0, "Southern Bank"         , 21);
-				Menu->AddItem( 0, "Sewers"         , 22); // Sewers 1
+                Menu->AddItem( 0, "Northern Bank"	, 20);
+                Menu->AddItem( 0, "Southern Bank"	, 21);
+				Menu->AddItem( 0, "Sewers"			, 22); // Sewers 1
                 Menu->SendTo(Plr);
             }break;
 
@@ -99,16 +99,16 @@ public:
         case 5:     // Battlemasters
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50004, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-                Menu->AddItem( 0, "The Horde Quarter"         , 19);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+                Menu->AddItem( 0, "The Horde Quarter"		, 19);
                 Menu->SendTo(Plr);
             }break;
 
         case 6:     // Capital Portals
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50005, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-                Menu->AddItem( 0, "The Horde Quarter"         , 19);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+                Menu->AddItem( 0, "The Horde Quarter"		, 19);
                 Menu->SendTo(Plr);
             }break;
 
@@ -127,35 +127,35 @@ public:
         case 9:     // Inn
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50006, Plr);
-                Menu->AddItem( 0, "Alliance Inn"         , 24);
-                Menu->AddItem( 0, "Horde Inn"          , 25);
-                Menu->AddItem( 0, "Sewers"         , 26); // Sewers 2
+                Menu->AddItem( 0, "Alliance Inn"	, 24);
+                Menu->AddItem( 0, "Horde Inn"		, 25);
+                Menu->AddItem( 0, "Sewers"			, 26); // Sewers 2
                 Menu->SendTo(Plr);
 			}break;
         case 10:     // Mailbox
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50007, Plr);
-                Menu->AddItem( 0, "Inn"          , 9);
-                Menu->AddItem( 0, "Bank"         , 3);
-                Menu->AddItem( 0, "Krasus' Landing"          , 74);
+                Menu->AddItem( 0, "Inn"				, 9);
+                Menu->AddItem( 0, "Bank"			, 3);
+                Menu->AddItem( 0, "Krasus' Landing"	, 74);
                 Menu->SendTo(Plr);
 			}break;
 
         case 11:     // Points of Interest
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50008, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-                Menu->AddItem( 0, "The Horde Quarter"         , 19);
-                Menu->AddItem( 0, "The Violet Citadel"          , 27);
-                Menu->AddItem( 0, "The Violet Hold"          , 28);
-                Menu->AddItem( 0, "Sewers"         , 22); // Sewers 1
-                Menu->AddItem( 0, "Trade District"          , 29);
-                Menu->AddItem( 0, "Krasus'Landing"          , 75);
-                Menu->AddItem( 0, "Antonidas Memorial"         , 30);
-                Menu->AddItem( 0, "Runeweaver Square"          , 31);
-                Menu->AddItem( 0, "The Eventide"          , 32);
-                Menu->AddItem( 0, "Cemetary"         , 33);
-                Menu->AddItem( 0, "Lexicon of Power"          , 34);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+                Menu->AddItem( 0, "The Horde Quarter"		, 19);
+                Menu->AddItem( 0, "The Violet Citadel"		, 27);
+                Menu->AddItem( 0, "The Violet Hold"			, 28);
+                Menu->AddItem( 0, "Sewers"					, 22); // Sewers 1
+                Menu->AddItem( 0, "Trade District"			, 29);
+                Menu->AddItem( 0, "Krasus'Landing"			, 75);
+                Menu->AddItem( 0, "Antonidas Memorial"		, 30);
+                Menu->AddItem( 0, "Runeweaver Square"		, 31);
+                Menu->AddItem( 0, "The Eventide"			, 32);
+                Menu->AddItem( 0, "Cemetary"				, 33);
+                Menu->AddItem( 0, "Lexicon of Power"		, 34);
                 Menu->SendTo(Plr);
 			}break;
 
@@ -168,31 +168,31 @@ public:
         case 13:     // Trainers
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50009, Plr);
-                Menu->AddItem( 0, "Class Trainer"          , 35);
-				Menu->AddItem( 0, "Cold Weather Flying Trainer"          , 76);
-				Menu->AddItem( 0, "Portal Trainer"          , 36);
-				Menu->AddItem( 0, "Profession Trainer"          , 37);
+                Menu->AddItem( 0, "Class Trainer"				, 35);
+				Menu->AddItem( 0, "Cold Weather Flying Trainer"	, 76);
+				Menu->AddItem( 0, "Portal Trainer"				, 36);
+				Menu->AddItem( 0, "Profession Trainer"			, 37);
                 Menu->SendTo(Plr);
 			}break;
 
         case 14:     // Vendors
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50010, Plr);
-                Menu->AddItem( 0, "Armor"          , 38);
-				Menu->AddItem( 0, "Clothing"          , 39);
-				Menu->AddItem( 0, "Emblem Gear"          , 40);
-				Menu->AddItem( 0, "Flowers"          , 41);
-				Menu->AddItem( 0, "Fruit"          , 42);
-				Menu->AddItem( 0, "General Goods"          , 43);
-				Menu->AddItem( 0, "Jewelry"          , 44);
-				Menu->AddItem( 0, "Pet Supplies & Exotic Mounts"          , 45);
-				Menu->AddItem( 0, "Pie, Pastry & Cakes"          , 46);
-				Menu->AddItem( 0, "Reagents & Magical Goods"          , 47);
-				Menu->AddItem( 0, "Toys"          , 48);
-				Menu->AddItem( 0, "Trade Supplies"          , 43);
-				Menu->AddItem( 0, "Trinkets. Relics & Off-hand items"          , 49);
-				Menu->AddItem( 0, "Weapons"          , 50);
-				Menu->AddItem( 0, "Wine & Cheese"          , 51);
+                Menu->AddItem( 0, "Armor"								, 38);
+				Menu->AddItem( 0, "Clothing"							, 39);
+				Menu->AddItem( 0, "Emblem Gear"							, 40);
+				Menu->AddItem( 0, "Flowers"								, 41);
+				Menu->AddItem( 0, "Fruit"								, 42);
+				Menu->AddItem( 0, "General Goods"						, 43);
+				Menu->AddItem( 0, "Jewelry"								, 44);
+				Menu->AddItem( 0, "Pet Supplies & Exotic Mounts"		, 45);
+				Menu->AddItem( 0, "Pie, Pastry & Cakes"					, 46);
+				Menu->AddItem( 0, "Reagents & Magical Goods"			, 47);
+				Menu->AddItem( 0, "Toys"								, 48);
+				Menu->AddItem( 0, "Trade Supplies"						, 43);
+				Menu->AddItem( 0, "Trinkets. Relics & Off-hand items"	, 49);
+				Menu->AddItem( 0, "Weapons"								, 50);
+				Menu->AddItem( 0, "Wine & Cheese"						, 51);
                 Menu->SendTo(Plr);
 			}break;
 
@@ -243,7 +243,7 @@ public:
             Plr->Gossip_SendPOI(5766.31, 731.66, 7, 6, 0, "Sewers");
 			SendQuickMenu(60011);
             }break;
-//
+
         case 23:     // Legerdemain Lounge
 			{
             Plr->Gossip_SendPOI(5845.40, 647.37, 7, 6, 0, "Legerdemain Lounge");
@@ -267,7 +267,7 @@ public:
             Plr->Gossip_SendPOI(5761.06, 714.45, 7, 6, 0, "Sewers");
 			SendQuickMenu(60015);
             }break;	
-//
+
         case 27:     // The Violet Citadel
 			{
             Plr->Gossip_SendPOI(5795.11, 769.15, 7, 6, 0, "The Violet Citadel");
@@ -319,8 +319,8 @@ public:
         case 35:     // Class Trainers
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50011, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-				Menu->AddItem( 0, "The Horde Quarter"          , 19);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+				Menu->AddItem( 0, "The Horde Quarter"		, 19);
                 Menu->SendTo(Plr);
 			}break;
 
@@ -333,31 +333,31 @@ public:
         case 37:     // Profession Trainer
 			{
                 objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50012, Plr);
-                Menu->AddItem( 0, "Alchemy"          , 52);
-				Menu->AddItem( 0, "Blacksmithing"          , 53);
-				Menu->AddItem( 0, "Cooking"          , 54);
-				Menu->AddItem( 0, "Enchanting"          , 55);
-				Menu->AddItem( 0, "engineering"          , 56);
-				Menu->AddItem( 0, "First Aid"          , 57);
-				Menu->AddItem( 0, "Fishing"          , 58);
-				Menu->AddItem( 0, "Herbalism"          , 59);
-				Menu->AddItem( 0, "Inscription"          , 60);
-				Menu->AddItem( 0, "Jewelcrafting"          , 61);
-				Menu->AddItem( 0, "Leatherworking"          , 62);
-				Menu->AddItem( 0, "Mining"          , 63);
-				Menu->AddItem( 0, "Skinning"          , 64);
-				Menu->AddItem( 0, "Tailoring"          , 65);
+                Menu->AddItem( 0, "Alchemy"			, 52);
+				Menu->AddItem( 0, "Blacksmithing"	, 53);
+				Menu->AddItem( 0, "Cooking"			, 54);
+				Menu->AddItem( 0, "Enchanting"		, 55);
+				Menu->AddItem( 0, "engineering"		, 56);
+				Menu->AddItem( 0, "First Aid"		, 57);
+				Menu->AddItem( 0, "Fishing"			, 58);
+				Menu->AddItem( 0, "Herbalism"		, 59);
+				Menu->AddItem( 0, "Inscription"		, 60);
+				Menu->AddItem( 0, "Jewelcrafting"	, 61);
+				Menu->AddItem( 0, "Leatherworking"	, 62);
+				Menu->AddItem( 0, "Mining"			, 63);
+				Menu->AddItem( 0, "Skinning"		, 64);
+				Menu->AddItem( 0, "Tailoring"		, 65);
                 Menu->SendTo(Plr);
 			}break;
 
         case 38:     // Armor
 			{
 			objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50013, Plr);
-                Menu->AddItem( 0, "Cloth Armor"          , 66);
-				Menu->AddItem( 0, "Leather Armor"          , 67);
-				Menu->AddItem( 0, "Mail Armor"          , 68);
-				Menu->AddItem( 0, "Plate Armor"          , 69);
-				Menu->AddItem( 0, "Shields"          , 70);
+                Menu->AddItem( 0, "Cloth Armor"		, 66);
+				Menu->AddItem( 0, "Leather Armor"	, 67);
+				Menu->AddItem( 0, "Mail Armor"		, 68);
+				Menu->AddItem( 0, "Plate Armor"		, 69);
+				Menu->AddItem( 0, "Shields"			, 70);
                 Menu->SendTo(Plr);
             }break;
 
@@ -370,8 +370,8 @@ public:
         case 40:     // Emblem Gear
 			{
 			objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50014, Plr);
-                Menu->AddItem( 0, "The Alliance Quarter"          , 18);
-				Menu->AddItem( 0, "The Horde Quarter"          , 19);
+                Menu->AddItem( 0, "The Alliance Quarter"	, 18);
+				Menu->AddItem( 0, "The Horde Quarter"		, 19);
                 Menu->SendTo(Plr);
             }break;
 
@@ -432,9 +432,9 @@ public:
         case 50:     // Weapons
 			{
 			objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50015, Plr);
-                Menu->AddItem( 0, "Melee Weapons"          , 71);
-				Menu->AddItem( 0, "Ranged & Thrown Weapons"          , 72);
-				Menu->AddItem( 0, "Staves & Wands"          , 73);
+                Menu->AddItem( 0, "Melee Weapons"			, 71);
+				Menu->AddItem( 0, "Ranged & Thrown Weapons"	, 72);
+				Menu->AddItem( 0, "Staves & Wands"			, 73);
                 Menu->SendTo(Plr);
             }break;
 
@@ -459,8 +459,8 @@ public:
         case 54:     // Cooking
 			{
 			objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 50016, Plr);
-                Menu->AddItem( 0, "Alliance Inn"          , 24);
-				Menu->AddItem( 0, "Horde Inn"          , 25);
+                Menu->AddItem( 0, "Alliance Inn"	, 24);
+				Menu->AddItem( 0, "Horde Inn"		, 25);
                 Menu->SendTo(Plr);
             }break;
 
@@ -600,27 +600,27 @@ public:
     }
 };
 
- void SetupDalaranGossip(ScriptMgr * mgr)
+void SetupDalaran_Guard(ScriptMgr * mgr)
 {
 	GossipScript * dalar = (GossipScript*) new DalaranGuard();
 	
 	/* Guard List */
-	mgr->register_gossip_script(32675,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32676,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32677,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32678,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32679,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32680,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32681,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32683,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32684,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32685,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32686,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32687,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32688,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32689,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32690,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32691,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32692,dalar);			// Dalaran Guards
-	mgr->register_gossip_script(32693,dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32675, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32676, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32677, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32678, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32679, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32680, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32681, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32683, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32684, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32685, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32686, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32687, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32688, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32689, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32690, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32691, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32692, dalar);			// Dalaran Guards
+	mgr->register_gossip_script(32693, dalar);			// Dalaran Guards
 }
