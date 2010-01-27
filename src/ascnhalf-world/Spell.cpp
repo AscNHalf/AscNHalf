@@ -3132,7 +3132,7 @@ uint8 Spell::CanCast(bool tolerate)
 		
 		if( p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_ISLE_OF_CONQUEST)
 		{
-			if(m_spellInfo->Id == 54640)
+			if(m_spellInfo->Id == 66548)
 			{
 				IsleOfConquest * ioc = (IsleOfConquest *)p_caster->m_bg;
 				ioc->OnPlatformTeleport(p_caster);

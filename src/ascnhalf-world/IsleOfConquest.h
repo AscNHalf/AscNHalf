@@ -66,6 +66,7 @@ enum IOCvehicles
 #define IOC_FLAGPOLE 	191311
 #define IOC_DYNAMIC_DOOR_A		195703
 #define IOC_DYNAMIC_DOOR_H		195491
+#define PARACHUTE		54168
 
 struct IOCLocation { float x; float y; float z; };
 struct IOCSpawnLocation { float x; float y; float z; float o; };
@@ -90,7 +91,7 @@ struct IOCNodeTemplate
 };
 
 
-class IsleOfConquest : public CBattleground
+class SERVER_DECL IsleOfConquest : public CBattleground
 {
 public:
 	GameObject* m_ioccontrolPoints[IOC_NUM_CONTROL_POINTS];
@@ -103,11 +104,13 @@ protected:
 	bool m_LiveCaptain[2];
 	int m_bonusHonor;
 	Creature* cannons[8];
+	Creature* m_wsveh[8];
 	GameObject* m_flagpole[IOC_NUM_CONTROL_POINTS];
 	GameObject* m_teleporters[12];
 	GameObject* m_teleeffect[12];
 	GameObject* m_desgates[6];
 	GameObject* m_ogates[6];
+	GameObject* m_gunship[2];
 	Creature* m_spiritGuides[IOC_NUM_CONTROL_POINTS];
 	Creature* m_salesman;
 	uint32 m_resources[2];
@@ -129,7 +132,9 @@ public:
 	void HookOnMount(Player* plr);
 	void SpawnControlPoint(uint32 Id, uint32 Type);
 	void CaptureControlPoint(uint32 Id, uint32 Team);
-	void Updateworkshop(uint32 Team);
+//	void Updateworkshop(uint32 Team);
+//	uint8 WSVehicle();
+//	void SpawnWSVehicle(uint32 Team);
 	void AssaultControlPoint(Player* pPlayer, uint32 Id);
 	void HookOnAreaTrigger(Player* plr, uint32 id);
 	bool HookHandleRepop(Player* plr);

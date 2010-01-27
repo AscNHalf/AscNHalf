@@ -57,11 +57,11 @@
 	
 	static uint32 ControlPointGoIds[IOC_NUM_CONTROL_POINTS][5] = {
 		  // NEUTRAL    ALLIANCE-ATTACK    HORDE-ATTACK    ALLIANCE-CONTROLLED    HORDE_CONTROLLED
-		{ 180087,       180085,            180086,         180076,                180078 },			// The Oil Derrick	
-		{ 180089,       180085,            180086,         180076,                180078 },			// The Cobalt Mine
-		{ 180088,       180085,            180086,         180076,                180078 },			// The Docks
-		{ 180091,       180085,            180086,         180076,                180078 },			// The Airship Hangar
-		{ 180090,       180085,            180086,         180076,                180078 },			// The Siege Workshop
+		{ 195343,       180085,            180086,         180076,                180078 },			// The Oil Derrick	
+		{ 195338,       180085,            180086,         180076,                180078 },			// The Cobalt Mine
+		{ 195157,       180085,            180086,         180076,                180078 },			// The Docks
+		{ 195158,       180085,            180086,         180076,                180078 },			// The Airship Hangar
+		{ 195133,       180085,            180086,         180076,                180078 },			// The Siege Workshop
 		{ 180091,       180085,            180086,         180076,                180078 },			
 		{ 180090,       180085,            180086,         180076,                180078 },			
 	};
@@ -86,9 +86,41 @@
 		{ 1278.59f, -704.18f, 48.91f, 3.19f},						// Horde Keep
 	};
 	
+	static float NpcLocations[4][5] = {
+		{34918, 1304.67f, -772.29f, 69.98f, 6.20f},
+		{34918, 1305.24f, -757.54f, 69.98f, 6.02f},
+		{34919, 220.15f, -839.187f, 60.80f, 6.04f},
+		{34919, 221.57f, -822.50f, 60.80f, 6.16f},
+	};
+	
+	/*static float dockSpawns[5][5] = {
+		{755.18f, -340.10f, 12.13f, 4.54f},
+		{765.11f, -338.71f, 12.11f, 4.68f},
+		{776.82f, -339.41f, 12.11f, 4.75f},
+		{780.01f, -340.05f, 12.10f, 4.58f},
+		{805.57f, -341.07f, 12.09f, 4.58f},
+	};*/
+	
 	static float demolisherSalesmen[2][5] = {
 		{35345, 763.660f, -880.25f , 18.55f, 3.14f},				// Gnomish Mechanic (A)
 		{35346, 763.660f, -880.25f , 18.55f, 3.14f},				// Goblin Mechanic	(H)
+	};
+	
+	static float wsvehicle[3][4] = {
+		{773.54f, -884.69f, 16.7f , 2.24f},
+		{773.80f, -850.63f, 12.44f , 1.59f},
+		{793.57f, -853.70f, 12.46f , 1.58f},
+	};
+	
+	static float defcannon[8][4] = {
+		{423.79f, -789.80f, 87.71f, 5.86f},
+		{399.69f, -756.58f, 87.71f, 2.33f},
+		{421.97f, -876.37f, 87.95f, 0.86f},
+		{398.153f, -909.57f, 87.95f, 3.90f},
+		{1138.87f, -837.01f, 88.26f, 2.24f},
+		{1162.76f, -862.93f, 88.28f, 5.81f},
+		{1138.64f, -688.06f, 88.29f, 3.91f},
+		{1163.94f, -664.54f, 88.27f, 0.95f},
 	};
 	
 	static float iocTransporterDestination[12][4] = {
@@ -128,6 +160,11 @@
 		{1151.51562f, -763.4730f, 48.62429f, 3.17145f},		// Horde Front gate
 		{1218.54126f, -676.44390f, 48.68709f, 1.53727f},	// Horde West gate
 		{1218.35607f, -850.55456f, 48.91478f, 4.77781f},	// Horde East gate
+	};
+	
+	static float iocGunshipLocation[2][4] = {
+		{778.22f, -1140.66f, 256.04f, 5.21f},
+		{678.036f, -1238.87f, 247.66f, 5.25f},
 	};
 	
 	static uint32 gatesIds[6] = {
@@ -497,11 +534,11 @@ void IsleOfConquest::CaptureControlPoint(uint32 Id, uint32 Team)
 		event_ModifyTime(EVENT_IOC_RESOURCES_UPDATE_TEAM_0+Team, ResourceUpdateIntervals[m_capturedBases[Team]]);
 	}*/
 	
-	if(Id == 5)
-		Updateworkshop(Team);
+	/*if(Id == 5)
+		Updateworkshop(Team);*/
 }
 
-void IsleOfConquest::Updateworkshop(uint32 Team)
+/*void IsleOfConquest::Updateworkshop(uint32 Team)
 {
 	if(m_salesman != NULL)
 		m_salesman->Despawn(0,0);
@@ -509,7 +546,77 @@ void IsleOfConquest::Updateworkshop(uint32 Team)
 	m_salesman = SpawnCreature(demolisherSalesmen[Team][0], demolisherSalesmen[Team][1], demolisherSalesmen[Team][2], demolisherSalesmen[Team][3], demolisherSalesmen[Team][4]);
 	
 	m_salesman->PushToWorld(m_mapMgr);
+	
+	for(uint32 i = 0; i < 8; i++)
+	{
+		if(m_wsveh[i] == NULL)
+		{
+			TO_VEHICLE(m_wsveh[i])->EjectAllPassengersFromVehicle();
+			m_wsveh[i]->Despawn(0,0);
+		}
+	}
+	
+	uint32 faction;
+	if(Team)
+		faction = 2;
+	else
+		faction = 1;
+	
+	for(uint32 i = 0; i < 3; i++)
+	{
+		m_wsveh[i] = SpawnVehicle(DEMOLISHER, wsvehicle[i][0], wsvehicle[i][1], wsvehicle[i][2], wsvehicle[i][3]);
+		m_wsveh[i]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction);
+		m_wsveh[i]->PushToWorld(m_mapMgr);
+	}
+		
 }
+
+uint8 IsleOfConquest::WSVehicle()
+{
+	uint8 count = 0;
+	
+	// Cleanup
+	for(uint32 i = 0; i < 8; i++)
+	{
+		if(m_wsveh[i]->isDead())
+			m_wsveh[i]->Despawn(0,0);
+	}		
+	
+	for(uint32 i = 0; i < 8; i++)
+	{
+		if(m_wsveh[i] != NULL)
+			count++;
+	}
+	return count;
+}
+
+void IsleOfConquest::SpawnWSVehicle(uint32 Team)
+{
+	uint32 faction, x;
+	x = 0;
+	
+	if(Team)
+		faction = 2;
+	else
+		faction = 1;
+		
+	for(uint32 i = 0; i < 8; i++)
+	{
+		if(m_wsveh[i] == NULL)
+		{
+			x = i;
+			break;
+		}
+			
+	}
+	if(x)
+	{
+		m_wsveh[x] = SpawnVehicle(DEMOLISHER, wsvehicle[0][0], wsvehicle[0][1], wsvehicle[0][2], wsvehicle[0][3]);
+		m_wsveh[x]->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction);
+		m_wsveh[x]->PushToWorld(m_mapMgr);
+	}
+	else return;
+}*/
 
 void IsleOfConquest::AssaultControlPoint(Player* pPlayer, uint32 Id)
 {
@@ -621,11 +728,11 @@ void IsleOfConquest::AssaultControlPoint(Player* pPlayer, uint32 Id)
 	pPlayer->m_bgScore.MiscData[BG_SCORE_IOC_BASE_ASSAULTED]++;
 	UpdatePvPData();
 	
-	if(Id == 5)
+	/*if(Id == 5)
 	{
 		if(m_salesman != NULL)
 			m_salesman->Despawn(0,0);
-	}
+	}*/
 }
 
 void IsleOfConquest::HookOnAreaTrigger(Player* plr, uint32 id)
@@ -739,10 +846,32 @@ void IsleOfConquest::OnCreate()
 	SpawnCreature(34924, 214.77f, -830.73f, 60.81f, 0.07f);	// High Commander Halford Wyrmbane (ALLIANCE)
 	SpawnCreature(34922, 1296.57f, -765.78f, 69.98f, 6.22f);	// Overlord Agmar (not sure this is the good general) (HORDE)
 	
+	for(uint32 i = 0; i < 4; i++)
+	{
+		SpawnCreature(NpcLocations[i][0], NpcLocations[i][1], NpcLocations[i][2], NpcLocations[i][3], NpcLocations[i][4]);
+	}
+	
 	// Spawn const spiritguides
 	AddSpiritGuide(SpawnSpiritGuide(NoBaseGYLocations[0][0], NoBaseGYLocations[0][1], NoBaseGYLocations[0][2], NoBaseGYLocations[0][3], 0));
 	AddSpiritGuide(SpawnSpiritGuide(NoBaseGYLocations[1][0], NoBaseGYLocations[1][1], NoBaseGYLocations[1][2], NoBaseGYLocations[1][3], 1));
 	
+	// alliance gate
+	GameObject* gate = SpawnGameObject(195436, 288.19f, -832.639f, 51.468f, 6.264f, 32, 114, 1.5799990f);
+	gate->SetUInt32Value(GAMEOBJECT_FLAGS, 32);
+	gate->SetUInt32Value(GAMEOBJECT_DYNAMIC, 4294901760);
+	gate->SetUInt32Value(GAMEOBJECT_FACTION, 1375);
+	gate->SetUInt32Value(GAMEOBJECT_BYTES_1, 4278190081);
+	gate->PushToWorld(m_mapMgr);
+	m_gates.push_back(gate);
+
+	// horde gate
+	gate = SpawnGameObject(195436, 1283.43f, -765.59f, 50.78f, 3.09f, 32, 114, 1.5699990f);	// ToDo: fix the gateid
+	gate->SetUInt32Value(GAMEOBJECT_FLAGS, 32);
+	gate->SetUInt32Value(GAMEOBJECT_DYNAMIC, 4294901760);
+	gate->SetUInt32Value(GAMEOBJECT_FACTION, 1375);
+	gate->SetUInt32Value(GAMEOBJECT_BYTES_1, 4278190081);
+	gate->PushToWorld(m_mapMgr);
+	m_gates.push_back(gate);
 	
 	// Spawn Teleporters
 	for(uint32 i = 0; i < 6; i++)	// Alliance
@@ -799,6 +928,18 @@ void IsleOfConquest::OnCreate()
 	SpawnControlPoint(IOC_CONTROL_POINT_SIEGEWORKSHOP,	IOC_SPAWN_TYPE_NEUTRAL);
 	SpawnControlPoint(IOC_CONTROL_POINT_ALLIANCE_KEEP,	IOC_SPAWN_TYPE_NEUTRAL);
 	SpawnControlPoint(IOC_CONTROL_POINT_HORDE_KEEP,		IOC_SPAWN_TYPE_NEUTRAL);
+	
+	for(uint32 i = 0; i < 8; i++)
+	{
+		cannons[i] = SpawnVehicle(KEEP_CANNON, defcannon[i][0], defcannon[i][1], defcannon[i][2], defcannon[i][3]);
+		cannons[i]->PushToWorld(m_mapMgr);
+	}
+	
+	m_gunship[0] = SpawnGameObject(195121, iocGunshipLocation[0][0], iocGunshipLocation[0][1], iocGunshipLocation[0][2], iocGunshipLocation[0][3], 0, 35, 1.0f);
+	m_gunship[0]->PushToWorld(m_mapMgr);
+	
+	m_gunship[1] = SpawnGameObject(195276, iocGunshipLocation[1][0], iocGunshipLocation[1][1], iocGunshipLocation[1][2], iocGunshipLocation[1][3], 0, 35, 1.0f);
+	m_gunship[1]->PushToWorld(m_mapMgr);
 }
 
 void IsleOfConquest::HookOnPlayerKill(Player* plr, Unit* pVictim)
@@ -847,9 +988,9 @@ void IsleOfConquest::RemoveReinforcements(uint32 teamId, uint32 amt)
 LocationVector IsleOfConquest::GetStartingCoords(uint32 Team)
 {
 	if(Team)		// Horde
-		return LocationVector(1264.06f, -736.73f, 48.91f, 3.07f);
+		return LocationVector(1301.84f, -766.70f, 50.61f, 2.91f);
 	else			// Alliance
-		return LocationVector(303.22f, -857.02f, 48.91f, 5.99f);
+		return LocationVector(258.912f, -831.09f, 50.43f, 5.16f);
 }
 
 void IsleOfConquest::OnStart()
@@ -861,11 +1002,11 @@ void IsleOfConquest::OnStart()
 	}
 
 	// open gates
-	/*for(list< GameObject* >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list< GameObject* >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
-	}*/
+	}
 
 	/* correct? - burlex */
 	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
