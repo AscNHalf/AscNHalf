@@ -678,6 +678,9 @@ struct ItemPrototype
 	uint32 GemProperties;
 	int32 DisenchantReqSkill;
 	uint32 ArmorDamageModifier;
+	bool heirloom;
+	uint32 ScaleDistributeId;
+	uint32 ScaleFlags;
 
 	string lowercase_name;	// used in auctions
 	uint32 FoodType;		//pet food type

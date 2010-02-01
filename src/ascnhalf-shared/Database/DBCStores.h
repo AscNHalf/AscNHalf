@@ -469,6 +469,21 @@ struct BankSlotPrice
 	uint32 Price;
 };
 
+struct ScalingStatDistributionEntry
+{
+	uint32 id;
+	int32 stat[10];
+	uint32 statmodifier[10];
+	uint32 maxlevel;
+};
+
+struct ScalingStatValuesEntry
+{
+	uint32 id;
+	uint32 level;
+	uint32 multiplier[22];
+};
+
 struct CharTitlesEntry
 {
     uint32  ID;                                             // 0, title ids
@@ -1682,6 +1697,8 @@ extern SERVER_DECL DBCStorage<VehicleEntry> dbcVehicle;
 extern SERVER_DECL DBCStorage<VehicleSeatEntry> dbcVehicleSeat;
 extern SERVER_DECL DBCStorage<WorldMapOverlayEntry> dbcWorldMapOverlay;
 extern SERVER_DECL DBCStorage<SummonPropertiesEntry> dbcSummonProps;
+extern SERVER_DECL DBCStorage<ScalingStatDistributionEntry> dbcScalingStatDistribution;
+extern SERVER_DECL DBCStorage<ScalingStatValuesEntry> dbcScalingStatValues;
 
 bool LoadDBCs();
 bool LoadRSDBCs();

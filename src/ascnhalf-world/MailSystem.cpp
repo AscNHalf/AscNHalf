@@ -189,8 +189,8 @@ WorldPacket * Mailbox::MailboxListingPacket()
 		}
 
  		if(AddMessageToListingPacket(*data, &itr->second))
- 			++count;
 		{
+ 			++count;
 			++realcount;
 		}
 	}
@@ -524,7 +524,16 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
         pItem = _player->GetItemInterface()->GetItemByGUID( itemguid );
 		real_item_slot = _player->GetItemInterface()->GetInventorySlotByGuid( itemguid );
-		if( pItem == NULL || pItem->IsSoulbound() || pItem->HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_CONJURED ) || 
+		if(pItem->IsAccountbound())
+		{
+			if(player->acct != _player->GetSession()->GetAccountId())
+			{
+				SendMailError(MAIL_ERR_ITEM_IS_ACCOUNT_BOUND);
+				return;
+			}
+		}
+
+		if( pItem == NULL || !pItem->IsAccountbound() || pItem->IsSoulbound() || pItem->HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_CONJURED ) || 
 			( pItem->IsContainer() && (TO_CONTAINER( pItem ))->HasItems() ) || real_item_slot >= 0 && real_item_slot < INVENTORY_SLOT_ITEM_START )
 		{
 			SendMailError(MAIL_ERR_INTERNAL_ERROR);

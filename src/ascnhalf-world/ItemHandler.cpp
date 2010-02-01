@@ -754,6 +754,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	if(!itemProto)
 	{
 		DEBUG_LOG( "WORLD"," Unknown item id 0x%.8X", itemid );
+		uint32 count = GetPlayer()->GetItemInterface()->GetItemCount(itemid); // Remove non existing items.
+		GetPlayer()->GetItemInterface()->RemoveItemAmt(itemid, count); // Should be safe.
 		return;
 	} 
 
@@ -799,8 +801,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 		data << itemProto->Stats[i].Type;
 		data << itemProto->Stats[i].Value;
 	}
-	data << uint32(0);								// 3.0.2 related to scaling stats
-	data << uint32(0);								// 3.0.2 related to scaling stats
+	data << uint32(itemProto->ScaleDistributeId);	// Stat scaling id, tells client which stats to display at which level.
+	data << uint32(itemProto->ScaleFlags);			// Stat flags, tells client which stats are changed based on level.
 	for(i = 0; i < 2; i++)
 	{
 		data << itemProto->Damage[i].Min;

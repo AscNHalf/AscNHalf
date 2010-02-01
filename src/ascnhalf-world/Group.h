@@ -37,8 +37,12 @@ enum PartyErrors
 
 enum GroupTypes
 {
-	GROUP_TYPE_PARTY					= 0,
-	GROUP_TYPE_RAID						= 1,
+	GROUP_TYPE_PARTY	= 0,
+	GROUP_TYPE_BG		= 1,
+	GROUP_TYPE_RAID		= 2,
+	GROUP_TYPE_BGRAID	= GROUP_TYPE_BG | GROUP_TYPE_RAID,
+	GROUP_TYPE_LFD		= 8,
+	// 10 Leaving battleground, going to normal group
 };
 
 enum MaxGroupCount

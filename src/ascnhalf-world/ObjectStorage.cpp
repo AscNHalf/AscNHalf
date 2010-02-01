@@ -39,7 +39,7 @@ const char * gFishingFormat								= "uuu";
 const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gGraveyardFormat							= "uffffuuuux";
 const char * gItemPageFormat							= "usu";
-const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuubuu";
 const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
 const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuc";
 const char * gTeleportCoordFormat						= "uxuffff";
@@ -396,9 +396,15 @@ void ObjectMgr::LoadExtraItemStuff()
 		map<uint32,uint32>::iterator iter = foodItems.find(pItemPrototype->ItemId);
 		if(iter != foodItems.end())
 			ft = iter->second;
-		pItemPrototype->FoodType = ft ;
+		pItemPrototype->heirloom = false;
+		pItemPrototype->ScaleDistributeId = NULL;
+		pItemPrototype->ScaleFlags = NULL;
+
+		Item::HeirloomInfo(pItemPrototype);
+
+		pItemPrototype->FoodType = ft;
 	
-		pItemPrototype->gossip_script=NULL;
+		pItemPrototype->gossip_script = NULL;
 
 		// forced pet entries
 		switch( pItemPrototype->ItemId )

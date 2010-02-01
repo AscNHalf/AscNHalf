@@ -1149,3 +1149,73 @@ bool ItemPrototype::ValidateItemSpell(uint32 SpellId)
 			return true;
 	return false;
 }
+
+uint32 GetStatScalingStatValueColumn(ItemPrototype *proto, uint32 type)
+{
+	switch(type)
+	{
+	case 0: // Stat
+		{
+			if(proto->ScaleFlags & 1)
+				return 0;
+			if(proto->ScaleFlags & 2)
+				return 1;
+			if(proto->ScaleFlags & 4)
+				return 2;
+			if(proto->ScaleFlags & 8)
+				return 15;
+			if(proto->ScaleFlags & 16)
+				return 3;
+			if(proto->ScaleFlags & 65536)
+				return 16;
+			break;
+		}
+
+	case 1: // Armor
+		{
+			if(proto->ScaleFlags & 32) // Cloth Armor
+				return 4;
+			if(proto->ScaleFlags & 64) // Leather Armor
+				return 5;
+			if(proto->ScaleFlags & 128) // Mail Armor
+				return 6;
+			if(proto->ScaleFlags & 256) // Plate Armor
+				return 7;
+
+			if(proto->ScaleFlags & 131072) // ?? More cloth? Chest Maybe.
+				return 18;
+			if(proto->ScaleFlags & 262144) // ?? More Leather? Chest Maybe.
+				return 19;
+			if(proto->ScaleFlags & 524288) // ?? More Mail? Chest Maybe.
+				return 20;
+			if(proto->ScaleFlags & 1048576) // ?? More Plate? Chest Maybe.
+				return 21;
+		}
+
+	case 2: // Damage
+		{
+			if(proto->ScaleFlags & 512)
+				return 8;
+			if(proto->ScaleFlags & 1024)
+				return 9;
+			if(proto->ScaleFlags & 2048)
+				return 10;
+			if(proto->ScaleFlags & 4096)
+				return 11;
+			if(proto->ScaleFlags & 8192)
+				return 12;
+			if(proto->ScaleFlags & 16384)
+				return 13;
+			break;
+		}
+
+	case 3: // Spell Power
+		{
+			if(proto->ScaleFlags & 32768)
+				return 14;
+			break;
+		}
+	}
+	return 17;
+}
+

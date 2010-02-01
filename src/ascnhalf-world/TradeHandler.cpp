@@ -352,7 +352,7 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 				Guid = _player->mTradeItems[Index] ? _player->mTradeItems[Index]->GetGUID() : 0;
 				if(Guid != 0)
 				{
-					if( _player->mTradeItems[Index]->IsSoulbound())
+					if( _player->mTradeItems[Index]->IsSoulbound() || _player->mTradeItems[Index]->IsAccountbound())
 						_player->GetItemInterface()->BuildInventoryChangeError(	_player->mTradeItems[Index], NULLITEM, INV_ERR_CANNOT_TRADE_THAT);
 					else
 					{

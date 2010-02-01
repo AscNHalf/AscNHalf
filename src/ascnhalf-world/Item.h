@@ -149,6 +149,11 @@ public:
 	{
 		return HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_QUEST | ITEM_FLAG_SOULBOUND );
 	}
+	
+	INLINE bool IsAccountbound()
+	{
+		return HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_BINDONACC );
+	}
 
 	INLINE uint32 GetChargesLeft()
 	{
@@ -246,6 +251,8 @@ public:
 	bool HasEnchantments() { return ( Enchantments.size() > 0 ) ? true : false; }
 
 	uint32 wrapped_item_id;
+	
+	static void HeirloomInfo(ItemPrototype* proto);
 
 protected:
 
@@ -264,5 +271,6 @@ uint32 GetBuyPriceForItem( ItemPrototype* proto, uint32 count, Player* plr, Crea
 
 uint32 GetSellPriceForItem( uint32 itemid, uint32 count);
 uint32 GetBuyPriceForItem( uint32 itemid, uint32 count, Player* plr, Creature* vendor );
+uint32 GetStatScalingStatValueColumn(ItemPrototype *proto, uint32 type);
 
 #endif

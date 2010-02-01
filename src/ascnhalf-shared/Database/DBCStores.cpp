@@ -22,7 +22,7 @@
 #include "DataStore.h"
 #include "NGLog.h"
 
-//SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
+SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
 SERVER_DECL DBCStorage<AreaGroup> dbcAreaGroup;
 SERVER_DECL DBCStorage<CharTitlesEntry> dbcCharTitlesEntry;
 SERVER_DECL DBCStorage<GemPropertyEntry> dbcGemProperty;
@@ -41,6 +41,8 @@ SERVER_DECL DBCStorage<FactionTemplateDBC> dbcFactionTemplate;
 SERVER_DECL DBCStorage<FactionDBC> dbcFaction;
 SERVER_DECL DBCStorage<EnchantEntry> dbcEnchant;
 SERVER_DECL DBCStorage<RandomProps> dbcRandomProps;
+SERVER_DECL DBCStorage<ScalingStatDistributionEntry> dbcScalingStatDistribution;
+SERVER_DECL DBCStorage<ScalingStatValuesEntry> dbcScalingStatValues;
 SERVER_DECL DBCStorage<skilllinespell> dbcSkillLineSpell;
 SERVER_DECL DBCStorage<skilllineentry> dbcSkillLine;
 SERVER_DECL DBCStorage<DBCTaxiNode> dbcTaxiNode;
@@ -94,6 +96,9 @@ const char* GemPropertyEntryFormat = "uuuuu";
 const char* GlyphPropertyEntryFormat = "uuuu";
 const char* skilllineentrYFormat = "uuusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char* spellentryFormat = "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuiuuuuuuuuuuuffffffiiiiiiuuuuuuuuuuuuuuufffuuuuuuuuuuuuuuufffuuuuuuuuuuxuuusxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxuuuuuuuuuuuifffuuuuuiuuxuuuuu";
+
+const char* scalingstatdistributionformat = "uiiiiiiiiiiuuuuuuuuuuu";
+const char* scalingstatvaluesformat = "uuuuuuuuuuuuuuuuuuuuuuuu";
 
 const char* itemextendedcostFormat = "uuuuuuuuuuuuuuux";
 const char* talententryFormat = "uuuuuuuuuxxxxuxxuxxxuxx";
@@ -228,6 +233,9 @@ bool LoadDBCs()
 	LOAD_DBC("DBC/Lock.dbc", LockFormat, true, dbcLock, false);
 
 	LOAD_DBC("DBC/Map.dbc", mapentryFormat, true, dbcMap, true);
+	
+	LOAD_DBC("DBC/ScalingStatDistribution.dbc", scalingstatdistributionformat, true, dbcScalingStatDistribution, true);
+	LOAD_DBC("DBC/ScalingStatValues.dbc", scalingstatvaluesformat, true, dbcScalingStatValues, true);
 
 	LOAD_DBC("DBC/StableSlotPrices.dbc", bankslotpriceformat, true, dbcStableSlotPrices, false);
 	LOAD_DBC("DBC/SkillLine.dbc", skilllineentrYFormat, true, dbcSkillLine, true);
