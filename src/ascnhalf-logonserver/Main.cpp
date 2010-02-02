@@ -182,7 +182,7 @@ bool Rehash()
 #ifdef WIN32
 	char * config_file = "ascnhalf-logonserver.conf";
 #else
-	char * config_file = (char*)CONFDIR "/ascnhalf-logonserver.conf";
+	char * config_file = "../etc/ascnhalf-logonserver.conf";
 #endif
 	if(!Config.MainConfig.SetSource(config_file))
 	{
@@ -297,8 +297,8 @@ void LogonServer::Run(int argc, char ** argv)
 		{
 		case 'c':
 			/* Log filename was set */
-			config_file = new char[strlen(optarg)];
-			strcpy(config_file,optarg);
+			config_file = new char[strlen(ascnhalf_optarg)];
+			strcpy(config_file, ascnhalf_optarg);
 			break;
 		case 0:
 			break;

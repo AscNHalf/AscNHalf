@@ -92,7 +92,7 @@ static const char* default_config_file = CONFDIR "/ascnhalf-realmserver.conf";
 static const char* default_realm_config_file = CONFDIR "/ascnhalf-realms.conf";
 #endif
 
-volatile bool bServerShutdown = false;
+bool bServerShutdown = false;
 
 void Master::Rehash(bool load)
 {

@@ -330,15 +330,15 @@ void CommandTableStorage::Init()
 		{ "delete",	  'o', &ChatHandler::HandleGODelete,   "Deletes selected GameObject",			  NULL, 0, 0, 0},
 		{ "spawn",	   'o', &ChatHandler::HandleGOSpawn,	"Spawns a GameObject by ID",				NULL, 0, 0, 0},
 		{ "info",		'o', &ChatHandler::HandleGOInfo,	 "Gives you informations about selected GO", NULL, 0, 0, 0},
-		/*{ "activate",	'o', &ChatHandler::HandleGOActivate, "Activates/Opens the selected GO.",		 NULL, 0, 0, 0},
+		{ "activate",	'o', &ChatHandler::HandleGOActivate, "Activates/Opens the selected GO.",		 NULL, 0, 0, 0},
 		{ "enable",	  'o', &ChatHandler::HandleGOEnable,   "Enables the selected GO for use.",		 NULL, 0, 0, 0},
 		{ "scale",	   'o', &ChatHandler::HandleGOScale,	"Sets scale of selected GO",				NULL, 0, 0, 0},
-		{ "animprogress",'o', &ChatHandler::HandleGOAnimProgress, "Sets anim progress",				   NULL, 0, 0, 0 },
-		{ "export",	  'o', &ChatHandler::HandleGOExport,   "Exports the current GO selected",		  NULL, 0, 0, 0 },*/
-		{ "move", 'g', &ChatHandler::HandleGOMove, "Moves gameobject to player xyz", NULL, 0, 0, 0 },
-		{ "rotate", 'g', &ChatHandler::HandleGORotate, "Rotates gameobject x degrees", NULL, 0, 0, 0 },
-		{ "f_flags", 'g', NULL, "Flags", NULL, GAMEOBJECT_FLAGS, 0, 3 },
-		{ "f_dynflags", 'g', NULL, "Dynflags", NULL, GAMEOBJECT_DYNAMIC, 0, 3 },
+		{ "animprogress",	'o', &ChatHandler::HandleGOAnimProgress, "Sets anim progress",				   NULL, 0, 0, 0 },
+		{ "export",	  'o', &ChatHandler::HandleGOExport,   "Exports the current GO selected",		  NULL, 0, 0, 0 },
+		{ "move",	'g', &ChatHandler::HandleGOMove, "Moves gameobject to player xyz", NULL, 0, 0, 0 },
+		{ "rotate",	'g', &ChatHandler::HandleGORotate, "Rotates gameobject x degrees", NULL, 0, 0, 0 },
+		{ "f_flags",	'g', NULL, "Flags", NULL, GAMEOBJECT_FLAGS, 0, 3 },
+		{ "f_dynflags",	'g', NULL, "Dynflags", NULL, GAMEOBJECT_DYNAMIC, 0, 3 },
 		{ NULL,			0, NULL,						   "",										 NULL, 0, 0  }
 	};
 	dupe_command_table(GameObjectCommandTable, _GameObjectCommandTable);

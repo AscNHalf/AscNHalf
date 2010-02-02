@@ -20,6 +20,7 @@
 
 #include "RStdAfx.h"
 initialiseSingleton(LogonCommHandler);
+extern bool bServerShutdown;
 
 LogonCommHandler::LogonCommHandler()
 {
@@ -216,15 +217,21 @@ void LogonCommHandler::UpdateSockets()
 
 void LogonCommHandler::ConnectionDropped(uint32 ID)
 {
+	if(bServerShutdown)
+		return;
+
 	mapLock.Acquire();
 	map<LogonServer*, LogonCommClientSocket*>::iterator itr = logons.begin();
 	for(; itr != logons.end(); ++itr)
 	{
 		if(itr->first->ID == ID && itr->second != 0)
 		{
-			sLog.outColor(TNORMAL, " >> realm id %u connection was dropped unexpectedly. reconnecting next loop.", ID);
-			sLog.outColor(TNORMAL, "\n");
-			itr->second = 0;
+			if(!bServerShutdown)
+				sLog.outColor(TNORMAL, " >> realm id %u connection was dropped unexpectedly. reconnecting next loop.", ID);
+				sLog.outColor(TNORMAL, "\n");
+			itr->second->_id = 0;
+			itr->second->Disconnect();
+			itr->second = NULL;
 			break;
 		}
 	}

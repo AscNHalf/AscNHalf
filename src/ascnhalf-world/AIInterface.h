@@ -78,8 +78,11 @@ bool isGuard(uint32 id);
 uint32 getGuardId(uint32 id);
 bool isTargetDummy(uint32 id);
 
-
+#ifdef ENABLE_BOOST
 typedef boost::unordered_map< Unit*, int32> TargetMap;
+#else
+typedef tr1::unordered_map< Unit*, int32> TargetMap;
+#endif
 
 #ifdef TRHAX
 	namespace std

@@ -23,6 +23,25 @@
 
 typedef void(Session::*SessionPacketHandler)(WorldPacket&);
 
+enum PlayerFlags
+{
+    PLAYER_FLAG_PARTY_LEADER		= 0x01,
+    PLAYER_FLAG_AFK					= 0x02,
+    PLAYER_FLAG_DND					= 0x04,
+    PLAYER_FLAG_GM					= 0x08,
+    PLAYER_FLAG_DEATH_WORLD_ENABLE  = 0x10,
+    PLAYER_FLAG_RESTING				= 0x20,
+    PLAYER_FLAG_UNKNOWN1            = 0x40,
+    PLAYER_FLAG_FREE_FOR_ALL_PVP	= 0x80,
+    PLAYER_FLAG_UNKNOWN2            = 0x100,
+    PLAYER_FLAG_PVP_TOGGLE			= 0x200,
+    PLAYER_FLAG_NOHELM				= 0x400,
+    PLAYER_FLAG_NOCLOAK				= 0x800,
+    PLAYER_FLAG_NEED_REST_3_HOURS	= 0x1000,
+    PLAYER_FLAG_NEED_REST_5_HOURS	= 0x2000,
+	PLAYER_FLAG_PVP_TIMER			= 0x40000,
+};
+
 class Session
 {
 public:
@@ -48,6 +67,11 @@ protected:
 	uint32 language;
 	static SessionPacketHandler Handlers[NUM_MSG_TYPES];
 	bool m_loadedPlayerData;
+	bool m_hasDeathKnight;
+	uint8 m_highestLevel;
+
+private:
+	int8 _side;
 
 public:
 	bool deleted;

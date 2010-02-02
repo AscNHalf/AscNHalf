@@ -88,6 +88,7 @@ SET(ascnhalf_world_SCRS
     Item.cpp
     Item.h
     ItemHandler.cpp
+	ItemHeirloom.cpp
     ItemInterface.cpp
     ItemInterface.h
     ItemPrototype.h

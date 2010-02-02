@@ -1034,7 +1034,11 @@ public:
 	void InheritSMMods(Unit* inherit_from);
 	// Multimap used to handle aura 271
 	// key is caster GUID and value is a pair of SpellMask pointer and mod value
+#ifdef ENABLE_BOOST
 	typedef boost::unordered_multimap<uint64, pair<uint32*, int32> > DamageTakenPctModPerCasterType;
+#else
+	typedef tr1::unordered_multimap<uint64, pair<uint32*, int32> > DamageTakenPctModPerCasterType;
+#endif
 	DamageTakenPctModPerCasterType DamageTakenPctModPerCaster;
 	
 	//Events

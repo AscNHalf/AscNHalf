@@ -95,8 +95,8 @@ struct Addr
         static const char* default_config_file = "ascnhalf-world.conf";
         static const char* default_realm_config_file = "ascnhalf-realms.conf";
 #else
-        static const char* default_config_file = CONFDIR "/ascnhalf-world.conf";
-        static const char* default_realm_config_file = CONFDIR "/ascnhalf-realms.conf";
+        static const char* default_config_file = "../etc/ascnhalf-world.conf";
+        static const char* default_realm_config_file = "../etc/ascnhalf-realms.conf";
 #endif
 
 bool bServerShutdown = false;
@@ -134,13 +134,13 @@ bool Master::Run(int argc, char ** argv)
 		switch (c)
 		{
 		case 'c':
-			config_file = new char[strlen(optarg)];
-			strcpy(config_file, optarg);
+			config_file = new char[strlen(ascnhalf_optarg)];
+			strcpy(config_file, ascnhalf_optarg);
 			break;
 
 		case 'r':
-			realm_config_file = new char[strlen(optarg)];
-			strcpy(realm_config_file, optarg);
+			realm_config_file = new char[strlen(ascnhalf_optarg)];
+			strcpy(realm_config_file, ascnhalf_optarg);
 			break;
 
 		case 0:

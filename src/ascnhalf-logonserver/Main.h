@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef LOGONSERVER_MAIN
+#define LOGONSERVER_MAIN
+
 #include "../ascnhalf-shared/Singleton.h"
 
 extern bool mrunning;
@@ -35,7 +38,6 @@ struct AllowedIP
 bool IsServerAllowed(unsigned int IP);
 bool IsServerAllowedMod(unsigned int IP);
 
-class LogonServer;
 class LogonServer : public Singleton< LogonServer >
 {
 public:
@@ -49,3 +51,5 @@ public:
 private:
 	bool m_stopEvent;
 };
+
+#endif	// LOGONSERVER_MAIN

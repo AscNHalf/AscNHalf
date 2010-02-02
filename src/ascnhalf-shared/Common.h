@@ -116,6 +116,10 @@ enum MsTimeVariables
 	using namespace boost;
 	using boost::unordered_set;
 	//using std::tr1::shared_ptr;
+#else
+#	define UNORDERED_SET		tr1::unordered_set
+#	define UNORDERED_MULTIMAP	tr1::unordered_multimap
+#	define UNORDERED_MAP		tr1::unordered_map
 #endif
 
 	

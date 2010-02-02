@@ -27,10 +27,12 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 	{
 		uint32 displayid;
 		uint8 invtype;
+		uint32 enchantment; // added in 2.4
 	};
 
 	player_item items[20];
 	uint32 slot;
+	int8 containerslot;
 	uint32 i;
 	ItemPrototype * proto;
 
@@ -41,6 +43,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 	QueryResult * res;
 	CreatureInfo *info = NULL;
 	uint8 num = 0;
+	uint8 race;
 
 	// should be more than enough.. 200 bytes per char..
 	WorldPacket data((result ? result->GetRowCount() * 200 : 1));	
@@ -54,38 +57,40 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 	{
 		uint64 guid;
 		uint8 Class;
-		uint32 banned;
 		uint32 bytes2;
+		uint32 flags;
+		uint32 banned;
 		Field *fields;
 		do
 		{
 			fields = result->Fetch();
 			guid = fields[0].GetUInt32();
 			bytes2 = fields[6].GetUInt32();
-			Class = fields[3].GetUInt8();			
+			Class = fields[3].GetUInt8();	
+			flags = fields[17].GetUInt32();
+			race = fields[2].GetUInt8();
 
 			/* build character enum, w0000t :p */
 			data << fields[0].GetUInt64();		// guid
 			data << fields[7].GetString();		// name
-			data << fields[2].GetUInt8();		// race
-			data << fields[3].GetUInt8();		// class
+			data << race;						// race
+			data << Class;						// class
 			data << fields[4].GetUInt8();		// gender
 			data << fields[5].GetUInt32();		// PLAYER_BYTES
 			data << uint8(bytes2 & 0xFF);		// facial hair
 			data << fields[1].GetUInt8();		// Level
 			data << fields[12].GetUInt32();		// zoneid
 			data << fields[11].GetUInt32();		// Mapid
-			data << fields[10].GetFloat();		// X
+			data << fields[8].GetFloat();		// X
 			data << fields[9].GetFloat();		// Y
-			data << fields[8].GetFloat();		// Z
-			data << fields[17].GetUInt32();		// GuildID
+			data << fields[10].GetFloat();		// Z
+			data << fields[18].GetUInt32();		// GuildID
 
-			/*
 			if( fields[1].GetUInt8() > m_highestLevel )
 				m_highestLevel = fields[1].GetUInt8();
 
-			if( Class == DEATHKNIGHT )
-				m_hasDeathKnight = true;*/
+			if( Class == 6 /*DEATHKNIGHT*/)
+				m_hasDeathKnight = true;
 
 			banned = fields[13].GetUInt32();
 			if(banned && (banned<10 || banned > (uint32)UNIXTIME))
@@ -102,11 +107,11 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 
 			data << uint32(0);					//Added in 3.0.2
 			data << fields[14].GetUInt8();		// Rest State
-			//data << uint8(0); -- No longer used in last build of 3.2.2.					// Added in 3.2
+			//data << uint8(0);
 
 			if(Class == 9 /*WARLOCK*/ || Class == 3 /*HUNTER*/)
 			{
-				res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid=%u AND active=1", guid);
+				res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid="I64FMTD" AND active=1", guid);
 
 				if(res)
 				{
@@ -120,26 +125,53 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 			else
 				data << uint32(0) << uint32(0) << uint32(0);
 
-			res = CharacterDatabase.Query("SELECT slot, entry FROM playeritems WHERE ownerguid=%u and containerslot=-1 and slot < 19 and slot >= 0", guid);
-
+			res = CharacterDatabase.Query("SELECT containerslot, slot, entry, enchantments FROM playeritems WHERE ownerguid=%u", GUID_LOPART(guid));
+			
 			memset(items, 0, sizeof(player_item) * 20);
+			uint32 enchantid;
+			EnchantEntry * enc;
 			if(res)
 			{
 				do 
 				{
-					proto = ItemPrototypeStorage.LookupEntry(res->Fetch()[1].GetUInt32());
-					if(proto)
+					containerslot = res->Fetch()[0].GetInt8();
+					slot = res->Fetch()[1].GetInt8();
+
+					if( containerslot == -1 && slot < 19 && slot >= 0 )
 					{
-						slot = res->Fetch()[0].GetUInt32();
-						items[slot].displayid = proto->DisplayInfoID;
-						items[slot].invtype = proto->InventoryType;
+						proto = ItemPrototypeStorage.LookupEntry(res->Fetch()[2].GetUInt32());
+						if(proto)
+						{
+							// slot0 = head, slot14 = cloak
+							
+							if(!(slot == 0 && (flags & (uint32)PLAYER_FLAG_NOHELM) != 0) && !(slot == 14 && (flags & (uint32)PLAYER_FLAG_NOCLOAK) != 0)) {
+								items[slot].displayid = proto->DisplayInfoID;
+								items[slot].invtype = proto->InventoryType;
+								// weapon glows
+								if( slot == 15 || slot == 16 )
+								{
+									// get enchant visual ID
+									const char * enchant_field = res->Fetch()[3].GetString();	
+									if( sscanf( enchant_field , "%u,0,0;" , (unsigned int *)&enchantid ) == 1 && enchantid > 0 )
+									{
+										enc = dbcEnchant.LookupEntry( enchantid );
+										if( enc != NULL )
+										items[slot].enchantment = enc->visual;
+										else
+										items[slot].enchantment = 0;
+									}
+								}
+							}
+						}
 					}
 				} while(res->NextRow());
 				delete res;
 			}
 
 			for( i = 0; i < 20; ++i )
-				data << items[i].displayid << items[i].invtype << uint32(0);
+			{
+				data << items[i].displayid << items[i].invtype << uint32(items[i].enchantment);
+			}
 
 			num++;
 		}
@@ -173,6 +205,7 @@ void Session::HandlePlayerLogin(WorldPacket & pck)
 
 	m_currentPlayer = sClientMgr.CreateRPlayer((uint32)guid);
 	RPlayerInfo * p = m_currentPlayer;
+	sClientMgr.AddSessionRPInfo(this, p);
 
 	/* Load player data */
 	QueryResult * result = CharacterDatabase.Query("SELECT acct, name, level, guild_data.guildid, positionX, positionY, zoneId, mapId, race, class, gender, instance_id, entrypointmap, entrypointx, entrypointy, entrypointz, entrypointo, difficulty FROM characters LEFT JOIN guild_data ON characters.guid = guild_data.playerid WHERE guid = %u", guid);
@@ -217,6 +250,9 @@ void Session::HandlePlayerLogin(WorldPacket & pck)
 		m_currentPlayer = NULL;
 		return;
 	}
+
+	//now we're here, insert rplayerinfo into string hash map
+	sClientMgr.AddStringPlayerInfo(p);
 
 	if(IS_MAIN_MAP(m_currentPlayer->MapId))
 	{
@@ -283,7 +319,7 @@ void Session::HandlePlayerLogin(WorldPacket & pck)
 		}
 	}
 
-	if(!dest || !dest->Server)		// Shouldn't happen
+	if(dest == NULL || dest->Server == NULL)		// Shouldn't happen
 	{
 		Log.Error("CharacterHandler", "World server is down!");
 		/* world server is down */

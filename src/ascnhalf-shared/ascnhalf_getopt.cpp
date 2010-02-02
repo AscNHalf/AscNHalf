@@ -22,7 +22,7 @@
 #include "ascnhalf_getopt.h"
 
 int arg_counter = 1;
-char optarg[514];
+char ascnhalf_optarg[514];
 int getopt_long_only(int ___argc, char *const *___argv, const char *__shortopts, const struct option *__longopts, int *__longind)
 {
 	// burlex todo: handle the shortops, at the moment it only works with longopts.

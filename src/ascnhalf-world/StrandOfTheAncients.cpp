@@ -31,9 +31,9 @@ const float m_gateSigilsLocations[5][5] = {
 };
 
 const uint32 m_gatetransgos[3] = {
-	{190763},
-	{191575},		// the same as the first one, but not needed
-	{192819},		// the same as the first one, but not needed
+	190763,
+	191575,		// the same as the first one, but not needed
+	192819,		// the same as the first one, but not needed
 };
 
 const float m_gatesLocations[5][5] = {
@@ -130,11 +130,7 @@ static uint32 ControlPointGoIds[3][2] = { /* ALLIANCE-CONTROLLED    HORDE_CONTRO
 		{ 180076,    180078 },
 };
 
-const uint32 m_banners[3] = {
-	0,
-	1,
-	2,
-};
+const uint32 m_banners[3] = { 0, 1, 2 };
 
 const float ControlPointFlagpole[3][4] = {
 	{1217.88f, -68.01f, 70.08f, 0.01f},			// South Graveyard

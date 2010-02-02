@@ -26,7 +26,11 @@
 
 #define M_PI	   3.14159265358979323846f
 
+#ifdef ENABLE_BOOST
 using boost::unordered_set;
+#else
+using tr1::unordered_set;
+#endif
 
 Creature::Creature(uint64 guid)
 {
