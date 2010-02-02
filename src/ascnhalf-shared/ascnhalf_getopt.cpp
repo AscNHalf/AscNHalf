@@ -77,7 +77,7 @@ int getopt_long_only(int ___argc, char *const *___argv, const char *__shortopts,
 
 			// store argument in optarg
 			if (par)
-				strncpy(optarg, par, 514);
+				strncpy(ascnhalf_optarg, par, 514);
 
 			if (__longopts[i].flag != 0)
 			{
