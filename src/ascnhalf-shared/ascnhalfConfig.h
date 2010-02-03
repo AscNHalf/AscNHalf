@@ -72,7 +72,7 @@
   * Default: enabled
 */
 
-#define ENABLE_BOOST 1
+//#define ENABLE_BOOST 1
 
 /** Enable/disable the Strand of the Ancients battleground.
   * It is very buggy atm, not recommended to turn on.
