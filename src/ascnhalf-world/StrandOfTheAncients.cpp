@@ -755,7 +755,7 @@ void StrandOfTheAncients::SOTARebuild(bool m_reliccaptured)
 		PlaySoundToAll( 8212 );
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<Player*  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				(*itr)->CastSpell((*itr),52459,true);
 				if(Attackers == ALLIANCE)

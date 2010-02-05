@@ -46,7 +46,7 @@ public:
 
         case 1:
 			plr->Gossip_Complete();
-			Creature* veh = plr->GetMapMgr()->GetInterface()->SpawnCreature(BG_DEMOLISHER, spawncoordinates[0][0], spawncoordinates[0][1], spawncoordinates[0][2], spawncoordinates[0][3], true, false, 0, 0);
+			plr->GetMapMgr()->GetInterface()->SpawnCreature(BG_DEMOLISHER, spawncoordinates[0][0], spawncoordinates[0][1], spawncoordinates[0][2], spawncoordinates[0][3], true, false, 0, 0);
 			break;
 		}
     }
@@ -92,7 +92,7 @@ public:
 
         case 1:
 			plr->Gossip_Complete();
-			Creature* veh = plr->GetMapMgr()->GetInterface()->SpawnCreature(BG_DEMOLISHER, spawncoordinates[1][0], spawncoordinates[1][1], spawncoordinates[1][2], spawncoordinates[1][3], true, false, 0, 0);
+			plr->GetMapMgr()->GetInterface()->SpawnCreature(BG_DEMOLISHER, spawncoordinates[1][0], spawncoordinates[1][1], spawncoordinates[1][2], spawncoordinates[1][3], true, false, 0, 0);
 			break;
 		}
     }
