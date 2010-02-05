@@ -28,6 +28,7 @@
 
 #define BANNER "AscNHalf r%u/%s-%s (%s) :: Logon Server\n"
 
+
 #ifndef WIN32
 #include <sched.h>
 #endif
@@ -322,7 +323,7 @@ void LogonServer::Run(int argc, char ** argv)
 	}
 	
 	sLog.outString(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
-	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
+	//printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 
 	sLog.outString("==============================================================================");
 	sLog.outString("");

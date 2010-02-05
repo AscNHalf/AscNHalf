@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # SVN Revision Extractor for Unix systems
 # Written by Burlex, 2008/02/20

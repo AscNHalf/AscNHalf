@@ -165,7 +165,7 @@ bool Master::Run(int argc, char ** argv)
 
 	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	sLog.outString("");
-	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
+	//printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 	sLog.outString("==============================================================================");
 	Log.Line();
 
