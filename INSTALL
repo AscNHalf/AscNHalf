@@ -1,9 +1,43 @@
 Installation Instructions
+ASCNHALF for Linux.
+Written by: Twl
 *************************
 
 		English
 ======================
 
+To build on linux, you need a few packages and their dependencies first.
+To install them, under Debian and Ubuntu you can use the following command:
+
+
+apt-get install build-essential unzip make subversion cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient15-dev
+
+then change to a directory where you want AscNHalf
+for e.g:
+
+cd ~/dev
+
+then type:
+
+wget http://svn2.assembla.com/svn/ascnhalf/trunk/build.sh
+
+after that:
+
+chmod +x ./build.sh
+
+finally:
+
+./build.sh
+
+Answer the questions (press enters when required:P:P) and if it says Build completed, you are ready!
+If it says error or failed at some point, post on our forums (ascnforum.scymex.info) or come to our IRC at:
+
+irc.rizon.net @ #ascnhalf
+
+and ask one of the ops (%, @, &, ~ before their name) or voiced people (+ before their name)
+
+
+After this all you have to do is to setup your DB and configure the conf files in build/etc.
 
 
 
