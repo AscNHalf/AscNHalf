@@ -18,4 +18,4 @@ echo "" >> svn_revision.h
 echo "#endif         // SVN_REVISION_H" >> svn_revision.h
 echo "" >> svn_revision.h
 mv ./svn_revision.h ./src/ascnhalf-shared
-echo "Found revision: $revision";
+echo $revision;

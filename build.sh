@@ -23,6 +23,7 @@ read
 clear
 mkdir build
 echo -e "Running cmake...\nPrefix is: $currentdir/build";
+chmod +x ./extract_svn_revision.sh
 sleep 2
 cmake -DPREFIX="$currentdir/build" -DDO_SCRIPTS=1
 if [ "$?" = "0" ]; then echo -e "Cmake finished successfully.\n"
@@ -32,8 +33,7 @@ exit 1
 fi
 echo -e "\nExtracting revision...";
 sleep 1
-chmod +x ./extract_svn_revision.sh
-./extract_svn_revision.sh
+# ./extract_svn_revision.sh
 echo -e "\nNow proceeding to the main process.\n";
 echo -e "Press any key...";
 read
