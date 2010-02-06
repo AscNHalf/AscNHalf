@@ -7,20 +7,8 @@ echo -e "The builder will now execute the required operations to build the core.
 echo -e "Press any key...";
 read
 clear
-echo -e "Checking out... "
 sleep 1
-svn co http://svn2.assembla.com/svn/ascnhalf/trunk ascnhalf
-if [ "$?" = "0" ]; then echo -e "done."
-else
-echo -e "error!"
-exit 1
-fi
-cd ascnhalf
 currentdir=`pwd`
-echo -e "\nAttempting to build...\n";
-echo -e "Press any key...";
-read
-clear
 mkdir build
 echo -e "Running cmake...\nPrefix is: $currentdir/build";
 chmod +x ./extract_svn_revision.sh
