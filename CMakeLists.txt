@@ -18,6 +18,7 @@ OPTION(DO_POSTGRESQL "With PostgreSQL support" 0) # not complete yet, may not li
 OPTION(DO_SCRIPTS "With scripts" 0)
 OPTION(DO_DEBUG "Debug mode" 0)
 OPTION(DO_WARN "Enable all compile warnings" 0)
+OPTION(DO_DEV "Enable developer mode" 0)
 
 EXECUTE_PROCESS(
         COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/extract_svn_revision.sh ${CMAKE_CURRENT_SOURCE_DIR} {rev}
@@ -35,15 +36,15 @@ ENDIF(PREFIX)
 
 message("* AscNHalf Binary directory: ${CMAKE_INSTALL_PREFIX}")
 
-add_definitions("-DPREFIX=\"\\\"${CMAKE_INSTALL_PREFIX}\\\"\"")
+add_definitions("-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 
 SET(CONFDIR ${CMAKE_INSTALL_PREFIX}/etc)
 SET(LIBSDIR ${CMAKE_INSTALL_PREFIX}/lib)
 SET(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 
-add_definitions("-DCONFDIR=\"\\\"${CMAKE_INSTALL_PREFIX}\\\"\"")
-add_definitions("-DLIBSDIR=\"\\\"${CMAKE_INSTALL_PREFIX}\\\"\"")
-add_definitions("-DBINDIR=\"\\\"${CMAKE_INSTALL_PREFIX}\\\"\"")
+add_definitions("-DCONFDIR=\"${CONFDIR}\"")
+add_definitions("-DLIBSDIR=\"${LIBSDIR}\"")
+add_definitions("-DBINDIR=\"${BINDIR}\"")
 
 IF(DO_DEV)
 message("* Developer mode: ON")
