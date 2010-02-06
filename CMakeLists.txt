@@ -35,20 +35,20 @@ ENDIF(PREFIX)
 
 message("* AscNHalf Binary directory: ${CMAKE_INSTALL_PREFIX}")
 
-add_definitions("-DPREFIX="\\"${CMAKE_INSTALL_PREFIX}\\"")
+# add_definitions("-DPREFIX="\\"${CMAKE_INSTALL_PREFIX}\\"")
 
 SET(CONFDIR ${CMAKE_INSTALL_PREFIX}/etc)
 SET(LIBSDIR ${CMAKE_INSTALL_PREFIX}/lib)
 SET(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 
-add_definitions("-DCONFDIR="\\"${CONFDIR}\\"")
-add_definitions("-DLIBSDIR="\\"${LIBSDIR}\\"")
-add_definitions("-DBINDIR="\\"${BINDIR}\\"")
+#add_definitions("-DCONFDIR="\\"${CONFDIR}\\"")
+#add_definitions("-DLIBSDIR="\\"${LIBSDIR}\\"")
+#add_definitions("-DBINDIR="\\"${BINDIR}\\"")
 
-IF(DEV)
-message("* Developer mode: ON")
-add_definitions("-DASCENT_DEV")
-ENDIF(DEV)
+#IF(DEV)
+#message("* Developer mode: ON")
+#add_definitions("-DASCENT_DEV")
+#ENDIF(DEV)
 
 if(DO_SCRIPTS)
 message("* With Script library")
