@@ -431,9 +431,9 @@ void OnAreaTrigger(Player * pPlayer, uint32 AreaTrigger)
 
 void SetupQuestHooks(ScriptMgr * mgr)
 {
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_ACCEPT, OnQuestAccept);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_FINISHED, OnQuestFinished);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_CANCELLED, OnQuestCancelled);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_EMOTE, OnEmote);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_AREATRIGGER, OnAreaTrigger);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_ACCEPT, (void*)OnQuestAccept);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_FINISHED, (void*)OnQuestFinished);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_QUEST_CANCELLED, (void*)OnQuestCancelled);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_EMOTE, (void*)OnEmote);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_AREATRIGGER, (void*)OnAreaTrigger);
 }

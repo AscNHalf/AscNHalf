@@ -485,8 +485,8 @@ void SpawnObjects(MapMgr* pmgr)
 void SetupPvPHellfirePeninsula(ScriptMgr *mgr)
 {
 	// register instance hooker
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, ZoneHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, SpawnObjects);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, (void*)ZoneHook);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, (void*)SpawnObjects);
 
 	// load data
 	const string tstadium = WorldStateManager::GetPersistantSetting("hellfire-stadium-status", "-1");

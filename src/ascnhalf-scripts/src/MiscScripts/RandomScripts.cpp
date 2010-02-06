@@ -87,5 +87,5 @@ void OnEmote(Player * pPlayer, uint32 Emote, Unit * pUnit)
 
 void SetupRandomScripts(ScriptMgr * mgr)
 {	// Register Hook Event here
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_EMOTE, OnEmote);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_EMOTE, (void*)OnEmote);
 }

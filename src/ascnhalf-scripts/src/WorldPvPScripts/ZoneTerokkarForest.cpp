@@ -468,8 +468,8 @@ void TFSpawnObjects(MapMgr* pmgr)
 void SetupPvPTerokkarForest(ScriptMgr *mgr)
 {
 	// register instance hooker
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, TFZoneHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, TFSpawnObjects);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, (void*)TFZoneHook);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, (void*)TFSpawnObjects);
 
 	// load data
 	const string Tower1 = WorldStateManager::GetPersistantSetting("Terokkar-Tower1-status", "-1");

@@ -151,10 +151,10 @@ void SetupPvPSilithus(ScriptMgr *mgr)
 	mgr->register_gameobject_script(SILITHYST_GEYSER, &SilithystPickup::Create);
 	mgr->register_gameobject_script(SILITHYST_MOUND, &SilithystPickup::Create);
 	
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, InitWorldStates);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, SilithusZoneHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_AREATRIGGER, AreatriggerHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_AURA_REMOVE, DropFlag);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, (void*)InitWorldStates);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, (void*)SilithusZoneHook);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_AREATRIGGER, (void*)AreatriggerHook);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_AURA_REMOVE, (void*)DropFlag);
 	
 	SpellEntry* sp = dbcSpell.LookupEntryForced( SILITHYST_SPELL );
 	if( sp != NULL )

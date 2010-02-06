@@ -690,10 +690,10 @@ void SetupPvPZangarmarsh(ScriptMgr *mgr)
 	ZMg_towerOwners[TOWER_WEST] = atoi(Tower1.c_str());
 	ZMg_towerOwners[TOWER_EAST] = atoi(Tower2.c_str());
 	ZMCityOwners = atoi(City.c_str());
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_KILL_PLAYER, Tokens);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, ZMZoneHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, ZMSpawnObjects);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, SetGrave);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_KILL_PLAYER, (void*)Tokens);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, (void*)ZMZoneHook);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, (void*)ZMSpawnObjects);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, (void*)SetGrave);
 }
 
 
