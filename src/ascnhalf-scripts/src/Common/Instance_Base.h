@@ -108,10 +108,10 @@ typedef std::vector< TimerPair >								TimerArray;
 #else
   typedef std::tr1::hash_map<uint32, GameObject*>				GameObjectMap;
 #endif
-typedef boost::unordered_set< Unit* >							UnitSet;
-typedef boost::unordered_set< Player* >							PlayerSet;
-typedef boost::unordered_set< Creature* >						CreatureSet;
-typedef boost::unordered_set< GameObject* >						GameObjectSet;
+typedef std::tr1::unordered_set< Unit* >							UnitSet;
+typedef std::tr1::unordered_set< Player* >							PlayerSet;
+typedef std::tr1::unordered_set< Creature* >						CreatureSet;
+typedef std::tr1::unordered_set< GameObject* >						GameObjectSet;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Class MoonInstanceScript
