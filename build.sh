@@ -31,7 +31,7 @@ else
 echo -e "\nCmake returned errors. Aborting.\n";
 exit 1
 fi
-echo -e "\nExtracting revision...";
+#echo -e "\nExtracting revision...";
 sleep 1
 # ./extract_svn_revision.sh
 echo -e "\nNow proceeding to the main process.\n";
@@ -54,6 +54,25 @@ echo -e "\nInstall failed. Aborting.\n";
 exit 1
 fi
 sleep 1
+echo -e "Copying required files...\n";
+mkdir ./build/lib
+mv src/ascnhalf-scripts/src/libevent.a ./build/lib
+echo -e "Copying: libevent.a\n";
+mv src/ascnhalf-scripts/src/libgossip.a ./build/lib
+echo -e "Copying: libgossip.a\n";
+mv src/ascnhalf-scripts/src/libextra.a ./build/lib
+echo -e "Copying: libextra.a\n";
+mv src/ascnhalf-scripts/src/libmisc.a ./build/lib
+echo -e "Copying: libmisc.a\n";
+mv src/ascnhalf-scripts/src/libinstance.a ./build/lib
+echo -e "Copying: libinstance.a\n";
+mv src/ascnhalf-scripts/src/libpvp.a ./build/lib
+echo -e "Copying: libpvp.a\n";
+mv src/ascnhalf-scripts/src/libspell.a ./build/lib
+echo -e "Copying: libspell.a\n";
+mv src/ascnhalf-scripts/src/libquest.a ./build/lib
+echo -e "Copying: libquest.a";
+
 echo -e "\n\nBuild complete!\n";
 
 
