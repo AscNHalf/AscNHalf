@@ -8360,6 +8360,59 @@ void Player::ZoneUpdate(uint32 ZoneId)
 
 	if( IsInWorld() )				// should be
 		m_mapMgr->GetStateManager().SendWorldStates(TO_PLAYER(this));
+	
+	
+	// remove auras
+	switch(oldzone)
+	{
+		case 4197:		// wintergrasp
+		{
+			if(TO_PLAYER(this)->HasActiveAura(52108))
+				TO_PLAYER(this)->RemoveAura(52108);
+		}break;
+		
+		case 3518:		// Nagrand
+		{
+			if(TO_PLAYER(this)->HasActiveAura(33795))
+				TO_PLAYER(this)->RemoveAura(33795);
+		}break;
+		
+		case 210:		// Icecrown (argent)
+		{
+			if(!at || at->AreaId != 4658)
+				if(TO_PLAYER(this)->HasActiveAura(64373))
+					TO_PLAYER(this)->RemoveAura(64373);
+		}break;
+		
+		case 4298:		// Scarlet enclave
+		{
+			if(!at || at->AreaId != 4342)
+				if(TO_PLAYER(this)->HasActiveAura(51721))
+					TO_PLAYER(this)->RemoveAura(51721);
+		}break;
+	}
+	
+	// send area auras
+	switch(m_zoneId)
+	{
+		case 4197:		// wintergrasp
+		{
+			CastSpell(TO_PLAYER(this), 52108, true); 
+		}break;
+		
+		case 210:		// Icecrown (argent)
+		{
+			if(at && at->AreaId == 4658)
+				CastSpell(TO_PLAYER(this), 64373, true);
+		}break;
+		
+		case 4298:		// Scarlet enclave
+		{
+			if(at && at->AreaId == 4342)
+				if(TO_PLAYER(this)->getClass() == DEATHKNIGHT)
+					CastSpell(TO_PLAYER(this), 51721, true);
+		}break;
+	}
 }
 
 void Player::SendTradeUpdate()
