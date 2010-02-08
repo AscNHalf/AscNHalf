@@ -1206,7 +1206,7 @@ void World::Rehash(bool load)
 		Config.MainConfig.SetSource("ascnhalf-world.conf", true);
 		#else
 		char* conf = new char[100];
-		sprintf(conf, "%s", STR(CONFDIR));
+		sprintf(conf, "%s", MACRO_STR(CONFDIR));
 		strcat(conf, "/ascnhalf-world.conf");
 		Config.MainConfig.SetSource(conf, true);
 		#endif

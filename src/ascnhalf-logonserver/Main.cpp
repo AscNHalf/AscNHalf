@@ -275,7 +275,7 @@ void LogonServer::Run(int argc, char ** argv)
 	char * config_file = "ascnhalf-logonserver.conf";
 #else
 	char * config_file = new char[100];
-	sprintf(config_file, "%s", STR(CONFDIR));
+	sprintf(config_file, "%s", MACRO_STR(CONFDIR));
 	strcat(config_file, "/ascnhalf-logonserver.conf");
 #endif
 	int file_log_level = DEF_VALUE_NOT_SET;
