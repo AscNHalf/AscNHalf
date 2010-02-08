@@ -44,22 +44,23 @@ fi
 sleep 1
 echo -e "Copying required files...\n";
 mkdir ./build/lib
-mv src/ascnhalf-scripts/src/libevent.a ./build/lib
-echo -e "Copying: libevent.a\n";
-mv src/ascnhalf-scripts/src/libgossip.a ./build/lib
-echo -e "Copying: libgossip.a\n";
-mv src/ascnhalf-scripts/src/libextra.a ./build/lib
-echo -e "Copying: libextra.a\n";
-mv src/ascnhalf-scripts/src/libmisc.a ./build/lib
-echo -e "Copying: libmisc.a\n";
-mv src/ascnhalf-scripts/src/libinstance.a ./build/lib
-echo -e "Copying: libinstance.a\n";
-mv src/ascnhalf-scripts/src/libpvp.a ./build/lib
-echo -e "Copying: libpvp.a\n";
-mv src/ascnhalf-scripts/src/libspell.a ./build/lib
-echo -e "Copying: libspell.a\n";
-mv src/ascnhalf-scripts/src/libquest.a ./build/lib
-echo -e "Copying: libquest.a";
+sleep 2
+mv src/ascnhalf-scripts/src/libevent.so ./build/lib
+echo -e "Copying: libevent.so\n";
+mv src/ascnhalf-scripts/src/libgossip.so ./build/lib
+echo -e "Copying: libgossip.so\n";
+mv src/ascnhalf-scripts/src/libextra.so ./build/lib
+echo -e "Copying: libextra.so\n";
+mv src/ascnhalf-scripts/src/libmisc.so ./build/lib
+echo -e "Copying: libmisc.so\n";
+mv src/ascnhalf-scripts/src/libinstance.so ./build/lib
+echo -e "Copying: libinstance.so\n";
+mv src/ascnhalf-scripts/src/libpvp.so ./build/lib
+echo -e "Copying: libpvp.so\n";
+mv src/ascnhalf-scripts/src/libspell.so ./build/lib
+echo -e "Copying: libspell.so\n";
+mv src/ascnhalf-scripts/src/libquest.so ./build/lib
+echo -e "Copying: libquest.so";
 
 echo -e "\n\nBuild complete!\n";
 
