@@ -236,13 +236,23 @@ SET(instance_SRCS
    InstanceScripts/Setup.h
 )
 
+SET(SHARED_LIB shared)
+
 message("* Instance scripts found.")
 
 add_library(event SHARED ${event_SRCS})
+#target_link_libraries(event ${SHARED_LIB})
 add_library(gossip SHARED ${gossip_SRCS})
+#target_link_libraries(gossip ${SHARED_LIB})
 add_library(extra SHARED ${extra_SRCS})
+#target_link_libraries(extra ${SHARED_LIB})
 add_library(spell SHARED ${spell_SRCS})
+#target_link_libraries(spell ${SHARED_LIB})
 add_library(quest SHARED ${quest_SRCS})
+#target_link_libraries(quest ${SHARED_LIB})
 add_library(pvp SHARED ${pvp_SRCS})
+#target_link_libraries(pvp ${SHARED_LIB})
 add_library(misc SHARED ${misc_SRCS})
+#target_link_libraries(misc ${SHARED_LIB})
 add_library(instance SHARED ${instance_SRCS})
+#target_link_libraries(instance ${SHARED_LIB})

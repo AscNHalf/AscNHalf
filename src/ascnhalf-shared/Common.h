@@ -67,6 +67,10 @@ enum MsTimeVariables
 #endif
 #endif
 
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
+ 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

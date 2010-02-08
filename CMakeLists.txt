@@ -42,6 +42,8 @@ SET(CONFDIR ${CMAKE_INSTALL_PREFIX}/etc)
 SET(LIBSDIR ${CMAKE_INSTALL_PREFIX}/lib)
 SET(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 
+#SET(SHARED_LIB ./src/ascnhalf-shared/libshared.a)
+
 add_definitions("-DCONFDIR=\"${CONFDIR}\"")
 add_definitions("-DLIBSDIR=\"${LIBSDIR}\"")
 add_definitions("-DBINDIR=\"${BINDIR}\"")
