@@ -8829,6 +8829,12 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 
 	bool force_new_world = false;
 
+	if(GetShapeShift())
+	{
+		// Extra Check
+		SetShapeShift(GetShapeShift());
+	}
+
 	// Lookup map info
 	MapInfo * mi = WorldMapInfoStorage.LookupEntry(MapID);
 	if(!mi)
@@ -8884,6 +8890,13 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 	//all set...relocate
 	_Relocate(MapID, vec, true, force_new_world, InstanceID);
 #else
+
+	if(GetShapeShift())
+	{
+		// Extra Check
+		SetShapeShift(GetShapeShift());
+	}
+
 	if(force_new_world)
 	{
 		WorldPacket data(SMSG_TRANSFER_PENDING, 4);
@@ -8924,6 +8937,12 @@ void Player::SafeTeleport(MapMgr* mgr, LocationVector vec)
 	m_sentTeleportPosition = vec;
 	SetPosition(vec);
 	ResetHeartbeatCoords();
+
+	if(GetShapeShift())
+	{
+		// Extra Check
+		SetShapeShift(GetShapeShift());
+	}
 
 	if(DuelingWith != NULL)
 	{
