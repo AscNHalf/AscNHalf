@@ -15,10 +15,11 @@ ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/c
 
 OPTION(DO_MYSQL "With MySQL support" 1)
 OPTION(DO_POSTGRESQL "With PostgreSQL support" 0) # not complete yet, may not link properly.
-OPTION(DO_SCRIPTS "With scripts" 0)
+OPTION(DO_SCRIPTS "With scripts" 1)
 OPTION(DO_DEBUG "Debug mode" 0)
 OPTION(DO_WARN "Enable all compile warnings" 0)
 OPTION(DO_DEV "Enable developer mode" 0)
+OPTION(NO_WARN "Disable all compile warnings" 1)
 
 EXECUTE_PROCESS(
         COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/extract_svn_revision.sh ${CMAKE_CURRENT_SOURCE_DIR} {rev}
@@ -31,7 +32,8 @@ message("* AscNHalf Core revision: ${SVN_REVISION}")
 IF(PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})
 ELSE(PREFIX)
-    SET(CMAKE_INSTALL_PREFIX ./built)
+	EXECUTE_PROCESS(COMMAND pwd OUTPUT_VARIABLE CURRENT_DIR)
+    SET(CMAKE_INSTALL_PREFIX ${CURRENT_DIR}/build)
 ENDIF(PREFIX)
 
 message("* AscNHalf Binary directory: ${CMAKE_INSTALL_PREFIX}")
@@ -82,7 +84,7 @@ message("-- Miscellaneus options:")
 
 if(DO_DEBUG)
 message("* Debug mode ON")
-add_definitions(-g -DPASSAT_DEBUG)
+add_definitions(-g -D_DEBUG)
 endif(DO_DEBUG)
 
 if(DO_WARN)
@@ -97,7 +99,10 @@ IF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
   add_definitions(-D__ASSERTMACROS__)
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
-add_definitions(--no-warnings) #to make build look nice, no gcc nazi warnings.
+IF(NO_WARN)
+message("* No warnings mode.")
+add_definitions(--no-warnings)
+ENDIF(NO_WARN)
 
 INCLUDE_DIRECTORIES(
     src/ascnhalf-shared
