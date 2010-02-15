@@ -5352,8 +5352,32 @@ void Player::UpdateStats()
 			// counting and adding AP from weapon to total AP.
 			if ( it ) {
 				ItemPrototype *ip = it->GetProto();  
-				if ( ip ) { 
+				if ( ip && !ip->heirloom ) { 
 					dps = ( ( ( ip->Damage->Max + ip->Damage->Min ) / 2 ) / (ip->Delay / 1000) ) ; 
+				}
+				if(ip->heirloom)
+				{
+					int32 col = 0;
+					col = GetStatScalingStatValueColumn(ip, 2); // Damage
+					float scaledmindmg, scaledmaxdmg;
+					if(col != -1)
+					{
+						ScalingStatValuesEntry *ssvrow = dbcScalingStatValues.LookupEntry(SSVDBCEByLevel[getLevel() - 1]);
+						uint32 scaleddps = ssvrow->multiplier[col];
+						float dpsmod = 1.0;
+
+						if(ip->ScaleFlags & 0x1400)
+							dpsmod = 0.2f;
+						else
+							dpsmod = 0.3f;
+
+						scaledmindmg = (scaleddps - (scaleddps * dpsmod)) * (ip->Delay/1000);
+						scaledmaxdmg = (scaleddps * (dpsmod+1.0f)) * (ip->Delay/1000);
+					}
+
+					float wpndmg = ((scaledmindmg + scaledmaxdmg)/2);
+					float wpnspeed = (float(ip->Delay))/1000;
+					dps = wpndmg/wpnspeed;
 				}
 				if ( dps > 54.8 )  {
 					dps =( dps - 54.8f ) * 14 ; //bonus AP = (dps - 54.8) * 14 ; if greater then 54.8, else 0 
