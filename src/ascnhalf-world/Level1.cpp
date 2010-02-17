@@ -129,7 +129,22 @@ bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 		obj->GetMapId(),obj->GetInstanceID(), at ? at->AreaId : 0, at ? at->ZoneId : 0, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation()); 	
 
 	SystemMessage(m_session, buf);
-
+	if(Config.MainConfig.GetBoolDefault("Log", "GPS", false))
+	{
+		//string filen = Config.MainConfig.GetStringDefault("GPS", "File", "gps.log");
+		FILE* gpsLog = fopen("gps.log", "a+");
+		if(!gpsLog || gpsLog == NULL)
+		{
+			sLog.outColor(TRED, "Failed to open GPS log.");
+			return true;
+		}
+		time_t ut = UNIXTIME;
+		tm* aTm = localtime(&ut);
+		fprintf(gpsLog, "[%-4d-%02d-%02d %02d:%02d:%02d]: %s\n\n", aTm->tm_year+1900, aTm->tm_mon+1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+		delete aTm;
+		fclose(gpsLog);
+		gpsLog = NULL;
+	}
 	return true;
 }
 

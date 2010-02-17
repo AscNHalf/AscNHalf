@@ -116,8 +116,8 @@ void DarkPortalEventTriggerAI::AIUpdate()
 					uint32 LastWP = static_cast< MelGrommHighmountainAI* >( mMelgr )->mLastWP;
 					if ( LastWP == 0 )
 						LastWP = 1;
-					if ( LastWP >= mMelgr->GetWaypointCount() )
-						LastWP = mMelgr->GetWaypointCount() - 1;
+					if ( LastWP >= (uint32)mMelgr->GetWaypointCount() )
+						LastWP = (uint32)mMelgr->GetWaypointCount() - 1;
 
 					mMelgr->SetWaypointToMove( LastWP );
 				};

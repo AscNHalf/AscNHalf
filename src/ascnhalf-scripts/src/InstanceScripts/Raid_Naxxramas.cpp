@@ -1012,7 +1012,7 @@ void SpellFunc_AnubRekhanCorpseScarabsPlayer( SpellDesc* pThis, MoonScriptCreatu
 
 		if ( PlayerCorpses.size() > 0 )
 		{
-			uint32 Id = RandomUInt( PlayerCorpses.size() - 1 );
+			uint32 Id = RandomUInt( (uint32)PlayerCorpses.size() - 1 );
 			PlayerPtr = PlayerCorpses[ Id ].first;
 			AnubRekhan->mUsedCorpseGuids.insert( PlayerPtr->GetGUID() );
 			AnubRekhan->ApplyAura( ANUBREKHAN_SUMMON_CORPSE_SCARABS_5 );
@@ -1060,7 +1060,7 @@ void SpellFunc_AnubRekhanCorpseScarabsCryptGuard( SpellDesc* pThis, MoonScriptCr
 
 		if ( CryptCorpses.size() > 0 )
 		{
-			uint32 Id = RandomUInt( CryptCorpses.size() - 1 );
+			uint32 Id = RandomUInt( (uint32)CryptCorpses.size() - 1 );
 			CreaturePtr = CryptCorpses[ Id ];
 
 			AnubRekhan->ApplyAura( ANUBREKHAN_SUMMON_CORPSE_SCARABS_10 );

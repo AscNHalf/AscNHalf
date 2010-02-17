@@ -296,7 +296,7 @@
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -310,7 +310,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ascnhalf-world.lib"
+				AdditionalDependencies="&quot;..\..\..\bin\Release_x64\ascnhalf-world.lib&quot;"
 				OutputFile="../../../bin/release_x64/script_bin/QuestScripts.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\bin\release_x64"
@@ -529,6 +529,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\QuestScripts\SholazarBasin.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\src\QuestScripts\SilvermoonCity.cpp"
 					>
 				</File>
@@ -582,10 +586,6 @@
 				</File>
 				<File
 					RelativePath="..\src\QuestScripts\Zangarmarsh.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\QuestScripts\SholazarBasin.cpp"
 					>
 				</File>
 			</Filter>

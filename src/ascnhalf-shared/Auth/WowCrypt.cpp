@@ -63,7 +63,7 @@ void WowCrypt::DecryptRecv(uint8 *data, size_t len)
 	if (!_initialized)
 		return;
 
-	_Decrypt.Process((uint8*)data, (uint8*)data, len);
+	_Decrypt.Process((uint8*)data, (uint8*)data, (uint32)len);
 }
 
 void WowCrypt::EncryptSend(uint8 *data, size_t len)
@@ -71,7 +71,7 @@ void WowCrypt::EncryptSend(uint8 *data, size_t len)
 	if (!_initialized)
 		return;
 
-	_Encrypt.Process((uint8*)data, (uint8*)data, len);
+	_Encrypt.Process((uint8*)data, (uint8*)data, (uint32)len);
 }
 
 WowCrypt::~WowCrypt()

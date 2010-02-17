@@ -38,7 +38,7 @@ extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)
 	SetupOldSpellCPPSuff(mgr);
 	SetupDruidSpells(mgr);
 	SetupPriestSpells(mgr);
-	SetupRaidBlackTempleSpells(mgr);
+	//SetupRaidBlackTempleSpells(mgr);
 	SetupQuestItems(mgr); //this was commented for crash reason, let see what are those...
 }
 
