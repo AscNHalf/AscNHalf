@@ -20,7 +20,9 @@
 
 #if !defined (CONFIG_H)
 #define CONFIG_H
-#include "Common.h"
+#include "../StdAfx.h"
+
+#pragma warning(disable: 4251)
 
 using namespace std;
 struct SERVER_DECL ConfigSetting
@@ -36,8 +38,6 @@ typedef map<uint32, ConfigSetting> ConfigBlock;
 class SERVER_DECL ConfigFile
 {
 public:
-	ConfigFile();
-	~ConfigFile();
 
 	bool SetSource(const char *file, bool ignorecase = true);
 	ConfigSetting * GetSetting(const char * Block, const char * Setting);
@@ -72,6 +72,6 @@ public:
 	ConfigFile ClusterConfig;
 };
 
-extern SERVER_DECL ConfigMgr Config;
+//extern SERVER_DECL ConfigMgr Config;
 
 #endif

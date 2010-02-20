@@ -22,10 +22,10 @@
 #define CONFIGENVIRONMENT_H
 
 //! Other libs we depend on.
-#include "Common.h"
+#include "../StdAfx.h"
 
 //! Our own includes.
 #include "Config.h"
-#include "Log.h"
+#include "../Log.h"
 
 #endif
