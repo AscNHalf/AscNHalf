@@ -19,9 +19,8 @@
   */
 
 #include "ConfigEnv.h"
-//#include "NGLog.h"
-#include "../Log.h"
-#include "../StdAfx.h"
+#include "NGLog.h"
+
 ConfigMgr Config;
 
 
@@ -29,7 +28,6 @@ ConfigMgr Config;
 
 //#define _CONFIG_DEBUG
 
-Research::CLog cLog;
 
 void remove_spaces(string& str)
 {
@@ -130,7 +128,7 @@ bool ConfigFile::SetSource(const char *file, bool ignorecase)
 		int length;
 		if(!f)
 		{
-			cLog.Error("ConfigFile", "Could not open %s.", file);
+			Log.Error("ConfigFile", "Could not open %s.", file);
 			return false;
 		}
 
@@ -228,7 +226,7 @@ parse:
 					/* append the setting to the config block. */
 					if(current_block == "" || current_variable == "")
 					{
-						cLog.Error("ConfigFile", "Quote without variable.");
+						Log.Error("ConfigFile", "Quote without variable.");
 						return false;
 					}
 
@@ -256,7 +254,7 @@ parse:
                 offset = line.find("=");
 				if(offset != string::npos)
 				{
-					assert(current_variable == "");
+					ASSERT(current_variable == "");
 					current_variable = line.substr(0, offset);
 
 					/* remove any spaces from the end of the setting */
@@ -270,8 +268,8 @@ parse:
 				offset = line.find("\"");
 				if(offset != string::npos)
 				{
-					assert(current_setting == "");
-					assert(current_variable != "");
+					ASSERT(current_setting == "");
+					ASSERT(current_variable != "");
 
 					/* try and find the ending quote */
 					end = line.find("\"", offset + 1);
@@ -352,7 +350,7 @@ parse:
 					}
 					else
 					{
-						cLog.Error("ConfigFile", "Block without name.");
+						Log.Error("ConfigFile", "Block without name.");
 						return false;
 					}
 
@@ -364,26 +362,26 @@ parse:
 
 		}catch(...)
 			{
-				cLog.Error("ConfigFile", "Exception in config parsing.");
+				Log.Error("ConfigFile", "Exception in config parsing.");
 				return false;
 			}
 
 		/* handle any errors */
 		if(in_block)
 		{
-			cLog.Error("ConfigFile", "Unterminated block.");
+			Log.Error("ConfigFile", "Unterminated block.");
 			return false;
 		}
 
 		if(in_multiline_comment)
 		{
-			cLog.Error("ConfigFile", "Unterminated comment.");
+			Log.Error("ConfigFile", "Unterminated comment.");
 			return false;
 		}
 
 		if(in_multiline_quote)
 		{
-			cLog.Error("ConfigFile", "Unterminated quote.");
+			Log.Error("ConfigFile", "Unterminated quote.");
 			return false;
 		}
 

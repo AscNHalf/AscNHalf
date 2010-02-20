@@ -20,7 +20,7 @@
 
 #if !defined (CONFIG_H)
 #define CONFIG_H
-#include "../StdAfx.h"
+#include "Common.h"
 
 #pragma warning(disable: 4251)
 
@@ -72,6 +72,6 @@ public:
 	ConfigFile ClusterConfig;
 };
 
-//extern SERVER_DECL ConfigMgr Config;
+extern SERVER_DECL ConfigMgr Config;
 
 #endif
