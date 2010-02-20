@@ -128,6 +128,10 @@ bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 	snprintf((char*)buf, 512, "|cff00ff00Current Position: |cffffffffMap: |cff00ff00%u |cffffffffInst: |cff00ff00%u |cffffffff Area: |cff00ff00%u |cffffffffZone: |cff00ff00%u |cffffffffX: |cff00ff00%f |cffffffffY: |cff00ff00%f |cffffffffZ: |cff00ff00%f |cffffffffOrientation: |cff00ff00%f|r",
 		obj->GetMapId(),obj->GetInstanceID(), at ? at->AreaId : 0, at ? at->ZoneId : 0, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation()); 	
 
+	char cbuff[512];
+	snprintf((char*)cbuff, 512, "Current Position: Map: %u | Instance: %u | Area: %u | Zone: %u | X: %f | Y: %f | Z: %f | Orientation: %f",
+		obj->GetMapId(),obj->GetInstanceID(), at ? at->AreaId : 0, at ? at->ZoneId : 0, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+
 	SystemMessage(m_session, buf);
 	if(Config.MainConfig.GetBoolDefault("Log", "GPS", false))
 	{
@@ -138,12 +142,9 @@ bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 			sLog.outColor(TRED, "Failed to open GPS log.");
 			return true;
 		}
-		time_t ut = UNIXTIME;
-		tm* aTm = localtime(&ut);
-		fprintf(gpsLog, "[%-4d-%02d-%02d %02d:%02d:%02d]: %s\n\n", aTm->tm_year+1900, aTm->tm_mon+1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
-		delete aTm;
+		
+		fprintf(gpsLog, "[%s]: %s\n\n", args, cbuff);
 		fclose(gpsLog);
-		gpsLog = NULL;
 	}
 	return true;
 }
