@@ -1,5 +1,25 @@
+/*
+  * AscNHalf MMORPG Server
+  * Copyright (C) 2005-2007 Ascent Team <http://www.ascentemu.com/>
+  * Copyright (C) 2010 AscNHalf Team <http://ascnhalf.scymex.info/>
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU Affero General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  *
+  */
+
+
 #define _CRT_SECURE_NO_DEPRECATE
-//#define GENERATE_EQUIPINFO
 
 #include <stdio.h>
 #include <vector>
@@ -10,24 +30,21 @@
 #include <fcntl.h>
 #include <string>
 #include <map>
+#include <set>
 #include <Windows.h>
 #include <mmsystem.h>
-#include <mysql/mysql.h>
 using namespace std;
-
-#define SFIELD_EQUIP_1 "equipmodel1"
-#define SFIELD_EQUIP_2 "equipmodel2"
-#define SFIELD_EQUIP_3 "equipmodel3"
-#define FIELD_EQUIP_1 18
-#define FIELD_EQUIP_2 21
-#define FIELD_EQUIP_3 24
+#include "filestruct.h"
 
 extern unsigned int iRes;
 bool ConvertADT(uint32 x, uint32 y, FILE * out_file, char* name);
 void reset();
 void CleanCache();
+typedef std::vector<MPQArchive*> ArchiveSet;
+extern ArchiveSet gOpenArchives;
 
-typedef struct{
+typedef struct
+{
 	char name[64];
 	unsigned int id;
 }map_id;
@@ -66,7 +83,7 @@ void SetProgressBar(int val, int max, const char* label)
 
 void ClearProgressBar()
 {
-    for(int p = 0; p<70;p++)
+    for(int p = 0; p < 70; p++)
         putchar(' ');
     printf("\r");
 }
@@ -78,12 +95,10 @@ void SimpleProgressBar(int val, int max)
     int barPos = val * 60 / max + 1;
     int p;
     for (p = 0; p < barPos; p++) putchar (0xb1);
-    for (; p <60; p++) putchar (' ');
+    for (; p < 60; p++) putchar (' ');
 
     printf ("\xba %d%%\r", val * 100 / max);
-    fflush(stdout);
 }
-
 
 void ExtractMapsFromMpq()
 {
@@ -94,10 +109,10 @@ void ExtractMapsFromMpq()
     char output_filename[50];
     map_id * map;
 	char mpq_filename[128];
-	printf("\n %u maps kicsomagolása...\n\n", MapCount);
+	printf("\nProcessing %u maps...\n\n", MapCount);
 
     for(uint32 i = 0; i < MapCount; ++i)
-    {	
+    {
         map = &map_ids[i];
         printf("Converting maps for mapid %u [%s]...\n", map->id, map->name);
         // Create the container file
@@ -109,37 +124,58 @@ void ExtractMapsFromMpq()
             printf("  Could not create output file!\n");
             return;
         }
+		TotalTiles = 0;
+		AvailableTiles = 0;
+		memset(Available_Maps, 0, sizeof(bool)*64*64);
         printf("  Checking which tiles are extractable...\n");
+        sprintf(mpq_filename, "World\\Maps\\%s\\%s.wdt", map->name, map->name);
+		MPQFile mf(mpq_filename);
+		if(!mf.isEof())
+		{
+			uint8 * data = new uint8[mf.getSize()];
+			mf.read(data, mf.getSize());
+			fileVer * version = (fileVer*)data;
+			if(version->fcc != 'MVER' || version->ver != 18)
+			{
+				delete data;
+				continue;
+			}
+			wdt_MPHD * mphd = (wdt_MPHD*)((uint8*) version+version->size+8);
+			if(mphd->fcc != 'MPHD')
+			{
+				delete data;
+				continue;
+			}
+			wdt_MAIN * main = (wdt_MAIN*)((uint8*) mphd+mphd->size+8);
+			if(main->fcc != 'MAIN')
+			{
+				delete data;
+				continue;
+			}
 
-        // First, check the number of present tiles.
-        for(uint32 x = 0; x < 64; ++x)
-        {
-            for(uint32 y = 0; y < 64; ++y)
-            {
-                // set up the mpq filename
-                sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map->name, map->name, y, x);
-
-                // check if the file exists
-                if(!mpq_file_exists(mpq_filename))
-                {
-                    // file does not exist
-                    Available_Maps[x][y] = false;
-                }
-                else
-                {
-                    // file does exist
-                    Available_Maps[x][y] = true;
-                    ++AvailableTiles;
-                }
-                ++TotalTiles;
-
-                // Update Progress Bar
-                SimpleProgressBar( (x * 64 + y), 64 * 64 );
-            }
-        }
-
-        // Clear progress bar.
-        ClearProgressBar();
+			// First, check the number of present tiles.
+			for(uint32 x = 0; x < 64; ++x)
+			{
+				for(uint32 y = 0; y < 64; ++y)
+				{
+					// check if the file exists
+					if(!main->adt_list[x][y].exist)
+					{
+						// file does not exist
+						Available_Maps[x][y] = false;
+					}
+					else
+					{
+						// file does exist
+						Available_Maps[x][y] = true;
+						++AvailableTiles;
+					}
+					++TotalTiles;
+				}
+			}
+			delete data;
+		}
+		mf.close();
 
         // Calculate the estimated size.
         float Estimated_Size = 1048576.0f;
@@ -168,30 +204,35 @@ void ExtractMapsFromMpq()
         uint32 start_time = timeGetTime();
         reset();
 
-        // call the extraction function.
-        for(uint32 x = 0; x < 512; ++x)
-        {
-            for(uint32 y = 0; y < 512; ++y)
-            {
-                // Check if the map is available.
-                if(Available_Maps[x/8][y/8])
-                {
-                    uint32 Offset = ftell(out_file);
-                    if(ConvertADT(x, y, out_file, map->name))
-                        Offsets[x][y] = Offset;
+		if(TilesToExtract)
+		{
+			// call the extraction function.
+			for(uint32 x = 0; x < 512; ++x)
+			{
+				for(uint32 y = 0; y < 512; ++y)
+				{
+					// Check if the map is available.
+					if(Available_Maps[x/8][y/8])
+					{
+						uint32 Offset = ftell(out_file);
+						if(ConvertADT(x, y, out_file, map->name))
+							Offsets[x][y] = Offset;
 
-                    ++DoneTiles;
-                    SimpleProgressBar( DoneTiles, TilesToExtract );
-                }
-            }
+						++DoneTiles;
+					}
+				}
+				SimpleProgressBar( DoneTiles, TilesToExtract );
 
-            // Clean the cache every 8 cells.
-            if(!(x % 8))
-                CleanCache();
-        }
-        ClearProgressBar();
-        // clean any leftover cells
-        CleanCache();
+				// Clean the cache every 8 cells.
+				if(!(x % 8))
+					CleanCache();
+				if(DoneTiles >= TilesToExtract)
+					break;
+			}
+			ClearProgressBar();
+			// clean any leftover cells
+			CleanCache();
+		}
 
         printf("  Finished extracting in %ums. Appending header to start of file...\n", timeGetTime() - start_time);
         fseek(out_file, 0, SEEK_SET);
@@ -204,13 +245,29 @@ void ExtractMapsFromMpq()
 
 }
 
+bool ExtractFile( char const* mpq_name, std::string const& filename ) 
+{
+    FILE *output = fopen(filename.c_str(), "wb");
+    if(!output)
+    {
+        printf("Can't create the output file '%s'\n", filename.c_str());
+        return false;
+    }
+    MPQFile m(mpq_name);
+    if(!m.isEof())
+        fwrite(m.getPointer(), 1, m.getSize(), output);
+
+    fclose(output);
+    return true;
+}
+
 int main(int argc, char * arg[])
 {
-    printf("AscNHalf maps kicsomagolo. By ScymeX\n");
-    printf("============================================================\n\n");
+	printf("AscNHalf map extractor for versions 3.2.2 \n");
+	printf("============================================================\n\n");
 
 	FILE * tf;
-	const char* localeNames[] = { "enUS", "enGB", "deDE", "frFR", "koKR", "zhCN", "zhTW", "esES", 0 };
+	const char* localeNames[] = { "enUS", "enGB", "deDE", "frFR", "koKR", "zhCN", "zhTW", "esES", "ruRU", 0 };
 	int maxPatches = 3;
 	int locale = -1;
 	char tmp[100];
@@ -224,17 +281,13 @@ int main(int argc, char * arg[])
 	fclose(tf);
 	new MPQArchive("Data/common.MPQ");
 
-	for( size_t i = 0; localeNames[i] != 0; i++ )
+	tf = fopen("Data/common-2.MPQ", "r");
+	if (!tf)
 	{
-		sprintf(tmp, "Data/%s/locale-%s.MPQ", localeNames[i], localeNames[i]);
-		tf = fopen(tmp, "r");
-		if (!tf)
-			continue;
-		fclose(tf);
-		locale = i;
-		new MPQArchive(tmp);
+		printf("Could not find Data/common-2.MPQ\n");
+		return 1;
 	}
-
+	fclose(tf);
 	new MPQArchive("Data/common-2.MPQ");
 
 	for( size_t i = 0; localeNames[i] != 0; i++ )
@@ -307,89 +360,50 @@ int main(int argc, char * arg[])
 		}
 	}
 
-#ifdef GENERATE_EQUIPINFO
-	DBCFile * itemDBC = new DBCFile("DBFilesClient\\Item.dbc");
-	itemDBC->open();
+	printf("\nExtracting DBC Files: Identifying files...\n");
 
-	FILE* sql = fopen("Update.sql", "w");
-	if(sql == NULL )
+	std::set<std::string> dbcFiles;
+	int itc = 0;
+	for(std::vector<MPQArchive*>::iterator it = gOpenArchives.begin(); it != gOpenArchives.end(); ++it)
 	{
-		printf("Unable to open Update.sql");
-		exit(-1);
+		std::vector<std::string> files;
+		files = (*it)->GetFileList();
+        for (vector<string>::iterator iter = files.begin(); iter != files.end(); ++iter)
+            if (iter->rfind(".dbc") == iter->length() - strlen(".dbc"))
+                    dbcFiles.insert(*iter);
+		SimpleProgressBar(++itc, gOpenArchives.size());
 	}
+	CleanCache();
+	ClearProgressBar();
+	printf("Extracting...\n");
 
-	std::map<uint32,uint32> mapforquickness;
-	for(uint32 i = 0; i < itemDBC->getRecordCount(); ++i)
-	{
-		mapforquickness.insert(std::make_pair<uint32, uint32>(itemDBC->getRecord(i).getUInt(5), itemDBC->getRecord(i).getUInt(0)));
-	}
+    CreateDirectory("DBC", NULL);
 
-	MYSQL* con;
-	MYSQL* startup = mysql_init(NULL);
-	con = mysql_real_connect(startup, "localhost", "root", "yourpw", "yourworlddb", 3306, NULL, 0); // fill in the connect info yourself, lazy
-	if(con == NULL)
-	{
-		printf("Error connecting to mySQL.");
-		exit(-1);
-	}
+    // extract DBCs
+    int count = 0;
+    for (set<string>::iterator iter = dbcFiles.begin(); iter != dbcFiles.end(); ++iter)
+    {
+        string filename = "DBC\\";
+        filename += (iter->c_str() + strlen("DBFilesClient\\"));
 
-	uint32 pie = mysql_query(con, "SELECT * FROM creature_proto;");
-	if( pie == 0 )
-	{
-		MYSQL_RES* res = mysql_store_result(con);
-		while(MYSQL_ROW r = mysql_fetch_row(res))
-		{
-			if( r == NULL) // wtfbbq
-				break;
-
-			uint32 entry = atol(r[0]);
-			uint32 model = 0;
-			std::map<uint32,uint32>::iterator itr;
-			model = atol(r[FIELD_EQUIP_1 - 1]);
-			itr = mapforquickness.find( model );
-
-			if( itr != mapforquickness.end() )
-			{
-				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_1, itr->second, entry);
-			}
-
-			model = atol(r[FIELD_EQUIP_2 - 1]);
-			itr = mapforquickness.find( model );
-
-			if( itr != mapforquickness.end() )
-			{
-				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_2, itr->second, entry);
-			}
-
-			model = atol(r[FIELD_EQUIP_3 - 1]);
-			itr = mapforquickness.find( model );
-
-			if( itr != mapforquickness.end() )
-			{
-				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_3, itr->second, entry);
-			}
-		}
-	}
-	else
-	{
-		printf("MySQL error: %s (%u)", mysql_error(con), pie);
-		exit(-1);
-	}
-	delete itemDBC;
-	fclose(sql);
-	printf("Done generating EquipInfo!");
-#endif
+        if(ExtractFile(iter->c_str(), filename))
+            ++count;
+		SimpleProgressBar(count, dbcFiles.size());
+    }
+	CleanCache();
+	ClearProgressBar();
+    printf("Extracted %u DBC files\n\n", count);
 
 	//map.dbc
-	DBCFile * dbc= new DBCFile("DBFilesClient\\Map.dbc");
+	DBCFile * dbc = new DBCFile("DBFilesClient\\Map.dbc");
 	dbc->open();
 
-	MapCount=dbc->getRecordCount ();
-	map_ids=new map_id[MapCount];
+	MapCount = dbc->getRecordCount ();
+	map_ids = new map_id[MapCount];
 	for(unsigned int x = 0; x < MapCount; x++)
 	{
-		map_ids[x].id=dbc->getRecord (x).getUInt(0);
-		strcpy(map_ids[x].name,dbc->getRecord(x).getString(1));
+		map_ids[x].id = dbc->getRecord (x).getUInt(0);
+		strcpy(map_ids[x].name, dbc->getRecord(x).getString(1));
 	}
 	delete dbc;
 

@@ -1,3 +1,24 @@
+/*
+  * AscNHalf MMORPG Server
+  * Copyright (C) 2005-2007 Ascent Team <http://www.ascentemu.com/>
+  * Copyright (C) 2010 AscNHalf Team <http://ascnhalf.scymex.info/>
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU Affero General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  *
+  */
+
+
 #define _CRT_SECURE_NO_DEPRECATE
 
 #ifndef MPQ_H
@@ -21,7 +42,8 @@ public:
 	MPQArchive(const char* filename);
 	void close();
 
-    uint32 HashString(const char* Input, uint32 Offset) {
+    uint32 HashString(const char* Input, uint32 Offset)
+	{
         uint32 seed1 = 0x7fed7fed;
         uint32 seed2 = 0xeeeeeeee;
 			
@@ -33,13 +55,15 @@ public:
 
 		return seed1;
 	}
-	mpq_hash GetHashEntry(const char* Filename) {
+	mpq_hash GetHashEntry(const char* Filename)
+	{
 		uint32 index = HashString(Filename, 0);
 		index &= mpq_a.header->hashtablesize - 1;
 		uint32 name1 = HashString(Filename, 0x100);
 		uint32 name2 = HashString(Filename, 0x200);
 		
-		for(uint32 i = index; i < mpq_a.header->hashtablesize; ++i) {
+		for(uint32 i = index; i < mpq_a.header->hashtablesize; ++i)
+		{
 			mpq_hash hash = mpq_a.hashtable[i];
 			if (hash.name1 == name1 && hash.name2 == name2) return hash;
 		}
@@ -49,7 +73,8 @@ public:
 		return nullhash;
 	}
 
-    vector<string> GetFileList() {
+    vector<string> GetFileList()
+	{
         vector<string> filelist;
 
         mpq_hash hash = GetHashEntry("(listfile)");
@@ -68,7 +93,8 @@ public:
 
         token = strtok( buffer, seps );
         uint32 counter = 0;
-        while ((token != NULL) && (counter < size)) {
+        while ((token != NULL) && (counter < size))
+		{
             //cout << token << endl;
             token[strlen(token) - 1] = 0;
             string s = token;
@@ -111,12 +137,12 @@ public:
 inline void flipcc(char *fcc)
 {
 	char t;
-	t=fcc[0];
-	fcc[0]=fcc[3];
-	fcc[3]=t;
-	t=fcc[1];
-	fcc[1]=fcc[2];
-	fcc[2]=t;
+	t = fcc[0];
+	fcc[0] = fcc[3];
+	fcc[3] = t;
+	t = fcc[1];
+	fcc[1] = fcc[2];
+	fcc[2] = t;
 }
 
 bool mpq_file_exists(const char* file);

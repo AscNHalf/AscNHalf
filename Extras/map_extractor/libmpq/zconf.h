@@ -1,7 +1,22 @@
-/* zconf.h -- configuration of the zlib compression library
- * Copyright (C) 1995-2003 Jean-loup Gailly.
- * For conditions of distribution and use, see copyright notice in zlib.h
- */
+/*
+  * AscNHalf MMORPG Server
+  * Copyright (C) 2005-2007 Ascent Team <http://www.ascentemu.com/>
+  * Copyright (C) 2010 AscNHalf Team <http://ascnhalf.scymex.info/>
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU Affero General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  *
+  */
 
 /* @(#) $Id$ */
 
@@ -13,43 +28,50 @@
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
  */
 #ifdef Z_PREFIX
-#  define deflateInit_  z_deflateInit_
-#  define deflate       z_deflate
-#  define deflateEnd    z_deflateEnd
-#  define inflateInit_  z_inflateInit_
-#  define inflate       z_inflate
-#  define inflateEnd    z_inflateEnd
-#  define deflateInit2_ z_deflateInit2_
-#  define deflateSetDictionary z_deflateSetDictionary
-#  define deflateCopy   z_deflateCopy
-#  define deflateReset  z_deflateReset
-#  define deflatePrime  z_deflatePrime
-#  define deflateParams z_deflateParams
-#  define deflateBound  z_deflateBound
-#  define inflateInit2_ z_inflateInit2_
-#  define inflateSetDictionary z_inflateSetDictionary
-#  define inflateSync   z_inflateSync
-#  define inflateSyncPoint z_inflateSyncPoint
-#  define inflateCopy   z_inflateCopy
-#  define inflateReset  z_inflateReset
-#  define compress      z_compress
-#  define compress2     z_compress2
-#  define compressBound z_compressBound
-#  define uncompress    z_uncompress
-#  define adler32       z_adler32
-#  define crc32         z_crc32
-#  define get_crc_table z_get_crc_table
+#  define deflateInit_          z_deflateInit_
+#  define deflate               z_deflate
+#  define deflateEnd            z_deflateEnd
+#  define inflateInit_          z_inflateInit_
+#  define inflate               z_inflate
+#  define inflateEnd            z_inflateEnd
+#  define deflateInit2_         z_deflateInit2_
+#  define deflateSetDictionary  z_deflateSetDictionary
+#  define deflateCopy           z_deflateCopy
+#  define deflateReset          z_deflateReset
+#  define deflateParams         z_deflateParams
+#  define deflateBound          z_deflateBound
+#  define deflatePrime          z_deflatePrime
+#  define inflateInit2_         z_inflateInit2_
+#  define inflateSetDictionary  z_inflateSetDictionary
+#  define inflateSync           z_inflateSync
+#  define inflateSyncPoint      z_inflateSyncPoint
+#  define inflateCopy           z_inflateCopy
+#  define inflateReset          z_inflateReset
+#  define inflateBack           z_inflateBack
+#  define inflateBackEnd        z_inflateBackEnd
+#  define compress              z_compress
+#  define compress2             z_compress2
+#  define compressBound         z_compressBound
+#  define uncompress            z_uncompress
+#  define adler32               z_adler32
+#  define crc32                 z_crc32
+#  define get_crc_table         z_get_crc_table
+#  define zError                z_zError
 
-#  define Byte          z_Byte
-#  define uInt          z_uInt
-#  define uLong         z_uLong
-#  define Bytef         z_Bytef
-#  define charf         z_charf
-#  define intf          z_intf
-#  define uIntf         z_uIntf
-#  define uLongf        z_uLongf
-#  define voidpf        z_voidpf
-#  define voidp         z_voidp
+#  define alloc_func            z_alloc_func
+#  define free_func             z_free_func
+#  define in_func               z_in_func
+#  define out_func              z_out_func
+#  define Byte                  z_Byte
+#  define uInt                  z_uInt
+#  define uLong                 z_uLong
+#  define Bytef                 z_Bytef
+#  define charf                 z_charf
+#  define intf                  z_intf
+#  define uIntf                 z_uIntf
+#  define uLongf                z_uLongf
+#  define voidpf                z_voidpf
+#  define voidp                 z_voidp
 #endif
 
 #if defined(__MSDOS__) && !defined(MSDOS)
@@ -61,8 +83,10 @@
 #if defined(_WINDOWS) && !defined(WINDOWS)
 #  define WINDOWS
 #endif
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
-#  define WIN32
+#if defined(_WIN32) || defined(_WIN32_WCE) || defined(__WIN32__)
+#  ifndef WIN32
+#    define WIN32
+#  endif
 #endif
 #if (defined(MSDOS) || defined(OS2) || defined(WINDOWS)) && !defined(WIN32)
 #  if !defined(__GNUC__) && !defined(__FLAT__) && !defined(__386__)
@@ -281,7 +305,7 @@ typedef uLong FAR uLongf;
 #  ifdef VMS
 #    include <unixio.h>   /* for off_t */
 #  endif
-#  define z_off_t  off_t
+#  define z_off_t off_t
 #endif
 #ifndef SEEK_SET
 #  define SEEK_SET        0       /* Seek from beginning of file.  */
@@ -289,11 +313,11 @@ typedef uLong FAR uLongf;
 #  define SEEK_END        2       /* Set file pointer to EOF plus "offset" */
 #endif
 #ifndef z_off_t
-#  define  z_off_t long
+#  define z_off_t long
 #endif
 
 #if defined(__OS400__)
-#define NO_vsnprintf
+#  define NO_vsnprintf
 #endif
 
 #if defined(__MVS__)

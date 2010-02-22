@@ -1,24 +1,25 @@
 /*
- *  common.h -- defines and structs used by the config files.
- *
- *  Copyright (C) 2003 Maik Broemme <mbroemme@plusserver.de>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *  $Id: common.h,v 1.4 2004/02/12 00:41:55 mbroemme Exp $
- */
+  * AscNHalf MMORPG Server
+  * Copyright (C) 2005-2007 Ascent Team <http://www.ascentemu.com/>
+  * Copyright (C) 2010 AscNHalf Team <http://ascnhalf.scymex.info/>
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU Affero General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  *
+  */
+
+#ifndef _COMMON_H
+#define _COMMON_H
 
 #define LIBMPQ_CONF_FL_INCREMENT	512			/* i hope we did not need more :) */
 #define LIBMPQ_CONF_EXT			".conf"			/* listdb file seems to be valid with this extension */
@@ -42,3 +43,5 @@ char *libmpq_conf_delete_char(char *buf, char *chars);
 int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *entries);
 int libmpq_free_listfile(char **filelist);
 int libmpq_read_listfile(mpq_archive *mpq_a, FILE *fp);
+
+#endif
