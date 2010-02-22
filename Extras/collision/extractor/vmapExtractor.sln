@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmapExtractor", "vmapExtractor_VC90.vcproj", "{87335BBF-5DA8-4FEC-A51E-1FB948F2FFE9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmapExtractor", "vmapExtractor.vcproj", "{87335BBF-5DA8-4FEC-A51E-1FB948F2FFE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
