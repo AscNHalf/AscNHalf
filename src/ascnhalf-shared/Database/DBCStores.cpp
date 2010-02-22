@@ -25,6 +25,7 @@
 SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
 SERVER_DECL DBCStorage<AreaGroup> dbcAreaGroup;
 SERVER_DECL DBCStorage<CharTitlesEntry> dbcCharTitlesEntry;
+SERVER_DECL DBCStorage<CurrencyTypesEntry> dbcCurrencyTypesStore;
 SERVER_DECL DBCStorage<GemPropertyEntry> dbcGemProperty;
 SERVER_DECL DBCStorage<GlyphPropertyEntry> dbcGlyphProperty;
 SERVER_DECL DBCStorage<ItemSetEntry> dbcItemSet;
@@ -87,6 +88,7 @@ const char* SummonPropertiesfmt = "uuuuuu";
 const char* AreaTriggerFormat = "uuffffffff";
 const char* AreaGroupFormat="niiiiiii";
 const char* CharTitlesEntryfmt = "usxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxu";
+const char* CurrencyTypesEntryFormat = "xnxu";
 const char* ItemSetFormat = "usxxxxxxxxxxxxxxxuuuuuuuuuuuxxxxxxxuuuuuuuuuuuuuuuuuu";
 const char* LockFormat = "uuuuuuxxxuuuuuxxxuuuuuxxxxxxxxxxx";
 const char* EmoteEntryFormat = "uxuuuuxuxuxxxxxxxxx";
@@ -198,6 +200,7 @@ bool LoadDBCs()
 
 	LOAD_DBC("DBC/ChatChannels.dbc", chatchannelformat, true, dbcChatChannels, true);
 	LOAD_DBC("DBC/CharTitles.dbc", CharTitlesEntryfmt, true, dbcCharTitlesEntry, false);
+	LOAD_DBC("DBC/CurrencyTypes.dbc", CurrencyTypesEntryFormat, true, dbcCurrencyTypesStore, true);
 	LOAD_DBC("DBC/ChrClasses.dbc", charclassFormat, true, dbcCharClass, true);
 	LOAD_DBC("DBC/ChrRaces.dbc", charraceFormat, true, dbcCharRace, true);
 	LOAD_DBC("DBC/CreatureDisplayInfo.dbc", creaturedisplayFormat, true, dbcCreatureDisplayInfo, true);

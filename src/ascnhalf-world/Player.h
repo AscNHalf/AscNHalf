@@ -1565,6 +1565,7 @@ public:
 #endif
 	void AddItemsToWorld();
 	void RemoveItemsFromWorld();
+	void UpdateKnownCurrencies(uint32 itemId, bool apply);
 	
 	uint32 m_ShapeShifted;
 	uint32 m_MountSpellId;
