@@ -561,7 +561,7 @@ const char* SpellAuraNames[TOTAL_SPELL_AURAS] = {
 	"",													// 233
 	"",													// 234
 	"",													// 235
-	"",													// 236
+	"VEHICLE_PASSENGER",								// 236
 	"",													// 237
 	"",													// 238
 	"",													// 239
@@ -6278,10 +6278,6 @@ void Aura::SpellAuraMounted(bool apply)
 
 		m_target->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_MOUNT);
 
-		CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
-		if(!isVehicleSpell && ci != NULL && ci->Male_DisplayID != 0)
-			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , ci->Male_DisplayID);
-
 		TO_PLAYER(m_target)->m_MountSpellId = m_spellProto->Id;
 		TO_PLAYER(m_target)->m_FlyingAura = 0;
 		
@@ -6291,6 +6287,34 @@ void Aura::SpellAuraMounted(bool apply)
 				!(TO_PLAYER(m_target)->GetShapeShift() & FORM_BATTLESTANCE | FORM_DEFENSIVESTANCE | FORM_BERSERKERSTANCE ) && 
 				TO_PLAYER(m_target)->m_ShapeShifted != m_spellProto->Id )
 			m_target->RemoveAura( TO_PLAYER(m_target)->m_ShapeShifted );
+		
+		// Vehicle stuff
+		CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
+		CreatureProto* cp = CreatureProtoStorage.LookupEntry(mod->m_miscValue);
+		if(ci != NULL && ci->Male_DisplayID != 0 && (!cp || !cp->vehicle_entry) ) // regular mount
+			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , ci->Male_DisplayID);
+		else
+		{
+			// some complicated shit goes here!
+			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->Male_DisplayID );
+			if( m_target && TO_PLAYER(m_target)->GetGroup() )
+			{
+				WorldPacket * data = TO_PLAYER(m_target)->BuildFieldUpdatePacket(UNIT_NPC_FLAGS, TO_PLAYER(m_target)->GetUInt32Value(UNIT_NPC_FLAGS) | UNIT_NPC_FLAG_PLAYERVEHICLE);
+				TO_PLAYER(m_target)->GetGroup()->SendPacketToAllInRange(TO_PLAYER(m_target), data);
+			}
+			m_target->SetFlag(PLAYER_BYTES_3, 0x01000000);
+			TO_VEHICLE(m_target)->SetVehicleEntry(cp->vehicle_entry);
+
+			// fill the first slot
+			VehicleSeatEntry* vse = dbcVehicleSeat.LookupEntry( cp->vehicle_entry );
+			//m_target->m_CurrentVehicle = vse;
+			TO_VEHICLE(m_target)->SetVehiclePassenger(0, m_target/*->GetGUID()*/);
+			
+			WorldPacket data(SMSG_CONVERT_VEHICLE, 12);
+			data << m_target->GetNewGUID();
+			data << cp->vehicle_entry;
+			m_target->SendMessageToSet(&data, true);
+		}
 	}
 	else
 	{
@@ -6315,6 +6339,40 @@ void Aura::SpellAuraMounted(bool apply)
 			TO_PLAYER(m_target)->hasqueuedpet = false;
 		}
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
+		
+		// Vehicle stuff
+		CreatureProto* cp = CreatureProtoStorage.LookupEntry(mod->m_miscValue);
+		if( cp && cp->vehicle_entry )
+		{
+			if( TO_PLAYER(m_target) && TO_PLAYER(m_target)->GetGroup() )
+			{
+				WorldPacket * data = TO_PLAYER(m_target)->BuildFieldUpdatePacket(UNIT_NPC_FLAGS, TO_PLAYER(m_target)->GetUInt32Value(UNIT_NPC_FLAGS) & ~UNIT_NPC_FLAG_PLAYERVEHICLE);
+				TO_PLAYER(m_target)->GetGroup()->SendPacketToAllInRange(TO_PLAYER(m_target), data);
+			}
+			m_target->RemoveFlag(PLAYER_BYTES_3, 0x01000000);
+			TO_VEHICLE(m_target)->SetVehicleEntry(-1);
+
+			WorldPacket data(SMSG_CONVERT_VEHICLE, 12);
+			data << m_target->GetNewGUID();
+			data << uint32(0);
+			m_target->SendMessageToSet(&data, true);
+
+			TO_VEHICLE(m_target)->SetVehiclePassenger(0, NULL);
+			for(uint8 i = 1; i < 8; ++i)
+			{
+				Unit* pPassenger = TO_VEHICLE(m_target)->GetPassengerUnit(i);
+				/*if( pPassenger )
+				{
+					if( pPassenger->IsPlayer() )
+					{
+						pPassenger->m_CurrentVehicle->RemovePassenger(pPassenger);
+					}
+					else
+						TO_CREATURE(pPassenger)->SafeDelete();
+				}*/
+				TO_VEHICLE(m_target)->SetVehiclePassenger(i, NULL);
+			}
+		}
 	}
 }
 
@@ -9365,10 +9423,17 @@ void Aura::SpellAuraModSpellHealingFromAP(bool apply)
 
 void Aura::SpellAuraVehiclePassenger(bool apply)
 {
+	/*if( !GetUnitCaster() || !m_target->m_CurrentVehicle )
+		return;*/
+
 	if(!apply)
 	{
 		if( m_target && m_target->m_CurrentVehicle )
 			m_target->m_CurrentVehicle->RemovePassenger(m_target);
+	}
+	else
+	{
+		TO_VEHICLE(GetUnitCaster())->AddPassenger(m_target);
 	}
 }
 

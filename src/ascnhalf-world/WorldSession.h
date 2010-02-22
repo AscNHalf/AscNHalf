@@ -742,6 +742,9 @@ protected:
 	//Vehicles
 	void HandleVehicleDismiss(WorldPacket & recv_data);
 	void HandleSpellClick( WorldPacket & recv_data );
+	void HandleBoardPlayerVehicleOpcode(WorldPacket & recv_data);
+	void HandleRequestVehicleExitOpcode(WorldPacket & recv_data);
+	void HandleEjectPassengerOpcode(WorldPacket & recv_data);
 
 	//MISC
 	void HandleWorldStateUITimerUpdate( WorldPacket & recv_data );

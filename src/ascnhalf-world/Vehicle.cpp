@@ -715,3 +715,38 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
 
 	pVehicle->AddPassenger(pPlayer);
 }
+
+void WorldSession::HandleBoardPlayerVehicleOpcode(WorldPacket &recv_data)
+{
+	CHECK_PACKET_SIZE(recv_data, 1);
+	CHECK_INWORLD_RETURN;
+
+	uint64 guid;
+
+	recv_data >> guid;
+
+	Unit* pVehicle = GetPlayer()->GetMapMgr()->GetVehicle(GET_LOWGUID_PART(guid));
+	if(!pVehicle) return;
+
+	if( pVehicle->IsPlayer() && (!TO_PLAYER(pVehicle)->GetGroup() || TO_PLAYER(pVehicle)->GetGroup() != GetPlayer()->GetGroup()) )
+		return;
+
+	TO_VEHICLE(pVehicle)->AddPassenger(GetPlayer());
+}
+
+void WorldSession::HandleEjectPassengerOpcode(WorldPacket &recv_data)
+{
+	CHECK_INWORLD_RETURN;
+	CHECK_PACKET_SIZE(recv_data, 2);
+
+	uint64 guid;
+	
+	recv_data >> guid;
+
+	Unit* pPlayer = TO_UNIT(GetPlayer());
+	Unit* pUnit = GetPlayer()->GetMapMgr()->GetVehicle(GET_LOWGUID_PART(guid));
+
+	//if( pUnit && TO_VEHICLE(pUnit)->m_vehicleEntry && pUnit->m_CurrentVehicle == pPlayer->GetGUID() )
+		pPlayer->m_CurrentVehicle->RemovePassenger(pPlayer);
+}
+
