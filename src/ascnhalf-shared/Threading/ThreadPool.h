@@ -18,12 +18,12 @@
   *
   */
 
+#ifndef __THREADPOOL_H
+#define __THREADPOOL_H
+
 #include "../Common.h"
 #include "Mutex.h"
 #include "ThreadStarter.h"
-
-#ifndef __THREADPOOL_H
-#define __THREADPOOL_H
 
 #define THREAD_RESERVE 8
 

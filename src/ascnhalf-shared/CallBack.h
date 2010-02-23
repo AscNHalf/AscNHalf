@@ -23,13 +23,15 @@
 
 #include "Common.h"
 
-class CallbackBase {
+class CallbackBase
+{
 public:
 	virtual void execute() = 0;
 	virtual ~CallbackBase() {};
 };
 
-class CallbackFP {
+class CallbackFP
+{
 	typedef void(*callback)();
 	callback mycallback;
 public:
