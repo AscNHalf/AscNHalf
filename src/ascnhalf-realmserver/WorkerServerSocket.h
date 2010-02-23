@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef _R_WORKERSERVER_SOCKET_H
+#define _R_WORKERSERVER_SOCKET_H
+
 class WServer;
 class Session;
 class WSSocket : public Socket
@@ -43,4 +46,4 @@ public:
 
 };
 
-
+#endif

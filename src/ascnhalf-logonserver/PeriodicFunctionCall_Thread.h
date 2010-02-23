@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef PERIODICFUNCTIONCALL_THREAD_H
+#define PERIODICFUNCTIONCALL_THREAD_H
+
 #include "../ascnhalf-shared/CallBack.h"
 
 template<class Type>
@@ -108,3 +111,6 @@ private:
 
 #define SpawnPeriodicCallThread(otype, ptr, method, interval) \
 	launch_thread(new PeriodicFunctionCaller<otype>(ptr, method, interval));
+
+
+#endif

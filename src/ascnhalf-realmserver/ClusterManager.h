@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef _R_CLUSTERMANAGER_H
+#define _R_CLUSTERMANAGER_H
+
 #define MAX_WORKER_SERVERS 100
 #define MAX_SINGLE_MAPID 600
 
@@ -96,3 +99,4 @@ public:
 #define sClusterMgr ClusterMgr::getSingleton()
 
 
+#endif

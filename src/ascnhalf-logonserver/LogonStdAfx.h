@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef LOGONSTDAFX_H
+#define LOGONSTDAFX_H
+
 #pragma once
 
 #include <list>
@@ -60,3 +63,5 @@
 
 // database decl
 extern Database* sLogonSQL;
+
+#endif

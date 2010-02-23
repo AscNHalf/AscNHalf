@@ -18,6 +18,9 @@
   *
   */
 
+#ifndef _R_CLIENTMANAGER_H
+#define _R_CLIENTMANAGER_H
+
 #define MAX_SESSIONS 3000
 
 class ClientMgr : public Singleton<ClientMgr>
@@ -149,3 +152,4 @@ public:
 #define sClientMgr ClientMgr::getSingleton()
 
 
+#endif
