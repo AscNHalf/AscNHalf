@@ -33,9 +33,6 @@ using namespace std;
 
 Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 {
-#ifdef SHAREDPTR_DEBUGMODE
-	printf("Object::Object()\n");
-#endif
 	m_phaseAura = NULLAURA;
 	m_phaseMode = 1;
 	m_mapId = 0;

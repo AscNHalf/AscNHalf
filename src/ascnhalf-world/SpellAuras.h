@@ -503,9 +503,6 @@ public:
 	bool m_deleted;
 	bool m_added;
 	bool m_tmpAuradeleted;
-#ifdef SHAREDPTR_DEBUGMODE
-	bool deleting;
-#endif
 	bool m_creatureAA;
 	int16 m_interrupted;
 

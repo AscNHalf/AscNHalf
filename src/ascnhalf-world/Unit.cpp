@@ -22,9 +22,6 @@
 
 Unit::Unit()
 {
-#ifdef SHAREDPTR_DEBUGMODE
-	printf("Unit::Unit()\n");
-#endif
 	m_lastHauntInitialDamage = 0;
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
