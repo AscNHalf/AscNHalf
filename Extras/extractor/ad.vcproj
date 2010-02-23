@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="ad"
 	ProjectGUID="{D7552D4F-408F-4F8E-859B-366659150CF4}"
 	TargetFrameworkVersion="131072"
@@ -58,7 +58,7 @@
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="1"
-				WarningLevel="3"
+				WarningLevel="1"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
 			/>
