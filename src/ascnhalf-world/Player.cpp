@@ -808,6 +808,7 @@ bool Player::Create(WorldPacket& data )
 	SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER7, 1000 );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER6, 8);
+	SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld.StartGold);
 
 	if( sWorld.StartLevel >= uint8(class_ != DEATHKNIGHT ? 10: 55) )
 	{

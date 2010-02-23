@@ -535,9 +535,10 @@ public:
 	uint32 compression_threshold;
 
 	uint8 StartLevel;
+	uint32 StartGold;
 
-	void	SetKickAFKPlayerTime(uint32 idletimer){m_KickAFKPlayers=idletimer;}
-	uint32	GetKickAFKPlayerTime(){return m_KickAFKPlayers;}
+	void SetKickAFKPlayerTime(uint32 idletimer){m_KickAFKPlayers=idletimer;}
+	uint32 GetKickAFKPlayerTime(){return m_KickAFKPlayers;}
 
     uint32 GetRealmType() { return realmtype; }
 

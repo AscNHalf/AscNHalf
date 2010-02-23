@@ -1232,22 +1232,23 @@ channelmgr.seperatechannels = Config.MainConfig.GetBoolDefault("Server", "Sepera
 	display_free_items = Config.MainConfig.GetBoolDefault("Server", "DisplayFreeItems", false);
 
 	StartLevel = Config.MainConfig.GetIntDefault("Server", "StartLevel", 1);
+	StartGold = Config.MainConfig.GetIntDefault("Server", "StartGold", 1);
 
 	// load regeneration rates.
-	setRate(RATE_HEALTH,Config.MainConfig.GetFloatDefault("Rates", "Health",1));
-	setRate(RATE_POWER1,Config.MainConfig.GetFloatDefault("Rates", "Power1",1));
-	setRate(RATE_POWER2,Config.MainConfig.GetFloatDefault("Rates", "Power2",1));
-	setRate(RATE_POWER3,Config.MainConfig.GetFloatDefault("Rates", "Power4",1));
-	setRate(RATE_DROP0,Config.MainConfig.GetFloatDefault("Rates", "DropGrey",1));
-	setRate(RATE_DROP1,Config.MainConfig.GetFloatDefault("Rates", "DropWhite",1));
-	setRate(RATE_DROP2,Config.MainConfig.GetFloatDefault("Rates", "DropGreen",1));
-	setRate(RATE_DROP3,Config.MainConfig.GetFloatDefault("Rates", "DropBlue",1));
-	setRate(RATE_DROP4,Config.MainConfig.GetFloatDefault("Rates", "DropPurple",1));
-	setRate(RATE_DROP5,Config.MainConfig.GetFloatDefault("Rates", "DropOrange",1));
-	setRate(RATE_DROP6,Config.MainConfig.GetFloatDefault("Rates", "DropArtifact",1));
-	setRate(RATE_XP,Config.MainConfig.GetFloatDefault("Rates", "XP",1));
-	setRate(RATE_RESTXP,Config.MainConfig.GetFloatDefault("Rates", "RestXP", 1));
-	setRate(RATE_QUESTXP,Config.MainConfig.GetFloatDefault("Rates", "QuestXP", 1));
+	setRate(RATE_HEALTH, Config.MainConfig.GetFloatDefault("Rates", "Health", 1));
+	setRate(RATE_POWER1, Config.MainConfig.GetFloatDefault("Rates", "Power1", 1));
+	setRate(RATE_POWER2, Config.MainConfig.GetFloatDefault("Rates", "Power2", 1));
+	setRate(RATE_POWER3, Config.MainConfig.GetFloatDefault("Rates", "Power4", 1));
+	setRate(RATE_DROP0, Config.MainConfig.GetFloatDefault("Rates", "DropGrey", 1));
+	setRate(RATE_DROP1, Config.MainConfig.GetFloatDefault("Rates", "DropWhite", 1));
+	setRate(RATE_DROP2, Config.MainConfig.GetFloatDefault("Rates", "DropGreen", 1));
+	setRate(RATE_DROP3, Config.MainConfig.GetFloatDefault("Rates", "DropBlue", 1));
+	setRate(RATE_DROP4, Config.MainConfig.GetFloatDefault("Rates", "DropPurple", 1));
+	setRate(RATE_DROP5, Config.MainConfig.GetFloatDefault("Rates", "DropOrange", 1));
+	setRate(RATE_DROP6, Config.MainConfig.GetFloatDefault("Rates", "DropArtifact", 1));
+	setRate(RATE_XP, Config.MainConfig.GetFloatDefault("Rates", "XP", 1));
+	setRate(RATE_RESTXP, Config.MainConfig.GetFloatDefault("Rates", "RestXP", 1));
+	setRate(RATE_QUESTXP, Config.MainConfig.GetFloatDefault("Rates", "QuestXP", 1));
 	setIntRate(INTRATE_SAVE, Config.MainConfig.GetIntDefault("Rates", "Save", 1));
 	setRate(RATE_MONEY, Config.MainConfig.GetFloatDefault("Rates", "DropMoney", 1.0f));
 	setRate(RATE_QUEST_MONEY, Config.MainConfig.GetFloatDefault("Rates", "QuestMoney", 1.0f));
