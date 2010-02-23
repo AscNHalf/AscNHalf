@@ -684,6 +684,14 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	
 	switch( m_spellInfo->NameHash )
 	{
+	// Shattering Throw
+	case SPELL_HASH_SHATTERING_THROW:
+		{
+			if( unitTarget ) {
+				unitTarget->RemoveAllAurasByMechanic( MECHANIC_SHIELDED, 1, true );
+				unitTarget->RemoveAllAurasByMechanic( MECHANIC_INVULNARABLE, 1, true );
+			}
+		}break;
 	case SPELL_HASH_STEADY_SHOT:
 		{
 			if( p_caster != NULL && unitTarget != NULL )
@@ -872,6 +880,31 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647);
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
 		}break;
+
+	case 57755: // Heroic Throw
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo )
+				return;
+
+			int32 attackPower = u_caster->GetAP();
+
+			m_spellInfo->EffectBasePoints[0] = float2int32( ( 12 + attackPower ) * 0.5f );
+			int32 value =  m_spellInfo->EffectBasePoints[0] + 1;
+			u_caster->Strike( unitTarget, RANGED, m_spellInfo, 0, 0, value, 0, false, false );
+		}break;
+
+	case 20253: // Intercept (Rank1 ???)
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo )
+				return;
+
+			int32 attackPower = u_caster->GetAP();
+
+			m_spellInfo->EffectBasePoints[1] = float2int32( ( 1 + attackPower ) * 0.12f );
+			int32 value = m_spellInfo->EffectBasePoints[1];
+			u_caster->Strike( unitTarget, MELEE, m_spellInfo, 0, 0, value, 0, false, false );
+		}break;
+
 	/*************************
 	 * MAGE SPELLS
 	 *************************

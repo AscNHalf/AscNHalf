@@ -2520,9 +2520,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectMiscValue[0] = 120;
 				}break;
 			//rogue	-	intiative
-			case  13976:
-			case  13979:
-			case  13980:
+			case 13976:
+			case 13979:
+			case 13980:
 				{
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->procFlags	=	uint32(PROC_ON_CAST_SPELL|PROC_TARGET_SELF);
@@ -2534,12 +2534,26 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procChance = 30;//some say it	is triggered every now and then
 						sp->procFlags	=	PROC_ON_RANGED_ATTACK;
 				}break;
-		
-			//warrior	-	second wind	should trigger on	self
-			case  29841:
-			case  29842:
+			//warrior       -       Heroic Throw
+			case 57755:
 				{
-						sp->procFlags	|= PROC_TARGET_SELF;
+					sp->Effect[0] = SPELL_EFFECT_DUMMY;
+				}
+			//warrior       -       Intercept
+			case 20253:
+				{
+					sp->Effect[1] = SPELL_EFFECT_DUMMY;
+				}
+			//warrior	-	Shattering Throw
+			case 64382:
+				{
+					sp->Effect[1] = SPELL_EFFECT_DUMMY;
+				}break;
+			//warrior	-	second wind	should trigger on	self
+			case 29841:
+			case 29842:
+				{
+					sp->procFlags	|= PROC_TARGET_SELF;
 				}break;
 
 			// Improved Revenge
@@ -2550,7 +2564,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 
 			//warrior	-	berserker	rage is	missing	1	effect = regenerate	rage
-			case  18499:
+			case 18499:
 				{
 						sp->Effect[2]	=	6;
 						sp->EffectApplyAuraName[2] = SPELL_AURA_PROC_TRIGGER_SPELL;
