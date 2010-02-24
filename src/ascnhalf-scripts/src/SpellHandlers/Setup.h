@@ -30,10 +30,11 @@ void SetupPaladinSpells(ScriptMgr * mgr);
 void SetupRogueSpells(ScriptMgr * mgr);
 void SetupDruidSpells(ScriptMgr * mgr);
 void SetupPriestSpells(ScriptMgr * mgr);
+void SetupDeathKnightSpells(ScriptMgr * mgr);
 void SetupOldSpellCPPSuff(ScriptMgr * mgr);
 void SetupQuestItems(ScriptMgr * mgr); //this was commented for crash reason, let see what are those...
 
 //Instance spells (mainly scripted targets)
-void SetupRaidBlackTempleSpells(ScriptMgr* mgr);
+//void SetupRaidBlackTempleSpells(ScriptMgr* mgr);
 
 #endif
