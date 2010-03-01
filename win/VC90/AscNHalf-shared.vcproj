@@ -204,7 +204,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Running revision extractor..."
+				Description="Extracting revision..."
 				CommandLine="&quot;../../src/ascnhalf-shared/RevisionExtractor.exe&quot;"
 			/>
 			<Tool
@@ -269,6 +269,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description=""
 				CommandLine=""
 			/>
 		</Configuration>

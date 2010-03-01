@@ -103,85 +103,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin\Release"
-			IntermediateDirectory="ascnhalf-voicechat__2008_release"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\src\ascnhalf-shared"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="0"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/ascnhalf-voicechat.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine=""
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|x64"
 			OutputDirectory=".\..\..\bin\Debug_x64"
 			IntermediateDirectory="ascnhalf-voicechat__2008_debug_x64"
@@ -238,6 +159,84 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory=".\..\..\bin\Release"
+			IntermediateDirectory="ascnhalf-voicechat__2008_release"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\..\src\ascnhalf-shared"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
+				OutputFile="$(OutDir)/ascnhalf-voicechat.exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -346,7 +345,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
+			Name="Config"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
@@ -355,19 +354,41 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\configfile.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Opcode/Socket/Packet"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\ascnhalf_opcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\ascnhalf_packet.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascnhalf-voicechat\ascnhalf_socket.c"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="Voice/Network"
+			>
 			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\launcher.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\log.c"
+				RelativePath="..\..\src\ascnhalf-voicechat\network.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\ascnhalf-voicechat\network_handlers.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\network_handlers.h"
 				>
 			</File>
 			<File
@@ -383,52 +404,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\voice_socket.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\common.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\configfile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\ascnhalf_opcodes.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\ascnhalf_packet.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\linkedlist.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\log.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\mutex.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\network.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ascnhalf-voicechat\network_handlers.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\ascnhalf-voicechat\voice_channel.h"
 				>
 			</File>
@@ -436,7 +411,39 @@
 				RelativePath="..\..\src\ascnhalf-voicechat\voice_channelmgr.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\voice_socket.c"
+				>
+			</File>
 		</Filter>
+		<Filter
+			Name="Log"
+			>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\log.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-voicechat\log.h"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\..\src\ascnhalf-voicechat\common.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\ascnhalf-voicechat\launcher.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\ascnhalf-voicechat\linkedlist.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\ascnhalf-voicechat\mutex.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -92,12 +92,6 @@
 
 //#define ENABLE_BOOST 1
 
-/** Enable/disable the use of boost shared_ptr's.
-  * It is in testing currently, should only be used by devs.
-  * Default: disabled
-*/
-
-#define ENABLE_SHARED_POINTERS 1
 
 //Allow loading of unused testmaps.
 //#define EXCLUDE_TEST_MAPS 1

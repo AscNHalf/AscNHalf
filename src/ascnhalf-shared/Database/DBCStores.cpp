@@ -28,6 +28,7 @@ SERVER_DECL DBCStorage<CharTitlesEntry> dbcCharTitlesEntry;
 SERVER_DECL DBCStorage<CurrencyTypesEntry> dbcCurrencyTypesStore;
 SERVER_DECL DBCStorage<GemPropertyEntry> dbcGemProperty;
 SERVER_DECL DBCStorage<GlyphPropertyEntry> dbcGlyphProperty;
+SERVER_DECL DBCStorage<ItemEntry> dbcItem;
 SERVER_DECL DBCStorage<ItemSetEntry> dbcItemSet;
 SERVER_DECL DBCStorage<Lock> dbcLock;
 SERVER_DECL DBCStorage<SpellEntry> dbcSpell;
@@ -89,6 +90,7 @@ const char* AreaTriggerFormat = "uuffffffff";
 const char* AreaGroupFormat="niiiiiii";
 const char* CharTitlesEntryfmt = "usxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxu";
 const char* CurrencyTypesEntryFormat = "xnxu";
+const char* ItemFormat = "niiiiiii";
 const char* ItemSetFormat = "usxxxxxxxxxxxxxxxuuuuuuuuuuuxxxxxxxuuuuuuuuuuuuuuuuuu";
 const char* LockFormat = "uuuuuuxxxuuuuuxxxuuuuuxxxxxxxxxxx";
 const char* EmoteEntryFormat = "uxuuuuxuxuxxxxxxxxx";
@@ -97,7 +99,7 @@ const char* EnchantEntrYFormat = "uxuuuuuuuuuuuusxxxxxxxxxxxxxxxxuuuuxxx";
 const char* GemPropertyEntryFormat = "uuuuu";
 const char* GlyphPropertyEntryFormat = "uuuu";
 const char* skilllineentrYFormat = "uuusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char* spellentryFormat = "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuiuuuuuuuuuuuffffffiiiiiiuuuuuuuuuuuuuuufffuuuuuuuuuuuuuuufffuuuuuuuuuuxuuusxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxuuuuuuuuuuuifffuuuuuiuuxuuuuu";
+const char* spellentryFormat = "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuiuuuuuuuuuuuffffffiiiiiiuuuuuuuuuuuuuuufffuuuuuuuuuuuuuuufffuuuuuuuuuuxuuusxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxuuuuuuuuuuuifffuuuuuiuuxuuuuux";
 
 const char* scalingstatdistributionformat = "uiiiiiiiiiiuuuuuuuuuuu";
 const char* scalingstatvaluesformat = "uuuuuuuuuuuuuuuuuuuuuuuu";
@@ -124,13 +126,13 @@ const char* randompropsFormat = "usuuuxxxxxxxxxxxxxxxxxxx";
 const char* areatableFormat = "uuuuuxxxuxusxxxxxxxxxxxxxxxxuxxxxxxx";
 const char* factiontemplatedbcFormat = "uuuuuuuuuuuuuu";
 const char* auctionhousedbcFormat = "uuuuxxxxxxxxxxxxxxxxx";
-const char* factiondbcFormat = "uiuuuuxxxxiiiixxxxusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const char* factiondbcFormat = "uiuuuuxxxxiiiixxxxxxxxusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char* dbctaxinodeFormat = "uufffxxxxxxxxxxxxxxxxxuu";
 const char* dbctaxipathFormat = "uuuu";
 const char* dbctaxipathnodeFormat = "uuuufffuuxx";
 const char* creaturedisplayFormat = "uxxxfxxxxxxxxxxx";
 const char* creaturespelldataFormat = "uuuuuuuuu";
-const char* charraceFormat = "uxxxxxxuxxxxxusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const char* charraceFormat = "uxxxxxxuxxxxuxlxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char* charclassFormat = "uxuxsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxuxux";
 const char* creaturefamilyFormat = "ufufuuuuuxsxxxxxxxxxxxxxxxxx";
 const char* mapentryFormat =
@@ -138,19 +140,20 @@ const char* mapentryFormat =
 	"s"					// 1 name_internal
 	"u"					// 2 map_type
 	"u"					// 3 is_pvp_zone
-	"sxxxxxxxxxxxxxxxx"	// 4-20 real_name
-	"u"					// 21 linked_zone
-	"sxxxxxxxxxxxxxxxx" // 22-38 hordeIntro
-	"sxxxxxxxxxxxxxxxx" // 39-55 allianceIntro
-	"u"					// 56 multimap_id
-	"x"					// 57 unk_float (all 1 but arathi 1.25)
-	"s"					// 58 normalReqText
+	"x"					// 4 0 or 1 for battlegrounds (not arenas)
+	"sxxxxxxxxxxxxxxxx"	// 5-21 real_name
+	"u"					// 22 linked_zone
+	"sxxxxxxxxxxxxxxxx" // 23-39 hordeIntro
+	"sxxxxxxxxxxxxxxxx" // 40-56 allianceIntro
+	"u"					// 57 multimap_id
+	"x"					// 58 unk_float (all 1 but arathi 1.25)
 	"u"					// 59 parent_map
 	"u"					// 60 start_x
 	"u"					// 61 start_y
-	"u"					// 62 addon
-	"x"					// 63 unk
-	"x";				// 64 unk
+	"x"					// 62 unk
+	"u"					// 63 addon
+	"x"					// 64 normalReqText
+	"u";				// 65 Max players
 
 
 const char* itemrandomsuffixformat = "usxxxxxxxxxxxxxxxxxuuuuuuuuuu";
@@ -165,7 +168,21 @@ const char* spellshapeshiftformformat = "uxxxxxxxxxxxxxxxxxxxxxxxxxxxuuuuuuu";
 const char* vehicleseatentryFormat = "uuuffffffffffuuuuuufffffffuuufffuuuuuuuffuuuuuxxxxxxxxxxxx";
 const char* vehicleentryFormat = "uuffffuuuuuuuufffffffffffffffssssfufuxxx";
 
-const char* achievementfmt="niixsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiixixxxxxxxxxxxxxxxxxxxx";
+const char* achievementfmt=
+	"n" // Index
+	"i" // Faction
+	"i" // Mapid
+	"x" // unk.
+	"s" // Name
+	"xxxxxxxxxxxxxxx"
+	"s" // Description
+	"xxxxxxxxxxxxxxxxx"
+	"i" // Category Id
+	"i" // points
+	"x" // Order In Category
+	"i" // Flags
+	"xxxxxxxxxxxxxxxxxxxx";
+
 const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 
 
@@ -228,6 +245,7 @@ bool LoadDBCs()
 	LOAD_DBC("DBC/gtRegenHPPerSpt.dbc", gtfloatformat, false, dbcHPRegenBase, false); //it's not a mistake.
 	LOAD_DBC("DBC/gtRegenMPPerSpt.dbc", gtfloatformat, false, dbcManaRegenBase, false); //it's not a mistake.
 
+	LOAD_DBC("DBC/Item.dbc", ItemFormat, true, dbcItem, true);
 	LOAD_DBC("DBC/ItemExtendedCost.dbc", itemextendedcostFormat, true, dbcItemExtendedCost, false);
 	LOAD_DBC("DBC/ItemSet.dbc", ItemSetFormat, true, dbcItemSet, true);
 	LOAD_DBC("DBC/ItemRandomProperties.dbc", randompropsFormat, true, dbcRandomProps, false);

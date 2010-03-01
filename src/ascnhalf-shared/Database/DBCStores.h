@@ -32,9 +32,12 @@ struct AchievementEntry
     uint32 ID; // 0
     uint32 factionFlag; // 1 -1=all, 0=horde, 1=alliance
     uint32 mapID; // 2 -1=none
+    //uint32 unk0; // 3 Lots of 0's
     char* name; // 4
+    //uint32 unk1[14]; // 5-19
     //uint32 name_flags; // 20
-    //char *description[16]; // 21-36
+    char* description; // 21
+    //char *descriptionextra[15]; // 22-36
     //uint32 desc_flags; // 37
     uint32 categoryId; // 38
     uint32 points; // 39 reward points
@@ -517,6 +520,18 @@ struct ItemSetEntry
     uint32 itemscount[8];			//44 - 51
     uint32 RequiredSkillID;			//52
     uint32 RequiredSkillAmt;		//53
+};
+
+struct ItemEntry
+{
+	uint32 ID;						// 0
+	uint32 Class;					// 1
+	uint32 SubClass;				// 2 some items have strange subclasses
+	int32  Unk0;					// 3
+	int32  Material;				// 4
+	uint32 DisplayId;				// 5
+	uint32 InventoryType;			// 6
+	uint32 Sheath;					// 7
 };
 
 struct Lock
@@ -1329,6 +1344,8 @@ struct VehicleSeatEntry
     int32 m_uiSkin; // 44
     uint32 m_flagsB; // 45
 	// 46-57
+
+	bool IsUsable() const { return (m_flags & 0x2000000 ? true : false); }
 };
 
 #pragma pack(pop)
@@ -1682,6 +1699,7 @@ extern SERVER_DECL DBCStorage<CreatureFamilyEntry> dbcCreatureFamily;
 extern SERVER_DECL DBCStorage<CharClassEntry> dbcCharClass;
 extern SERVER_DECL DBCStorage<CharRaceEntry> dbcCharRace;
 extern SERVER_DECL DBCStorage<MapEntry> dbcMap;
+extern SERVER_DECL DBCStorage<ItemEntry> dbcItem;
 extern SERVER_DECL DBCStorage<ItemExtendedCostEntry> dbcItemExtendedCost;
 extern SERVER_DECL DBCStorage<ItemRandomSuffixEntry> dbcItemRandomSuffix;
 extern SERVER_DECL DBCStorage<CombatRatingDBC> dbcCombatRating;
