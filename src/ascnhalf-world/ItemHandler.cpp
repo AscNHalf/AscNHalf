@@ -896,10 +896,10 @@ void WorldSession::HandleBuyBackOpcode( WorldPacket & recv_data )
 		// Find free slot and break if inv full
 		uint32 amount = it->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
 		uint32 itemid = it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-	  
+
 		add = _player->GetItemInterface()->FindItemLessMax(itemid,amount, false);
-	 
-		   uint32 FreeSlots = _player->GetItemInterface()->CalculateFreeSlots(it->GetProto());
+
+		uint32 FreeSlots = _player->GetItemInterface()->CalculateFreeSlots(it->GetProto());
 		if ((FreeSlots == 0) && (!add))
 		{
 			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_INVENTORY_FULL);

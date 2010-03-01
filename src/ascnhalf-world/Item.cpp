@@ -289,7 +289,7 @@ void Item::ApplyRandomProperties( bool apply )
 	}
 }
 
-void Item::SaveToDB( int8 containerslot, int8 slot, bool firstsave, QueryBuffer* buf )
+void Item::SaveToDB( int16 containerslot, int16 slot, bool firstsave, QueryBuffer* buf )
 {
 	if( !m_isDirty && !firstsave )
 		return;

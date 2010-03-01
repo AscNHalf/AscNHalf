@@ -192,7 +192,6 @@ class Spell;
 #define CURRENCYTOKEN_SLOT_32		149
 #define CURRENCYTOKEN_SLOT_END		150
 
-
 enum INV_ERR
 {
 	INV_ERR_OK,

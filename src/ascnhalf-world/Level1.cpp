@@ -202,13 +202,11 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleAddInvItemCommand(const char *args, WorldSession *m_session)
 {
-	uint32 itemid, count=1;
-	int32 randomprop=0;
+	uint32 itemid, count = 1;
+	int32 randomprop = 0;
 
 	if(strlen(args) < 1)
-	{
 		return false;
-	}
 
 	if(sscanf(args, "%u %u %d", &itemid, &count, &randomprop) < 1)
 		return false;
@@ -220,48 +218,23 @@ bool ChatHandler::HandleAddInvItemCommand(const char *args, WorldSession *m_sess
 	if(it)
 	{
 		sGMLog.writefromsession(m_session, "used add item command, item id %u [%s] to %s", it->ItemId, it->Name1, chr->GetName());
-		Item* item;
-		item = objmgr.CreateItem( itemid, chr);
-		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT, ((count > it->MaxCount) ? it->MaxCount : count));
-		if(it->Bonding==ITEM_BIND_ON_PICKUP)
-			item->SoulBind();
-		uint32 pr = 0;
-		uint32 sf = 0;
-		if(randomprop!=0)
-		{
-			if(randomprop<0)
-			{
-				sf = abs(int(randomprop));
-				item->SetRandomSuffix(abs(int(randomprop)));
-			}
-			else
-			{
-				pr = randomprop;
-				item->SetRandomProperty(randomprop);
-			}
 
-			item->ApplyRandomProperties(false);
-		}
-	  
-		if(!chr->GetItemInterface()->AddItemToFreeSlot(item))
+		if(!chr->GetItemInterface()->AddItemById(itemid, count, randomprop, false))
 		{
 			m_session->SendNotification("No free slots were found in your inventory!");
-			item->Destructor();
 			return true;
 		}
 
 		char messagetext[500];
-		string itemlink = it->ConstructItemLink(pr, sf, item->GetUInt32Value(ITEM_FIELD_STACK_COUNT));
+		string itemlink = it->ConstructItemLink(randomprop, it->RandomSuffixId, count);
 		snprintf(messagetext, 500, "Adding item %d %s to %s's inventory.",(unsigned int)it->ItemId,itemlink.c_str(), chr->GetName());
 		SystemMessage(m_session, messagetext);
 		snprintf(messagetext, 500, "%s added item %d %s to your inventory.", m_session->GetPlayer()->GetName(), (unsigned int)itemid, itemlink.c_str());
 		SystemMessageToPlr(chr,  messagetext);
-
-		SlotResult *lr = chr->GetItemInterface()->LastSearchResult();
-		chr->GetSession()->SendItemPushResult(item,false,true,false,true,lr->ContainerSlot,lr->Slot,item->GetUInt32Value(ITEM_FIELD_STACK_COUNT));
-
 		return true;
-	} else {
+	}
+	else
+	{
 		RedSystemMessage(m_session, "Item %d is not a valid item!",itemid);
 		return true;
 	}
