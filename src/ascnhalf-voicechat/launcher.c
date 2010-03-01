@@ -72,6 +72,7 @@ int main(int argc, char* argv[])
 	{
 		// this needs to be cmd-line overrideable
 		log_write(ERROR, "FATAL: Could not open a valid config file. Exiting.");
+		Sleep(5000);
 		return -1;
 	}
 
@@ -81,6 +82,7 @@ int main(int argc, char* argv[])
 	if( network_init() < 0 )
 	{
 		log_write(ERROR, "FATAL: Network failed initialization.");
+		Sleep(5000);
 		return -1;
 	}
 
@@ -88,6 +90,7 @@ int main(int argc, char* argv[])
 	if( voicechat_init_clientsocket() < 0 || voicechat_init_serversocket() < 0 )
 	{
 		log_write(ERROR, "FATAL: Could not bind sockets.");
+		Sleep(5000);
 		return -1;
 	}
 
