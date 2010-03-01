@@ -65,7 +65,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectLearnSpell,					//SPELL_EFFECT_LEARN_SPELL - 36
 		&Spell::SpellEffectSpellDefense,				//SPELL_EFFECT_SPELL_DEFENSE - 37
 		&Spell::SpellEffectDispel,						//SPELL_EFFECT_DISPEL - 38
-		&Spell::SpellEffectNULL,						//SPELL_EFFECT_LANGUAGE - 39
+		&Spell::SpellEffectLanguage,					//SPELL_EFFECT_LANGUAGE - 39
 		&Spell::SpellEffectDualWield,					//SPELL_EFFECT_DUAL_WIELD - 40
 		&Spell::SpellEffectNULL,						//SPELL_EFFECT_SUMMON_WILD - 41
 		&Spell::SpellEffectMegaJump,					//SPELL_EFFECT_SUMMON_GUARDIAN - 42
@@ -3708,7 +3708,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 			{
  				CALL_GO_SCRIPT_EVENT(gameObjTarget, OnActivate)(TO_PLAYER(p_caster));
 				CALL_INSTANCE_SCRIPT_EVENT( gameObjTarget->GetMapMgr(), OnGameObjectActivate )( gameObjTarget, p_caster );
-			};
+			}
 
 			if(sQuestMgr.OnGameObjectActivate(p_caster, gameObjTarget))
 			{
@@ -3723,7 +3723,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 			loottype=LOOT_CORPSE;
 		}
 		break;
-	};
+	}
 	if( gameObjTarget != NULL && gameObjTarget->GetByte(GAMEOBJECT_BYTES_1, 1) == GAMEOBJECT_TYPE_CHEST)
 		TO_PLAYER( m_caster )->SendLoot( gameObjTarget->GetGUID(), loottype );
 }
@@ -4145,6 +4145,117 @@ void Spell::SpellEffectDispel(uint32 i) // Dispel
 	}
 }
 
+void Spell::SpellEffectLanguage(uint32 i)
+{
+	if(m_caster->GetTypeId() != TYPEID_PLAYER) 
+		return;
+
+	Player* pPlayer = TO_PLAYER( m_caster );
+
+	if(!pPlayer->GetSession()->HasGMPermissions())
+	{
+		if(pPlayer->GetTeam() == ALLIANCE)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_COMMON ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_COMMON, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_COMMON );
+		}
+
+		if(pPlayer->GetTeam() == HORDE)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_ORCISH ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_ORCISH, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_ORCISH );
+		}
+
+		if(pPlayer->getRace() == RACE_DWARF)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_DWARVEN ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_DWARVEN, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_DWARVEN );
+		}
+
+		if(pPlayer->getRace() == RACE_NIGHTELF)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_DARNASSIAN ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_DARNASSIAN, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_DARNASSIAN );
+		}
+
+		if(pPlayer->getRace() == RACE_UNDEAD)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_GUTTERSPEAK ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_GUTTERSPEAK, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_GUTTERSPEAK );
+		}
+
+		if(pPlayer->getRace() == RACE_TAUREN)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_TAURAHE ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_TAURAHE, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_TAURAHE );
+		}
+
+		if(pPlayer->getRace() == RACE_GNOME)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_GNOMISH ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_GNOMISH, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_GNOMISH );
+		}
+
+		if(pPlayer->getRace() == RACE_TROLL)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_TROLL ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_TROLL, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_TROLL );
+		}
+
+		if(pPlayer->getRace() == RACE_BLOODELF)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_THALASSIAN ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_THALASSIAN, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_THALASSIAN );
+		}
+
+		if(pPlayer->getRace() == RACE_DRAENEI)
+		{
+			if( !pPlayer->_HasSkillLine( SKILL_LANG_DRAENEI ) )
+				pPlayer->_AddSkillLine( SKILL_LANG_DRAENEI, 300, 300 );
+		}
+		else
+		{
+			pPlayer->_RemoveSkillLine( SKILL_LANG_DRAENEI );
+		}
+	}
+}
+
 void Spell::SpellEffectDualWield(uint32 i)
 {
 	if(m_caster->GetTypeId() != TYPEID_PLAYER) 
@@ -4272,7 +4383,7 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 			break;
 		default: //u cant learn other types in game
 			return;
-	};
+	}
 
 	if( target->_HasSkillLine( skill ) )
 		target->_ModifySkillMaximum( skill, max );
@@ -4301,31 +4412,36 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		target->addSpell( 2329 );//Elixir of Lion's Strength
 		target->addSpell( 7183 );//Elixir of Minor Defense
 		break;
+
 	case SKILL_ENCHANTING:
 		target->addSpell( 7418 );//Enchant Bracer - Minor Health
 		target->addSpell( 7428 );//Enchant Bracer - Minor Deflection
 		target->addSpell( 7421 );//Runed Copper Rod
 		target->addSpell( 13262 );//Disenchant
 		break;
+
 	case SKILL_HERBALISM:
 		target->addSpell( 2383 );//find herbs
 		break;
+
 	case SKILL_MINING:
 		target->addSpell( 2657 );//smelt copper
 		target->addSpell( 2656 );//smelting
 		target->addSpell( 2580 );//find minerals
 		break;
+
 	case SKILL_FIRST_AID:
 		target->addSpell( 3275 );//Linen Bandage
 		break;
+
 	case SKILL_TAILORING:
 		target->addSpell( 2963 );//Bolt of Linen Cloth
-
 		target->addSpell( 2387 );//Linen Cloak
 		target->addSpell( 2393 );//White Linen Shirt
 		target->addSpell( 3915 );//Brown Linen Shirt
 		target->addSpell( 12044 );//Simple Linen Pants
 		break;
+
 	case SKILL_LEATHERWORKING:
 		target->addSpell( 2149 );//Handstitched Leather Boots
 		target->addSpell( 2152 );//Light Armor Kit
@@ -4334,17 +4450,20 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		target->addSpell( 9058 );//Handstitched Leather Cloak
 		target->addSpell( 9059 );//Handstitched Leather Bracers
 		break;
+
 	case SKILL_ENGINERING:
 		target->addSpell( 3918 );//Rough Blasting Powder
 		target->addSpell( 3919 );//Rough Dynamite
 		target->addSpell( 3920 );//Crafted Light Shot
 		break;
+
 	case SKILL_COOKING:
 		target->addSpell( 2538 );//Charred Wolf Meat
 		target->addSpell( 2540 );//Roasted Boar Meat
 		target->addSpell( 818 );//Basic Campfire
 		target->addSpell( 8604 );//Herb Baked Egg
 		break;
+
 	case SKILL_BLACKSMITHING:
 		target->addSpell( 2660 );//Rough Sharpening Stone
 		target->addSpell( 2663 );//Copper Bracers
@@ -4352,12 +4471,14 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		target->addSpell( 2662 );//Copper Chain Pants
 		target->addSpell( 3115 );//Rough Weightstone
 		break;
+
 	case SKILL_JEWELCRAFTING:
 		target->addSpell( 25255 );// Delicate Copper Wire
 		target->addSpell( 25493 );// Braided Copper Ring
 		target->addSpell( 26925 );// Woven Copper Ring
 		target->addSpell( 32259 );// Rough Stone Statue
 		break;
+
 	case SKILL_INSCRIPTION:
 		target->addSpell( 51005 );// Milling
 		target->addSpell( 48116 );// Scroll of Spirit
@@ -4365,7 +4486,15 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		target->addSpell( 45382 );// Scroll of Stamina
 		target->addSpell( 52738 );// Ivory Ink
 
-	};
+	}
+}
+
+void Spell::SpellEffectDetect(uint32 i)
+{
+	if( p_caster == NULL )
+		return;
+
+	p_caster->UpdateVisibility();
 }
 
 void Spell::SpellEffectSummonObject(uint32 i)
@@ -5946,7 +6075,7 @@ void Spell::SpellEffectSummonPlayer(uint32 i)
 	if(m_caster->GetMapMgr()->GetMapInfo() && m_caster->GetMapMgr()->GetMapInfo()->type != INSTANCE_NULL)
 		return;
 	
-	playerTarget->SummonRequest(m_caster->GetLowGUID(), m_caster->GetZoneId(), m_caster->GetMapId(),
+	playerTarget->SummonRequest(m_caster, m_caster->GetZoneId(), m_caster->GetMapId(),
 		m_caster->GetInstanceID(), m_caster->GetPosition());
 }
 

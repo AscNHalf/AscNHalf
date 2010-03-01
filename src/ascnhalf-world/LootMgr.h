@@ -29,7 +29,7 @@ class LootRoll : public EventableObject
 public:
 	LootRoll();
 	~LootRoll();
-	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, MapMgr* mgr);
+	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 randomsuffixid, uint32 randompropertyid, MapMgr* mgr);
 	void PlayerRolled(Player* player, uint8 choice);
 	void Finalize();
 
@@ -43,8 +43,8 @@ private:
 	uint32 _groupcount;
 	uint32 _slotid;
 	uint32 _itemid;
-	uint32 _itemunk1;
-	uint32 _itemunk2;
+	uint32 _randomsuffixid;
+	uint32 _randompropertyid;
 	uint32 _remaining;
 	uint64 _guid;
 	MapMgr* _mgr;

@@ -970,4 +970,96 @@ ChannelMgr::ChannelMgr()
 	m_idHigh = 0;
 }
 
+#ifdef VOICE_CHAT
+void Channel::VoiceChannelCreated(uint16 id)
+{
+	Log.Debug("VoiceChannelCreated", "id %u", id);
+	i_voice_channel_id = id;
+
+	SendVoiceUpdate();
+}
+
+void Channel::JoinVoiceChannel(Player * plr)
+{
+	m_lock.Acquire();
+	if(m_VoiceMembers.find(plr) == m_VoiceMembers.end())
+	{
+		m_VoiceMembers.insert(make_pair(plr, 0x06));
+		if(m_VoiceMembers.size() == 1)		// create channel
+			sVoiceChatHandler.CreateVoiceChannel(this);
+
+		if(i_voice_channel_id != (uint16)-1)
+			SendVoiceUpdate();
+	}
+	m_lock.Release();
+}
+
+void Channel::PartVoiceChannel(Player * plr)
+{
+	m_lock.Acquire();
+	MemberMap::iterator itr = m_VoiceMembers.find(plr);
+	if(itr != m_VoiceMembers.end())
+	{
+		m_VoiceMembers.erase(itr);
+		if(m_VoiceMembers.size() == 0)
+			sVoiceChatHandler.DestroyVoiceChannel(this);
+
+		if(i_voice_channel_id != (uint16)-1)
+			SendVoiceUpdate();
+	}
+	m_lock.Release();
+}
+
+void Channel::SendVoiceUpdate()
+{
+	WorldPacket data(SMSG_VOICE_SESSION_ENABLE, 300);
+	uint8 m_encryptionKey[16] = { 0xba, 0x4d, 0x45, 0x60, 0x63, 0xcc, 0x12, 0xBC, 0x73, 0x94, 0x90, 0x03, 0x18, 0x14, 0x45, 0x1F };
+	uint8 counter=1;
+	m_lock.Acquire();
+	MemberMap::iterator itr;
+
+	data << uint64(0xe0e10000000032abULL);
+	data << uint16(0x5e26);		// used in header of udp packets
+	data << uint8(0);
+	data << m_name;
+	data.append(m_encryptionKey, 16);
+	data << uint32(htonl(sVoiceChatHandler.GetVoiceServerIP()));
+	data << uint16(htons(sVoiceChatHandler.GetVoiceServerPort()));
+	data << uint8(m_VoiceMembers.size());
+
+	for(itr = m_VoiceMembers.begin(); itr != m_VoiceMembers.end(); ++itr)
+	{
+		data << itr->first->GetGUID();
+		data << counter;
+		data << uint8(itr->second);
+	}
+
+	data << uint8(6);
+
+	for(itr = m_VoiceMembers.begin(); itr != m_VoiceMembers.end(); ++itr)
+		itr->first->GetSession()->SendPacket(&data);
+
+	m_lock.Release();
+}
+
+void Channel::VoiceDied()
+{
+	m_lock.Acquire();
+	m_VoiceMembers.clear();
+	i_voice_channel_id = (uint16)-1;
+	m_lock.Release();
+}
+
+void ChannelMgr::VoiceDied()
+{
+	lock.Acquire();
+	for(uint32 i = 0; i < 2; ++i)
+	{
+		for(ChannelList::iterator itr = Channels[i].begin(); itr != Channels[i].end(); ++itr)
+			itr->second->VoiceDied();
+	}
+	lock.Release();
+}
+
+#endif
 #endif

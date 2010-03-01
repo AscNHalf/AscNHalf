@@ -30,10 +30,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 1);
 	WorldPacket data(100);
 	std::string membername;
+	uint32 serverid; // Sent as of 3.3 multiserver parties
 	Player* player = NULLPLR;
 	Group *group = NULL;
 
 	recv_data >> membername;
+	recv_data >> serverid;
 	if(_player->HasBeenInvited())return;
 
 	player = objmgr.GetPlayer(membername.c_str(), false);
@@ -133,6 +135,9 @@ void WorldSession::HandleGroupCancelOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
 	CHECK_INWORLD_RETURN;
+
+	uint32 serverid; // Sent as of 3.3 multiserver parties
+	recv_data >> serverid;
 
 	Player* player = objmgr.GetPlayer(_player->GetInviter());
 	if ( !player )

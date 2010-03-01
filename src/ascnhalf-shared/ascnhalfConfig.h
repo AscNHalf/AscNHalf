@@ -24,6 +24,22 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+/** Enable/disable AscNHalfworld server debugging. 
+ * Enabling this will cause massive spam in the world server window, but will list
+ * packets recieved and certian player information.
+ * Default: Disabled
+ */
+
+//#define _DEBUG 1
+
+/** Enable/disable AscNHalf world server optimized player saving. 
+ * It is not yet complete, things have to be updated, and player account data needs to be fixed.
+ * Player guilds need to be updated as well, not saving correctly :|
+ * Default: Disabled
+ */
+
+//#define OPTIMIZED_PLAYER_SAVING 1
+
 /** Enable/disable AscNHalf world server cluster support.
  * Warning: AscNHalf will no longer function independantly when built in cluster mode. 
  * It will require a realmserver to function.
@@ -43,6 +59,7 @@
  * Only recommended under X64 builds, X86 builds will most likely run out of address space.
  * Default: Disabled
  */
+
 //#define USE_MEMORY_MAPPING_FOR_MAPS
 
 /** Enable/disable AscNHalf's Voice Chat support.
@@ -52,6 +69,7 @@
  * Also, it only works for parties. Custom chat channels are not fully supported yet.
  * However, if you want to play around with it, feel free to enable this define.
  */
+
 //#define VOICE_CHAT 1
 
 /** Enable/disable movement compression.
@@ -74,12 +92,12 @@
 
 //#define ENABLE_BOOST 1
 
-/** Enable/disable the Strand of the Ancients battleground.
-  * It is very buggy atm, not recommended to turn on.
+/** Enable/disable the use of boost shared_ptr's.
+  * It is in testing currently, should only be used by devs.
   * Default: disabled
 */
 
-#define ENABLE_BG_SOTA 1
+#define ENABLE_SHARED_POINTERS 1
 
 //Allow loading of unused testmaps.
 //#define EXCLUDE_TEST_MAPS 1

@@ -312,8 +312,13 @@ void Group::Update()
 				data << uint8(0);   // unk
 				data << uint8(sg1->GetID());
 				data << uint8(0);	// unk2
-				//data << uint64(0);	// unk3
+				if(m_GroupType & GROUP_TYPE_LFD) 
+				{
+					data << uint8(0);
+					data << uint32(0);
+				}
 				data << uint64(0x500000000004BC0CULL);
+				data << uint32(0);
 				data << uint32(m_MemberCount-1);	// we don't include self
 
 				for( j = 0; j < m_SubGroupCount; j++ )
@@ -354,6 +359,8 @@ void Group::Update()
 					}
 				}
 
+				data << uint8(0);
+
 				if( m_Leader != NULL )
 					data << m_Leader->guid << uint32( 0 );
 				else
@@ -367,7 +374,8 @@ void Group::Update()
 					data << uint64( 0 );
 
 				data << uint8( m_LootThreshold );
-				data << uint8( m_difficulty );
+				data << uint8( m_difficulty ); // 5 Normal/Heroic.
+				data << uint8(0); // 10/25 man.
 
 				if( !(*itr1)->m_loggedInPlayer->IsInWorld() )
 					(*itr1)->m_loggedInPlayer->CopyAndSendDelayedPacket( &data );
@@ -781,10 +789,10 @@ void Group::MovePlayer(PlayerInfo *info, uint8 subgroup)
 
 void Group::SendNullUpdate( Player* pPlayer )
 {
-	// this packet is 24 bytes long.		// AS OF 2.1.0
-	uint8 buffer[24];
-	memset(buffer, 0, 24);
-	pPlayer->GetSession()->OutPacket( SMSG_GROUP_LIST, 24, buffer );
+	// this packet is 28 bytes long.		// AS OF 3.3.0.a
+	uint8 buffer[28];
+	memset(buffer, 0, 28);
+	pPlayer->GetSession()->OutPacket( SMSG_GROUP_LIST, 28, buffer );
 }
 
 // player is object class becouse its called from unit class
@@ -1305,7 +1313,7 @@ void Group::SendVoiceUpdate()
 	uint32 i,j;
 	Player* pl;
 
-	WorldPacket data(SMSG_VOICE_SESSION, 100);
+	WorldPacket data(SMSG_VOICE_SESSION_ENABLE, 100);
 	data << uint32( 0x00000E9D );
 	data << uint32( 0xE2500000 );		// this appears to be constant :S
 

@@ -1473,7 +1473,8 @@ typedef enum SpellEffectTarget
 	EFF_TARGET_SIMPLE_AOE								= 87, //just seems to be a simple aoe target, with a little circle
 	EFF_TARGET_SMALL_AOE								= 88, //even smaller aoe circle
 	EFF_TARGET_NONCOMBAT_PET							= 90, //target non-combat pet :P
-	TOTAL_SPELL_TARGET									= 101 // note: all spells with target type's > 101 are test spells
+	EFF_TARGET_IN_FRONT_OF_CASTER2						= 104, // Used in 3.2/3.3
+	TOTAL_SPELL_TARGET									= 105 // note: all spells with target type's > 101 are test spells
 } SpellEffectTarget;
 
 INLINE bool IsFlyingSpell(SpellEntry *sp)
@@ -1698,6 +1699,7 @@ public:
 	void SpellEffectDispel(uint32 i);
 	void SummonGuardian(uint32 i);
 	void SpellEffectSkillStep(uint32 i);
+	void SpellEffectDetect(uint32 i);
 	void SpellEffectSummonObject(uint32 i);
 	void SpellEffectEnchantItem(uint32 i);
 	void SpellEffectEnchantItemTemporary(uint32 i);
@@ -1756,6 +1758,7 @@ public:
 	void SpellEffectDisenchant(uint32 i);
 	void SpellEffectWeapon(uint32 i);
 	void SpellEffectDefense(uint32 i);
+	void SpellEffectLanguage(uint32 i);
 	void SpellEffectDualWield(uint32 i);
 	void SpellEffectSkinPlayerCorpse(uint32 i);
 	void SpellEffectResurrectNew(uint32 i);

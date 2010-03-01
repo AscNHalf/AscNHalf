@@ -87,7 +87,7 @@ void VoiceChatClientSocket::SendPacket(WorldPacket* data)
 		rv = BurstSend((const uint8*)data->contents(), data->size());
 	}
 
-	printf("sent packet of %u bytes with op %u, buffer len is now %u\n", data->size(), data->GetOpcode(), writeBuffer.GetSize());
+	OUT_DEBUG("sent packet of %u bytes with op %u, buffer len is now %u\n", data->size(), data->GetOpcode(), writeBuffer.GetSize());
 	if( rv )
 		BurstPush();
 

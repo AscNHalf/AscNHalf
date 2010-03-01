@@ -222,7 +222,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraIncreaseAllWeaponSkill,//198
 		&Aura::SpellAuraIncreaseHitRate,//199 Apply Aura: Increases Spell % To Hit (Fire, Nature, Frost)
 		&Aura::SpellAuraNULL,//200 // Increases experience earned by $s1%.  Lasts $d.
-		&Aura::SpellAuraNULL,//201 Apply Aura: Cannot be Dodged
+		&Aura::SpellAuraEnableFlight,//201 Enable Flight
 		&Aura::SpellAuraFinishingMovesCannotBeDodged,//202 // Finishing moves cannot be dodged - 32601, 44452
 		&Aura::SpellAuraReduceCritMeleeAttackDmg,//203 Apply Aura: Reduces Attacker Critical Hit Damage with Melee by %
 		&Aura::SpellAuraReduceCritRangedAttackDmg,//204 Apply Aura: Reduces Attacker Critical Hit Damage with Ranged by %
@@ -231,7 +231,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraEnableFlight,//207 set fly
 		&Aura::SpellAuraEnableFlightWithUnmountedSpeed,//208
 		&Aura::SpellAuraNULL,//209  // mod flight speed?
-		&Aura::SpellAuraNULL,//210	// commentator's command - spell 42009
+		&Aura::SpellAuraIncreaseFlightSpeed,//210	// commentator's command - spell 42009
 		&Aura::SpellAuraIncreaseFlightSpeed,//211
 		&Aura::SpellAuraIncreaseRangedAPStatPCT,//SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT //212 Apply Aura: Increase Ranged Atk Power by % of Intellect
 		&Aura::SpellAuraIncreaseRageFromDamageDealtPCT, //213 Apply Aura: Increase Rage from Damage Dealt by %
@@ -2825,6 +2825,58 @@ void Aura::SpellAuraDummy(bool apply)
 					m_caster->RemoveOnAuraRemoveSpell(SPELL_HASH_PSYCHIC_SCREAM);
 			}
 		}break;
+
+	case 71903: // Shadowmourne Weapon Effect
+		{
+			if(GetCaster()->IsPlayer())
+			{
+				if(!apply)
+				{
+					TO_PLAYER(GetCaster())->RemoveAura(71905);
+					TO_PLAYER(GetCaster())->RemoveAura(72521);
+					TO_PLAYER(GetCaster())->RemoveAura(72523);
+				}
+			}
+		}break;
+
+	case 71905: // Shard Effects
+		{
+			if(GetCaster()->IsPlayer())
+			{
+				Player* plr = TO_PLAYER(GetCaster());
+				if(apply)
+				{
+					SetDuration(60000); // Set duration for stack bug reasons.
+					if(stackSize >= 1 && stackSize <= 5)
+					{
+						plr->RemoveAura(72523);
+						if(!plr->HasAura(72521))
+							plr->CastSpell(plr, 72521, false);
+					}
+					if(stackSize >= 6 && stackSize <= 9)
+					{
+						plr->RemoveAura(72521);
+						if(!plr->HasAura(72523))
+							plr->CastSpell(plr, 72523, false);						
+					}
+					if(stackSize >= 10)
+					{
+						SpellEntry* sp = dbcSpell.LookupEntry(71904);
+						plr->CastSpellAoF(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), sp, false);
+						plr->CastSpell(plr, 73422, false);
+						plr->RemoveAura(72521);
+						plr->RemoveAura(72523);
+						plr->RemoveAura(71905);
+					}
+				}
+				else
+				{
+					plr->RemoveAura(72521);
+					plr->RemoveAura(72523);
+				}
+			}
+		}break;
+
 	default:
 		{
 			dummy_aura = true;
@@ -4312,7 +4364,23 @@ void Aura::SpellAuraModIncreaseSpeed(bool apply)
 
 void Aura::SpellAuraModIncreaseMountedSpeed(bool apply)
 {
-	if(apply)
+	// maybe one day this will crash...
+	if (!m_target)
+		return;
+
+	// deal with those scaling mounts that don't have other spell IDs - the ones with multiple spell IDs are handled in scripts
+	if((GetSpellId() == 68768 || GetSpellId() == 68769) && m_target->GetTypeId() == TYPEID_PLAYER)
+	{
+		if (Player* pPlayer = TO_PLAYER(m_target))
+		{
+			if(pPlayer->_GetSkillLineCurrent(SKILL_RIDING, true) >= 150)
+				mod->m_amount = 100;
+			else // if(pPlayer->_GetSkillLineCurrent(SKILL_RIDING, true) >= 75) // Assuming nobody else would have the spell...
+				mod->m_amount = 60;
+		}
+	}
+
+	if (apply)
 	{ 
 		SetPositive();
 		m_target->m_mountedspeedModifier += mod->m_amount;
@@ -4516,6 +4584,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			}  
 			TO_PLAYER( m_target )->UpdateAttackSpeed();
 		}break;
+
 	case FORM_TREE:
 		{
 			modelId  = 864;
@@ -4523,18 +4592,21 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			spellId = 5420;//3122;
 			spellId2 = 34123;
 		} break;
+
 	case FORM_TRAVEL:
 		{//druid
 			freeMovements = true;
 			spellId = 5419;
 			modelId = 918;
 		} break;
+
 	case FORM_AQUA:
 		{//druid aqua
 			freeMovements = true;
 			spellId = 5421;
 			modelId = 2428;
 		} break;
+
 	case FORM_BEAR:
 		{//druid only
 			freeMovements = true;
@@ -4563,7 +4635,8 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			else //reset back to mana
 				m_target->SetByte(UNIT_FIELD_BYTES_0,3,POWER_TYPE_MANA);
 
-		} break;	
+		} break;
+
 	case FORM_DIREBEAR:
 		{//druid only
 			freeMovements = true; 
@@ -4592,6 +4665,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				m_target->SetByte(UNIT_FIELD_BYTES_0,3,POWER_TYPE_MANA);
 
 		} break;
+
 	case FORM_GHOSTWOLF:
 		{
 			modelId = 4613;
@@ -4605,23 +4679,28 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				if( m_target->IsPlayer() )
 					TO_PLAYER( m_target )->m_MountSpellId = 0;
 			}
-		} break;  
+		} break;
+
 	case FORM_ZOMBIE:
 		{
 			modelId = 10626;
 		} break;
+
 	case FORM_BATTLESTANCE:
 		{
 			spellId = 21156;
 		} break;
+
 	case FORM_DEFENSIVESTANCE:
 		{
 			spellId = 7376;
 		} break;
+
 	case FORM_BERSERKERSTANCE:
 		{
 			spellId = 7381;
 		} break;
+
 	case FORM_SHADOW:
 		{
 			if(apply)
@@ -4636,6 +4715,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				TO_PLAYER(m_target)->GetSession()->OutPacket(SMSG_COOLDOWN_EVENT, sizeof(packetSMSG_COOLDOWN_EVENT), &cd);
 			}
 		}break;
+
 	case FORM_FLIGHT:
 		{//druid
 			freeMovements = true;
@@ -4648,12 +4728,14 @@ void Aura::SpellAuraModShapeshift(bool apply)
 					modelId = 20872;
 			}
 		}break;
+
 	case FORM_STEALTH:
 		{// rogue		
 			if (!m_target->m_can_stealth)
 				return;
 			//m_target->UpdateVisibility();
 		} break;
+
 	case FORM_MOONKIN:
 		{//druid
 			freeMovements = true;
@@ -4666,6 +4748,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 					modelId = 15375;
 			}
 		}break;
+
 	case FORM_SWIFT: //not tested yet, right now going on trust
 		{// druid
 			freeMovements = true;
@@ -4678,31 +4761,41 @@ void Aura::SpellAuraModShapeshift(bool apply)
 					modelId = 21244;
 			}
 		}break;
+
 	case FORM_SPIRITOFREDEMPTION:
 		{
 			spellId = 27795;
 			modelId = 12824;
 			TO_PLAYER(m_target)->m_canCastSpellsWhileDead = true;
 		}break;
+
 	case FORM_DEMON:
 		{
-			spellId = 59673;
-			modelId = 25277;
-			if (!apply)
+			if(GetSpellId() == 47241)
 			{
-				//m_target->m_modlanguage = LANG_DEMONIC;
-				m_target->CastSpell(m_target, 54817, true);
-				m_target->CastSpell(m_target, 54879, true);
-				m_target->CastSpell(m_target, 61610, true);
+				spellId = 59673;
+				modelId = 25277;
+				if(GetUnitCaster()->IsPlayer() && GetUnitCaster()->HasDummyAura(SPELL_HASH_GLYPH_OF_METAMORPHOSIS))
+					SetDuration(GetDuration() + 6000);
+			}
+			else if(GetSpellId() == 54840)
+			{
+				modelId = 25277;
+				if (apply)
+				{
+					m_target->CastSpell(m_target, 54817, true);
+				}
+				else
+				{
+					m_target->RemoveAura(54817);
+				}
 			}
 			else
 			{
-				//m_target->m_modlanguage = -1;
-				m_target->RemoveAura(54817);
-				m_target->RemoveAura(54879);
-				m_target->RemoveAura(61610);
+				OUT_DEBUG("Unknown Spell with Morph Form Demon");
 			}
 		}break;
+
 	case FORM_GHOUL:
 		{
 			spellId = 0;
@@ -4804,12 +4897,12 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		}
 
 		//execute after we changed shape
-		TO_PLAYER( m_target )->EventTalentHearthOfWildChange( true );
+		TO_PLAYER( m_target )->EventTalentHeartOfWildChange( true );
 	}
 	else 
 	{
 		//execute before changing shape back
-		TO_PLAYER( m_target )->EventTalentHearthOfWildChange( false );
+		TO_PLAYER( m_target )->EventTalentHeartOfWildChange( false );
 		m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );				
 		if( spellId != GetSpellId() && spellId )
 		{
@@ -7682,14 +7775,14 @@ void Aura::SpellAuraModTotalStatPerc(bool apply)
 			if( m_spellProto->NameHash == SPELL_HASH_HEART_OF_THE_WILD )
 			{
 				//we should remove effect first
-				TO_PLAYER( m_target )->EventTalentHearthOfWildChange( false );
+				TO_PLAYER( m_target )->EventTalentHeartOfWildChange( false );
 				//set new value
 				if( apply )
 					TO_PLAYER( m_target )->SetTalentHearthOfWildPCT( val );
 				else
 					TO_PLAYER( m_target )->SetTalentHearthOfWildPCT( 0 ); //this happens on a talent reset
 				//reapply
-				TO_PLAYER( m_target )->EventTalentHearthOfWildChange( true );
+				TO_PLAYER( m_target )->EventTalentHeartOfWildChange( true );
 			}
 
 			if( mod->m_amount > 0 )

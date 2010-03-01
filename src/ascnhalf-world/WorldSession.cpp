@@ -25,7 +25,7 @@
 OpcodeHandler WorldPacketHandlers[NUM_MSG_TYPES];
 
 WorldSession::WorldSession(uint32 id, string Name, WorldSocket *sock) : _socket(sock), _accountId(id), _accountName(Name),
-_logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), instanceId(0)
+_logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), instanceId(0), _recentlogout(false)
 {
 	_player = NULLPLR;
 	m_hasDeathKnight = false;
@@ -147,6 +147,11 @@ int WorldSession::Update(uint32 InstanceID)
 				Log.Warning("WorldSession","Received unexpected/wrong state packet with opcode %s (0x%.4X)",
 					LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
 			}
+			else if(Handler->status == STATUS_IN_OR_LOGGINGOUT && !_player && !_recentlogout && Handler->handler != 0)
+			{
+				Log.Warning("WorldSession","Received unexpected/wrong state packet with opcode %s (0x%.4X)",
+					LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
+			}
 			else
 			{
 				// Valid Packet :>
@@ -243,6 +248,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		return;
 
 	_loggingOut = true;
+	_recentlogout = true;
 
 	if( _player != NULL )
 	{
@@ -587,6 +593,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_SET_SELECTION].handler							= &WorldSession::HandleSetSelectionOpcode;
 	WorldPacketHandlers[CMSG_STANDSTATECHANGE].handler						= &WorldSession::HandleStandStateChangeOpcode;
 	WorldPacketHandlers[CMSG_CANCEL_MOUNT_AURA].handler						= &WorldSession::HandleDismountOpcode;
+	WorldPacketHandlers[CMSG_HEARTH_AND_RESURRECT].handler					= &WorldSession::HandleHAndROpcode;
 	
 	// Friends
 	WorldPacketHandlers[CMSG_CONTACT_LIST].handler							= &WorldSession::HandleFriendListOpcode;
@@ -602,7 +609,11 @@ void WorldSession::InitPacketHandlerTable()
 	
 	// Account Data
 	WorldPacketHandlers[CMSG_UPDATE_ACCOUNT_DATA].handler					= &WorldSession::HandleUpdateAccountData;
+	WorldPacketHandlers[CMSG_UPDATE_ACCOUNT_DATA].status					= STATUS_AUTHED;
 	WorldPacketHandlers[CMSG_REQUEST_ACCOUNT_DATA].handler					= &WorldSession::HandleRequestAccountData;
+	WorldPacketHandlers[CMSG_REQUEST_ACCOUNT_DATA].status					= STATUS_AUTHED;
+	WorldPacketHandlers[CMSG_READY_FOR_ACCOUNT_DATA_TIMES].handler			= &WorldSession::HandleReadyForAccountDataTimes;
+	WorldPacketHandlers[CMSG_READY_FOR_ACCOUNT_DATA_TIMES].status			= STATUS_AUTHED;
 	WorldPacketHandlers[CMSG_SET_FACTION_ATWAR].handler						= &WorldSession::HandleSetAtWarOpcode;
 	WorldPacketHandlers[CMSG_SET_WATCHED_FACTION].handler					= &WorldSession::HandleSetWatchedFactionIndexOpcode;
 	WorldPacketHandlers[CMSG_TOGGLE_PVP].handler							= &WorldSession::HandleTogglePVPOpcode;
@@ -614,6 +625,8 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_MESSAGECHAT].handler							= &WorldSession::HandleMessagechatOpcode;
 	WorldPacketHandlers[CMSG_TEXT_EMOTE].handler							= &WorldSession::HandleTextEmoteOpcode;
 	WorldPacketHandlers[CMSG_INSPECT].handler								= &WorldSession::HandleInspectOpcode;
+	WorldPacketHandlers[CMSG_TIME_SYNC_RESP].handler						= &WorldSession::HandleTimeSyncResp;
+	WorldPacketHandlers[CMSG_GAMEOBJ_REPORT_USE].handler					= &WorldSession::HandleGameobjReportUseOpCode;
 
 #ifndef CLUSTERING
 	// Channels
@@ -736,6 +749,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_ACCEPT_TRADE].handler							= &WorldSession::HandleAcceptTrade;
 	WorldPacketHandlers[CMSG_UNACCEPT_TRADE].handler						= &WorldSession::HandleUnacceptTrade;
 	WorldPacketHandlers[CMSG_CANCEL_TRADE].handler							= &WorldSession::HandleCancelTrade;
+	WorldPacketHandlers[CMSG_CANCEL_TRADE].status							= STATUS_IN_OR_LOGGINGOUT;
 	WorldPacketHandlers[CMSG_SET_TRADE_ITEM].handler						= &WorldSession::HandleSetTradeItem;
 	WorldPacketHandlers[CMSG_CLEAR_TRADE_ITEM].handler						= &WorldSession::HandleClearTradeItem;
 	WorldPacketHandlers[CMSG_SET_TRADE_GOLD].handler						= &WorldSession::HandleSetTradeGold;
@@ -879,13 +893,14 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_OPEN_ITEM].handler								= &WorldSession::HandleOpenItemOpcode;
 	WorldPacketHandlers[CMSG_COMPLETE_CINEMATIC].handler					= &WorldSession::HandleCompleteCinematic;
 	WorldPacketHandlers[CMSG_MOUNTSPECIAL_ANIM].handler						= &WorldSession::HandleMountSpecialAnimOpcode;
-	WorldPacketHandlers[CMSG_SHOWING_CLOAK].handler							= &WorldSession::HandleToggleCloakOpcode;
-	WorldPacketHandlers[CMSG_SHOWING_HELM].handler							= &WorldSession::HandleToggleHelmOpcode;
+	WorldPacketHandlers[CMSG_TOGGLE_CLOAK].handler							= &WorldSession::HandleToggleCloakOpcode;
+	WorldPacketHandlers[CMSG_TOGGLE_HELM].handler							= &WorldSession::HandleToggleHelmOpcode;
 	WorldPacketHandlers[CMSG_SET_TITLE].handler								= &WorldSession::HandleSetVisibleRankOpcode;
 	WorldPacketHandlers[CMSG_COMPLAIN].handler								= &WorldSession::HandleReportSpamOpcode;
+	WorldPacketHandlers[CMSG_WORLD_STATE_UI_TIMER_UPDATE].handler			= &WorldSession::HandleWorldStateUITimerUpdate;
 
+	// Pet Cast Spell?
 	WorldPacketHandlers[CMSG_PET_CAST_SPELL].handler						= &WorldSession::HandleAddDynamicTargetOpcode;
-
 
 	// Arenas
 	WorldPacketHandlers[CMSG_ARENA_TEAM_QUERY].handler						= &WorldSession::HandleArenaTeamQueryOpcode;
@@ -910,11 +925,16 @@ void WorldSession::InitPacketHandlerTable()
 
 	// voicechat
 	WorldPacketHandlers[CMSG_VOICE_SESSION_ENABLE].handler					= &WorldSession::HandleEnableMicrophoneOpcode;
+	WorldPacketHandlers[CMSG_VOICE_SESSION_ENABLE].status					= STATUS_AUTHED;
+	WorldPacketHandlers[CMSG_CHANNEL_VOICE_ON].handler						= &WorldSession::HandleChannelVoiceOnOpcode;
+	WorldPacketHandlers[CMSG_SET_CHANNEL_WATCH].handler						= &WorldSession::HandleChannelWatchOpcode;
 	WorldPacketHandlers[CMSG_SET_ACTIVE_VOICE_CHANNEL].handler				= &WorldSession::HandleVoiceChatQueryOpcode;
-	//WorldPacketHandlers[CMSG_CHANNEL_VOICE_QUERY].handler					= &WorldSession::HandleChannelVoiceQueryOpcode;		// couldnt find new opcode
+	WorldPacketHandlers[CMSG_SET_ACTIVE_VOICE_CHANNEL].status				= STATUS_AUTHED;
+
+	// Opt out of loot!
 	WorldPacketHandlers[CMSG_OPT_OUT_OF_LOOT].handler						= &WorldSession::HandleSetAutoLootPassOpcode;
 
-	WorldPacketHandlers[CMSG_REALM_SPLIT].handler							= &WorldSession::Handle38C;
+	WorldPacketHandlers[CMSG_REALM_SPLIT].handler							= &WorldSession::HandleRealmSplit;
 	WorldPacketHandlers[CMSG_REALM_SPLIT].status							= STATUS_AUTHED;
 
 	WorldPacketHandlers[CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY].handler		= &WorldSession::HandleInrangeQuestgiverQuery;
@@ -1056,7 +1076,7 @@ void WorldSession::Delete()
 	delete this;
 }
 
-void WorldSession::Handle38C(WorldPacket & recv_data)
+void WorldSession::HandleRealmSplit(WorldPacket & recv_data)
 {
 	uint32 v;
 	recv_data >> v;
@@ -1155,18 +1175,4 @@ uint8 WorldSession::CheckTeleportPrerequsites(AreaTrigger * pAreaTrigger, WorldS
 	}
 	//Nothing more to check, should be ok
 	return AREA_TRIGGER_FAILURE_OK;
-}
-
-void WorldSession::SendAccountDataTimes(uint32 mask)
-{
-	WorldPacket data( SMSG_ACCOUNT_DATA_TIMES, 68 );
-	data << uint32(UNIXTIME); // Set Unix Timing?
-	data << uint8(1);
-	data << uint32(mask);
-
-	for(int i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
-		if(mask & (1 << i))
-			data << uint32(0);
-
-	SendPacket(&data);
 }

@@ -126,7 +126,11 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 	&Spell::SpellTargetNULL,					// 98
 	&Spell::SpellTargetNULL,					// 99
 	&Spell::SpellTargetNULL,					// 100
-	// all 100 > n spelltargettype's are from test spells
+	&Spell::SpellTargetNULL,					// 101
+	&Spell::SpellTargetNULL,					// 102
+	&Spell::SpellTargetNULL,					// 103
+	&Spell::SpellTargetInFrontOfCaster,			// 104
+	// all 104 > n spelltargettype's are from test spells
 };
 
 /* LEFTOVER RESEARCH, this contains note's comments from Captnoord
@@ -219,7 +223,7 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 // type 78 units in front of caster ( test spell )
 // type 79 is not used
 // type 80 related to summon some unit
-// type 81 > N are not handled because they are test spells 
+// type 104 > N are not handled because they are test spells 
 
 */
 

@@ -416,9 +416,9 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 	else
 	{
 		fail = DeleteCharacter((uint32)guid);
-		OutPacket(SMSG_CHAR_DELETE, 1, &fail);
 		m_lastEnumTime = 0;
 	}
+	OutPacket(SMSG_CHAR_DELETE, 1, &fail);
 }
 
 uint8 WorldSession::DeleteCharacter(uint32 guid)
@@ -477,20 +477,24 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 
 		CharacterDatabase.Execute("DELETE FROM achievements WHERE player = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM auctions WHERE owner = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM charters WHERE leaderGuid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM gm_tickets WHERE guid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM guild_data WHERE playerid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM instances WHERE creator_guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM mailbox WHERE player_guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM playercooldowns WHERE player_guid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM playerglyphs WHERE guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM playeritems WHERE ownerguid=%u",(uint32)guid);
-		CharacterDatabase.Execute("DELETE FROM playerskills WHERE player_guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM playerpets WHERE ownerguid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM playerpetspells WHERE ownerguid = %u", (uint32)guid);
-		CharacterDatabase.Execute("DELETE FROM playerpettalents WHERE ownerguid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM playerskills WHERE player_guid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM playerspells WHERE guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM playersummonspells WHERE ownerguid = %u", (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM playertalents WHERE guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM questlog WHERE player_guid = %u", (uint32)guid);
-		CharacterDatabase.Execute("DELETE FROM tutorials WHERE playerId = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_friends WHERE character_guid = %u OR friend_guid = %u", (uint32)guid, (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_ignores WHERE character_guid = %u OR ignore_guid = %u", (uint32)guid, (uint32)guid);
-
+		CharacterDatabase.Execute("DELETE FROM tutorials WHERE playerId = %u", (uint32)guid);
 
 		/* remove player info */
 		objmgr.DeletePlayerInfo((uint32)guid);
@@ -521,11 +525,22 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket & recv_data)
 
 	// Check name for rule violation.
 	const char * szName=name.c_str();
-	for(uint32 x=0;x<strlen(szName);x++)
+	for(uint32 x = 0; x < strlen(szName); x++)
 	{
-		if((int)szName[x]<65||((int)szName[x]>90&&(int)szName[x]<97)||(int)szName[x]>122)
+		if((int)szName[x] < 65 || ((int)szName[x] > 90 && (int)szName[x] < 97) || (int)szName[x] > 122)
 		{
-			data << uint8(CHAR_NAME_INVALID_CHARACTER);
+			if((int)szName[x] < 65)
+			{
+				data << uint8(CHAR_NAME_TOO_SHORT); // Name is too short.
+			}
+			else if((int)szName[x] > 122) // Name is too long.
+			{
+				data << uint8(CHAR_NAME_TOO_LONG);
+			}
+			else
+			{
+				data << uint8(CHAR_NAME_FAILURE); // No clue.
+			}
 			data << guid << name;
 			SendPacket(&data);
 			return;
@@ -628,10 +643,17 @@ void WorldSession::FullLogin(Player* plr)
 	datab << uint32(0x00);
 	SendPacket(&datab);
 
-	WorldPacket datat(SMSG_MOTD, 50);
+	// Send first line of MOTD
+	WorldPacket datat(SMSG_MOTD, 100);
 	datat << uint32(0x04);
 	datat << sWorld.GetMotd();
 	SendPacket(&datat);
+
+	// Send second line of MOTD
+	WorldPacket datat2(SMSG_MOTD, 100);
+	datat2 << uint32(0x04);
+	datat2 << sWorld.GetMotd2();
+	SendPacket(&datat2);
 
 	/* world preload */
 	packetSMSG_LOGIN_VERIFY_WORLD vwpck;
@@ -707,7 +729,27 @@ void WorldSession::FullLogin(Player* plr)
 	info->m_loggedInPlayer = plr;
 
 	// account data == UI config
-	SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
+	WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
+	//MD5Hash md5hash;
+
+	data << uint32(UNIXTIME) << uint8(1) << uint32(0xEA);
+
+	for (int i = 0; i < 8; i++) // TODO: FIX THIS!
+	{
+//		AccountDataEntry* acct_data = GetAccountData(i); // TODO: Use this correctly.
+
+		if(0xEA & (1 << i))
+		{
+			data << uint32(0);
+		}
+//		md5hash.Initialize();
+//		md5hash.UpdateData((const uint8*)acct_data->data, acct_data->sz);
+//		md5hash.Finalize();
+
+//		data.append(md5hash.GetDigest(), MD5_DIGEST_LENGTH);
+	}
+	SendPacket(&data);
+
 	_player->ResetTitansGrip();
 
 	// Set TIME OF LOGIN
@@ -842,8 +884,6 @@ void WorldSession::FullLogin(Player* plr)
 		_player->CopyAndSendDelayedPacket(data);
 		delete data;
 	}
-
-	SendAccountDataTimes(GLOBAL_CACHE_MASK);
 
 	if(enter_world && !_player->GetMapMgr())
 		plr->AddToWorld();

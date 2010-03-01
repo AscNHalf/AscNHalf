@@ -23,7 +23,7 @@
 
 // NOTE: All SERVER opcodes are now uint16's, as of patch 4 (3807/0.9.0)
 //		Client opcodes are still uint32 as far as we know.
-//3.2.x client opcodes
+//3.3.x client opcodes
 
 enum Opcodes
 {
@@ -536,7 +536,7 @@ enum Opcodes
     CMSG_GM_NUKE                                    = 0x1FA,
     MSG_RANDOM_ROLL                                 = 0x1FB,
     SMSG_ENVIRONMENTALDAMAGELOG                     = 0x1FC,
-    CMSG_RWHOIS_OBSOLETE                            = 0x1FD,
+    CMSG_PLAYER_DIFFICULTY_CHANGE                   = 0x1FD,
     SMSG_RWHOIS                                     = 0x1FE,
     MSG_LOOKING_FOR_GROUP                           = 0x1FF,
     CMSG_SET_LOOKING_FOR_GROUP                      = 0x200,
@@ -553,7 +553,7 @@ enum Opcodes
     CMSG_UPDATE_ACCOUNT_DATA                        = 0x20B,
     SMSG_UPDATE_ACCOUNT_DATA                        = 0x20C,
     SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                  = 0x20D,
-    SMSG_POWERGAINLOG_OBSOLETE                      = 0x20E,
+    SMSG_PLAYER_DIFFICULTY_CHANGE                   = 0x20E,
     CMSG_GM_TEACH                                   = 0x20F,
     CMSG_GM_CREATE_ITEM_TARGET                      = 0x210,
     CMSG_GMTICKET_GETTICKET                         = 0x211,
@@ -724,8 +724,8 @@ enum Opcodes
     SMSG_SCRIPT_MESSAGE                             = 0x2B6,
     SMSG_DUEL_COUNTDOWN                             = 0x2B7,
     SMSG_AREA_TRIGGER_MESSAGE                       = 0x2B8,
-    CMSG_SHOWING_HELM                               = 0x2B9,
-    CMSG_SHOWING_CLOAK                              = 0x2BA,
+    CMSG_TOGGLE_HELM                                = 0x2B9,
+    CMSG_TOGGLE_CLOAK                               = 0x2BA,
     SMSG_MEETINGSTONE_JOINFAILED                    = 0x2BB,
     SMSG_PLAYER_SKINNED                             = 0x2BC,
     SMSG_DURABILITY_DAMAGE_DEATH                    = 0x2BD,
@@ -905,10 +905,10 @@ enum Opcodes
     SMSG_LFG_LEADER_IS_LFM                          = 0x36B,
     SMSG_LFG_UPDATE                                 = 0x36C,
     SMSG_LFG_UPDATE_LFM                             = 0x36D,
-    SMSG_LFG_UPDATE_LFG                             = 0x36E,
-    SMSG_LFG_UPDATE_QUEUED                          = 0x36F,
-    SMSG_LFG_PENDING_INVITE                         = 0x370,
-    SMSG_LFG_PENDING_MATCH                          = 0x371,
+    CMSG_LFD_PLAYER_LOCK_INFO_REQUEST               = 0x36E,
+    SMSG_LFG_PLAYER_LOCK_INFO_RESPONSE              = 0x36F,
+    CMSG_LFG_TELEPORT                               = 0x370,
+    CMSG_LFD_PARTY_LOCK_INFO_REQUEST                = 0x371,
     SMSG_LFG_PENDING_MATCH_DONE                     = 0x372,
     SMSG_TITLE_EARNED                               = 0x373,
     CMSG_SET_TITLE                                  = 0x374,
@@ -1204,8 +1204,8 @@ enum Opcodes
     SMSG_AURA_UPDATE                                = 0x496,
     CMSG_FLOOD_GRACE_CHEAT                          = 0x497,
     SMSG_SERVER_FIRST_ACHIEVEMENT                   = 0x498,
-    SMSG_PET_LEARNED_SPELL                          = 0x499, // uint16 spellid, Your pet learned spell: %s
-    SMSG_PET_REMOVED_SPELL                          = 0x49A, // uint16 spellid, Your pet unlearned %s
+    SMSG_PET_LEARNED_SPELL                          = 0x499,
+    SMSG_PET_REMOVED_SPELL                          = 0x49A,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE         = 0x49B,
     CMSG_HEARTH_AND_RESURRECT                       = 0x49C, // not changed in 3.1
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA       = 0x49D, // not changed 9626
@@ -1229,12 +1229,12 @@ enum Opcodes
     UMSG_UNKNOWN_1199                               = 0x4AF, // not found
     UMSG_UNKNOWN_1200                               = 0x4B0, // not found
     UMSG_UNKNOWN_1201                               = 0x4B1, // not found
-    SMSG_UNKNOWN_1202                               = 0x4B2, // refund something
-    CMSG_UNKNOWN_1203                               = 0x4B3, // refund request?
-    CMSG_UNKNOWN_1204                               = 0x4B4, // lua: ContainerRefundItemPurchase
-    SMSG_UNKNOWN_1205                               = 0x4B5, // refund something
-    CMSG_UNKNOWN_1206                               = 0x4B6, // CMSG, uint32
-    SMSG_UNKNOWN_1207                               = 0x4B7, // SMSG, string+float
+    SMSG_ITEM_REFUND_INFO                           = 0x4B2, // refund something
+    CMSG_ITEM_REFUND_INFO                           = 0x4B3, // refund request?
+    CMSG_ITEM_REFUND_REQUEST                        = 0x4B4, // lua: ContainerRefundItemPurchase
+    SMSG_ITEM_REFUND_REQUEST                        = 0x4B5, // refund something
+    CMSG_CORPSE_MAP_POSITION_QUERY                  = 0x4B6, // CMSG, uint32
+    SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE         = 0x4B7, // SMSG, string+float
     CMSG_LFG_SET_ROLES                              = 0x4B8, // CMSG, empty, lua: SetLFGRoles
     UMSG_UNKNOWN_1209                               = 0x4B9, // not found
     CMSG_UNKNOWN_1210                               = 0x4BA, // CMSG, uint64, lua: CalendarContextEventSignUp
@@ -1299,7 +1299,21 @@ enum Opcodes
 	UMSG_UNKNOWN_1269                               = 0x4F5, // not found 3.2
 	CMSG_WORLD_STATE_UI_TIMER_UPDATE                = 0x4F6, // not found 3.2
 	SMSG_WORLD_STATE_UI_TIMER_UPDATE				= 0x4F7, // not found 3.2
-    NUM_MSG_TYPES                                   = 0x4F8
+	UMSG_UNKNOWN_1272								= 0x4F8, // called from lua: CreateCharacter, paid race change
+	UMSG_UNKNOWN_1273								= 0x4F9,
+	UMSG_UNKNOWN_1274								= 0x4FA,
+	UMSG_UNKNOWN_1275								= 0x4FB,
+	UMSG_UNKNOWN_1276								= 0x4FC,
+	UMSG_UNKNOWN_1277								= 0x4FD,
+	UMSG_UNKNOWN_1278								= 0x4FE,
+	CMSG_READY_FOR_ACCOUNT_DATA_TIMES				= 0x4FF,
+	CMSG_QUERY_QUESTS_COMPLETED						= 0x500,
+	SMSG_QUERY_QUESTS_COMPLETED_RESPONSE			= 0x501,
+	CMSG_GM_REPORT_LAG								= 0x502,
+	UMSG_UNKNOWN_1283								= 0x503,
+	UMSG_UNKNOWN_1284								= 0x504,
+	UMSG_UNKNOWN_1285								= 0x505,
+	NUM_MSG_TYPES									= 0x506
 };
 
 extern NameTableEntry g_worldOpcodeNames[];

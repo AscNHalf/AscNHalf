@@ -164,10 +164,21 @@ void LogonCommHandler::Connect(LogonServer * server)
 	if(bServerShutdown)
 		return;
 
+	if(ReConCounter >= 5)
+	{
+		// Attempt to connect 5 times, if not able to, shut down.
+		sWorld.QueueShutdown(5, SERVER_SHUTDOWN_TYPE_SHUTDOWN);
+		bServerShutdown = true;
+		return;
+	}
+
 	++ReConCounter;
+
 	Log.Notice("LogonCommClient", "Connecting to logonserver on `%s:%u, attempt %u`", server->Address.c_str(), server->Port, ReConCounter );
+
 	server->RetryTime = (uint32)UNIXTIME + 10;
 	server->Registered = false;
+
 	LogonCommClientSocket * conn = ConnectToLogon(server->Address, server->Port);
 	logons[server] = conn;
 	if(conn == NULL)

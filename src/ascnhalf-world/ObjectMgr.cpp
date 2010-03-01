@@ -1232,6 +1232,10 @@ void ObjectMgr::LoadSpellFixes()
 								sp->EffectSpellClassMask[i][j] = sf_effectClassMask[i][j];
 							
 				}
+				else
+				{
+					WorldDatabase.Query("DELETE FROM SpellFixes where spellid = '%u'", sf_spellId);
+				}
 			}
 		}while(result->NextRow());
 		delete result;

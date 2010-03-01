@@ -26,7 +26,6 @@
 #include "../ascnhalf-voicechat/ascnhalf_opcodes.h"
 #include "VoiceChatClientSocket.h"
 
-class VoiceChatClientSocket;
 struct VoiceChatChannelRequest
 {
 	string channel_name;

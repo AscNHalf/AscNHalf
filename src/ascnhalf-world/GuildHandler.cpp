@@ -512,10 +512,9 @@ void WorldSession::HandleSaveGuildEmblem(WorldPacket & recv_data)
 	pGuild->SendGuildQuery(NULL);
 }
 
-// Charter part
 void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 {
-	CHECK_PACKET_SIZE(recv_data, 8+8+4+1+5*8+2+1+4+4);
+	//CHECK_PACKET_SIZE(recv_data, 8+8+4+1+5*8+2+1+4+4); //outdated!
 	/*
 	{CLIENT} Packet: (0x01BD) CMSG_PETITION_BUY PacketSize = 85
 	|------------------------------------------------|----------------|
@@ -530,35 +529,27 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 	-------------------------------------------------------------------
 	*/
 
-	uint64 creature_guid;
-	uint64 unk1, unk3, unk4, unk5, unk6, unk7;
-	uint32 unk2;
-	std::string name;
-	uint16 unk8;
-	uint8  unk9;
-	uint32 arena_index;
-	uint32 unk10;
-
+	/*would be better, if we could skip the crap fields - will work on it in the future*/
 	uint8 error;
+	uint64 creature_guid;
+	uint64 crap;
+	uint32 crap2;
+	string name;
+	uint64 crap3, crap4, crap5, crap6, crap7, crap8;
+	uint32 crap9;
+	uint8 crap10;
+	uint32 arena_index;
+	uint32 crap11;
 
-	recv_data >> creature_guid;                             // NPC GUID
-	recv_data >> unk1;                                      // 0
-	recv_data >> unk2;                                      // 0
-	recv_data >> name;                                      // name
+	recv_data >> creature_guid;
+	recv_data >> crap >> crap2;
+	recv_data >> name;
+	recv_data >> crap3 >> crap4 >> crap5 >> crap6 >> crap7 >> crap8;
+	recv_data >> crap9;
+	recv_data >> crap10;
+	recv_data >> arena_index;
+	recv_data >> crap11;
 
-	// recheck
-	CHECK_PACKET_SIZE(recv_data, 8+8+4+(name.size()+1)+5*8+2+1+4+4);
-
-	recv_data >> unk3;                                      // 0
-	recv_data >> unk4;                                      // 0
-	recv_data >> unk5;                                      // 0
-	recv_data >> unk6;                                      // 0
-	recv_data >> unk7;                                      // 0
-	recv_data >> unk8;                                      // 0
-	recv_data >> unk9;                                      // 0
-	recv_data >> arena_index;                               // index
-	recv_data >> unk10;                                     // 0
-  
 	Creature* crt = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(creature_guid));
 	if(!crt)
 	{
@@ -774,6 +765,7 @@ void WorldSession::HandleCharterShowSignatures(WorldPacket & recv_data)
 void WorldSession::HandleCharterQuery(WorldPacket & recv_data)
 {
 	/*
+	->outdated!
 	{SERVER} Packet: (0x01C7) SMSG_PETITION_QUERY_RESPONSE PacketSize = 77
 	|------------------------------------------------|----------------|
 	|00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F |0123456789ABCDEF|
@@ -784,31 +776,11 @@ void WorldSession::HandleCharterQuery(WorldPacket & recv_data)
 	|00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 |................|
 	|00 00 00 00 00 00 00 00 00 00 00 00 00		  |.............   |
 	-------------------------------------------------------------------
-	
-	uint32 charter_id
-	uint64 leader_guid
-	string guild_name
-	uint8  0			<-- maybe subname? or some shit.. who knows
-	uint32 9
-	uint32 9
-	uint32[9] signatures
-	uint8  0
-	uint8  0
 	*/
-//this is wrong there are 42 bytes after 9 9, 4*9+2=38 not 42,
-	//moreover it can't signature, blizz uses always fullguid so it must be uin64
-	//moreover this does not show ppl who signed this, for this purpose there is another opcde
 	uint32 charter_id;
 	uint64 item_guid;
 	recv_data >> charter_id;
 	recv_data >> item_guid;
-	/*Charter * c = objmgr.GetCharter(charter_id,CHARTER_TYPE_GUILD);
-	if(c == 0)
-		c = objmgr.GetCharter(charter_id, CHARTER_TYPE_ARENA_2V2);
-	if(c == 0)
-		c = objmgr.GetCharter(charter_id, CHARTER_TYPE_ARENA_3V3);
-	if(c == 0)
-		c = objmgr.GetCharter(charter_id, CHARTER_TYPE_ARENA_5V5);*/
 
 	Charter * c = objmgr.GetCharterByItemGuid(item_guid);
 	if(c == 0)
@@ -824,35 +796,32 @@ void WorldSession::HandleCharterQuery(WorldPacket & recv_data)
 	}
 	else
 	{
-		/*uint32 v = c->CharterType;
-		if(c->CharterType == CHARTER_TYPE_ARENA_3V3)
-			v=2;
-		else if(c->CharterType == CHARTER_TYPE_ARENA_5V5)
-			v=4;
-
-		data << v << v;*/
 		data << uint32(c->Slots) << uint32(c->Slots);
 	}
 
-	data << uint32(0);                                      // 4
-    data << uint32(0);                                      // 5
-    data << uint32(0);                                      // 6
-    data << uint32(0);                                      // 7
-    data << uint32(0);                                      // 8
-    data << uint16(0);                                      // 9 2 bytes field
+	data << uint32(0);										// 4
+	data << uint32(0);										// 5
+	data << uint32(0);										// 6
+	data << uint32(0);										// 7
+	data << uint32(0);										// 8
+	data << uint16(0);										// 9 2 bytes field
     
 	if( c->CharterType == CHARTER_TYPE_GUILD )
 	{
-		data << uint32(1);                                      // 10
+		data << uint32(1);								// 10 minlevel
+		data << uint32(MAXIMUM_ATTAINABLE_LEVEL);		// 11 maxlevel based on Maximum Attainable Level, located in World.h
 	}
 	else
 	{
-		data << uint32(70);                                      // 10
+		data << uint32(80);								// 10 Arena Charter Min Level
+		data << uint32(MAXIMUM_ATTAINABLE_LEVEL);		// 11 Arena Charter Max Level based on Maximum Attainable Level, located in World.h
 	}
 
-    data << uint32(0);                                      // 11
-    data << uint32(0);                                      // 13 count of next strings?
-    data << uint32(0);                                      // 14
+	data << uint32(0);										// 12
+	data << uint32(0);										// 13 count of next strings?
+	data << uint32(0);										// 14
+	data << uint32(0);										// 15
+	data << uint16(0);										// 16
 
 	if (c->CharterType == CHARTER_TYPE_GUILD)
 	{

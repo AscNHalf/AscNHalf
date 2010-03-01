@@ -28,12 +28,9 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 	uint64 petGuid = 0;
 	uint16 misc = 0;
 	uint16 action = 0;
-
 	uint64 targetguid = 0;
-	recv_data >> petGuid >> misc >> action;
-	//recv_data.hexlike();
 
-	//printf("Pet_Action: 0x%.4X 0x%.4X\n", misc, action);
+	recv_data >> petGuid >> misc >> action >> targetguid;
 
 	if(GET_TYPE_FROM_GUID(petGuid) == HIGHGUID_TYPE_UNIT)
 	{
@@ -44,7 +41,6 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 		// must be a mind controled creature..
 		if(action == PET_ACTION_ACTION)
 		{
-			recv_data >> targetguid;
 			switch(misc)
 			{
 			case PET_ACTION_ATTACK:
@@ -70,7 +66,6 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 
 	if(action == PET_ACTION_SPELL || action == PET_ACTION_SPELL_1 || action == PET_ACTION_SPELL_2 || (action == PET_ACTION_ACTION && misc == PET_ACTION_ATTACK )) // >> target
 	{
-		recv_data >> targetguid;
 		pTarget = _player->GetMapMgr()->GetUnit(targetguid);
 		if(!pTarget) pTarget = pPet;	// target self
 	}

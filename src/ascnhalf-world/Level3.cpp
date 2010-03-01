@@ -37,7 +37,6 @@ bool ChatHandler::HandleWorldPortCommand(const char* args, WorldSession *m_sessi
 	return true;
 }
 
-
 bool ChatHandler::HandleClearCooldownsCommand(const char *args, WorldSession *m_session)
 {
 	uint32 guid = (uint32)m_session->GetPlayer()->GetSelection();
@@ -323,7 +322,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args, WorldSession *m_se
 	SystemMessage(m_session,  buf);
 
 
-	for (uint8 i = 0; i < 64; i++)
+	for (uint8 i = 0; i < 128; i++)
 	{
 		if (flag != 0)
 		{
@@ -1306,6 +1305,7 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args, WorldSession* m_ses
 		return true;
 	}
 
+	plr->UpdateStats();
 	plr->ApplyLevelInfo(Info, Level);
 	return true;
 }
@@ -1761,7 +1761,7 @@ bool ChatHandler::HandleMassSummonCommand(const char* args, WorldSession* m_sess
 		{
 			//plr->SafeTeleport(summoner->GetMapId(), summoner->GetInstanceID(), summoner->GetPosition());
 			/* let's do this the blizz way */
-			plr->SummonRequest(summoner->GetLowGUID(), summoner->GetZoneId(), summoner->GetMapId(), summoner->GetInstanceID(), summoner->GetPosition());
+			plr->SummonRequest(summoner, summoner->GetZoneId(), summoner->GetMapId(), summoner->GetInstanceID(), summoner->GetPosition());
 			++c;
 		}
 	}

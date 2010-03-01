@@ -413,8 +413,16 @@ public:
 
 	INLINE std::string getGmClientChannel() { return GmClientChannel; }
 
+	// MOTD line 1
 	void SetMotd(const char *motd) { m_motd = motd; }
 	INLINE const char* GetMotd() const { return m_motd.c_str(); }
+
+	// MOTD line 2
+	void SetMotd2(const char *motd2) { m_motd2 = motd2; }
+	INLINE const char* GetMotd2() const { return m_motd2.c_str(); }
+	
+	// what the hell:P 
+	//INLINE const char* GetMotd() const { return m_motd.c_str(); }
 
 	INLINE time_t GetGameTime() const { return m_gameTime; }
 
@@ -566,6 +574,9 @@ public:
 
 	bool display_free_items;
 
+	// Voice Chat
+	bool VoiceChatEnable;
+
 	//Enable/Disable specific battlegrounds/arenas
 	bool av_disabled;
 	bool wsg_disabled;
@@ -631,7 +642,8 @@ protected:
 	bool m_allowMovement;
 	bool m_gmTicketSystem;
 	std::string m_motd;
-   
+	std::string m_motd2;
+
     uint32 realmtype;
 
 	time_t m_gameTime;

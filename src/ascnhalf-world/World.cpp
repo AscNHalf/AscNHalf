@@ -1268,7 +1268,12 @@ channelmgr.seperatechannels = Config.MainConfig.GetBoolDefault("Server", "Sepera
 	setRate(RATE_EOTS_CAPTURERATE, Config.MainConfig.GetFloatDefault("Rates", "EOTSCaptureRate", 1.0f));
 	SetPlayerLimit(Config.MainConfig.GetIntDefault("Server", "PlayerLimit", 1000));
 
+	// Voice chat
+	VoiceChatEnable = Config.MainConfig.GetBoolDefault("VoiceChat", "Enabled", false);
+	// TODO: Set up other config options of VoiceChat to work.
+
 	SetMotd(Config.MainConfig.GetStringDefault("Server", "Motd", "AscNHalf Default MOTD").c_str());
+	SetMotd2(Config.MainConfig.GetStringDefault("Server", "Motd2", "").c_str());
 	mQueueUpdateInterval = Config.MainConfig.GetIntDefault("Server", "QueueUpdateInterval", 5000);
 	SetKickAFKPlayerTime(Config.MainConfig.GetIntDefault("Server", "KickAFKPlayers", 0));
 	gm_skip_attunement = Config.MainConfig.GetBoolDefault("Server", "SkipAttunementsForGM", true);

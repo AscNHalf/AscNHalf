@@ -150,32 +150,35 @@ void WorldSession::HandleIgnoreTrade(WorldPacket & recv_data)
 
 void WorldSession::HandleCancelTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
-		return;
-
-	if( _player->mTradeStatus == TRADE_STATUS_COMPLETE)
+	if(_player)
 	{
-		_player->ResetTradeVariables();
-		return;
-	}
+		if(!_player->IsInWorld() || _player->mTradeTarget == 0)
+			return;
 
-	uint32 TradeStatus = TRADE_STATUS_CANCELLED;
+		if( _player->mTradeStatus == TRADE_STATUS_COMPLETE)
+		{
+			_player->ResetTradeVariables();
+			return;
+		}
 
-	Player* pTarget = _player->GetTradeTarget();
-	if(pTarget == NULL || !pTarget->IsInWorld())
-	{
-		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
-		_player->ResetTradeVariables();
-		SendTradeStatus(TradeStatus);
-	}
-	else
-	{
-		pTarget->ResetTradeVariables();
-		_player->ResetTradeVariables();
-	
-		SendTradeStatus(TradeStatus);
-		if(pTarget->m_session && pTarget->m_session->GetSocket())
-			pTarget->m_session->SendTradeStatus(TradeStatus);
+		uint32 TradeStatus = TRADE_STATUS_CANCELLED;
+
+		Player* pTarget = _player->GetTradeTarget();
+		if(pTarget == NULL || !pTarget->IsInWorld())
+		{
+			TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+			_player->ResetTradeVariables();
+			SendTradeStatus(TradeStatus);
+		}
+		else
+		{
+			pTarget->ResetTradeVariables();
+			_player->ResetTradeVariables();
+
+			SendTradeStatus(TradeStatus);
+			if(pTarget->m_session && pTarget->m_session->GetSocket())
+				pTarget->m_session->SendTradeStatus(TradeStatus);
+		}
 	}
 }
 

@@ -188,10 +188,14 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 {
 	// sanity checks
 	if(!_player->IsInWorld() || !_player->GetLootGUID()) return;
-	
+
 	// lookup the object we will be looting
-	// TODO: Handle item guids
-	Object* pLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
+	Object* pLootObj = NULL;
+	if( GET_TYPE_FROM_GUID(_player->GetLootGUID()) == HIGHGUID_TYPE_ITEM )
+		pLootObj = _player->GetItemInterface()->GetItemByGUID(_player->GetLootGUID());
+	else
+		pLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
+
 	Player* plr;
 	if( pLootObj == NULL )
 		return;
@@ -1010,11 +1014,10 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
 	//OUT_DEBUG("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
-
-	uint32 uiID;
 	if(!sWorld.m_useAccountData)
 		return;
 
+	uint32 uiID;
 	recv_data >> uiID;
 
 	if(uiID > 8)
@@ -1032,12 +1035,6 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 	if(uiDecompressedSize == 0)
 	{
 		SetAccountData(uiID, NULL, false,0);
-		return;
-	}
-
-	if(uiDecompressedSize>100000)
-	{
-		Disconnect();
 		return;
 	}
 
@@ -1092,10 +1089,10 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
 	//OUT_DEBUG("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
-
-	uint32 id;
 	if(!sWorld.m_useAccountData)
 		return;
+
+	uint32 id;
 	recv_data >> id;
 	
 	if(id > 8)
@@ -2137,9 +2134,16 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket &recv_data)
 		// delete item from database, so we can't cheat
 		pItem->DeleteFromDB();
 		lootmgr.FillItemLoot(&pItem->m_loot, pItem->GetEntry());
+
+		if(pItem->GetProto()->Lootgold > 0) // Gold can be looted from items. http://www.wowhead.com/?item=45724
+			pItem->m_loot.gold = pItem->GetProto()->Lootgold;
+
+		if(pItem->m_loot.gold)
+			pItem->m_loot.gold = int32(float(pItem->m_loot.gold) * sWorld.getRate(RATE_MONEY));
+
 		pItem->m_looted = true;
 	}
-	
+
 	_player->SendLoot(pItem->GetGUID(), LOOT_DISENCHANTING);
 }
 
@@ -2251,10 +2255,22 @@ void WorldSession::HandleDungeonDifficultyOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket & recv_data)
 {
+	uint64 summonguid;
+	bool agree;
+	recv_data >> summonguid;
+	recv_data >> agree;
+
 	//Do we have a summoner?
 	if(!_player->m_summoner)
 	{
-		SendNotification(NOTIFICATION_MESSAGE_NO_PERMISSION);
+		SendNotification("Summoner guid has changed or does not exist.");
+		return;
+	}
+
+	// Summoner changed?
+	if(_player->m_summoner->GetGUID() != summonguid)
+	{
+		SendNotification("Summoner guid has changed or does not exist.");
 		return;
 	}
 
@@ -2278,11 +2294,22 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket & recv_data)
 			return;
 		}
 	}
-	if(!_player->SafeTeleport(_player->m_summonMapId, _player->m_summonInstanceId, _player->m_summonPos))
-		SendNotification(NOTIFICATION_MESSAGE_FAILURE);
+	if(agree)
+	{
+		if(!_player->SafeTeleport(_player->m_summonMapId, _player->m_summonInstanceId, _player->m_summonPos))
+			SendNotification(NOTIFICATION_MESSAGE_FAILURE);
 
-	// Null-out the summoner
-	_player->m_summoner = _player->m_summonInstanceId = _player->m_summonMapId = 0;
+		_player->m_summoner = NULLOBJ;
+		_player->m_summonInstanceId = _player->m_summonMapId = 0;
+		return;
+	}
+	else
+	{
+		// Null-out the summoner
+		_player->m_summoner = NULLOBJ;
+		_player->m_summonInstanceId = _player->m_summonMapId = 0;
+		return;
+	}
 }
 
 void WorldSession::HandleDismountOpcode(WorldPacket& recv_data)
@@ -2322,5 +2349,74 @@ void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& recv_data)
 {
 	WorldPacket data(SMSG_WORLD_STATE_UI_TIMER_UPDATE, 4);
 	data << uint32(UNIXTIME);
+	SendPacket(&data);
+}
+
+void WorldSession::HandleTimeSyncResp( WorldPacket & recv_data )
+{
+	uint32 counter, time;
+	recv_data >> counter >> time;
+
+	// time_ seems always more than getMSTime()
+	uint32 diff = getMSTimeDiff(getMSTime(), time);
+
+	OUT_DEBUG("Recieved opcode response for TimeSyncResp, Counter: %u, Time: %u, MS: %u, Difference: %u.\n", counter, time, getMSTime(), diff);
+}
+
+void WorldSession::HandleHAndROpcode( WorldPacket & recv_data )
+{
+	uint64 guid;
+	recv_data >> guid;
+
+	if(_player->isCasting())
+		_player->InterruptCurrentSpell();
+
+	if( _player->isDead())
+	{
+		_player->ResurrectPlayer(NULLPLR);
+	}
+
+	_player->SetMovement(MOVE_UNROOT, 1);
+	_player->SetUInt32Value(UNIT_FIELD_HEALTH, _player->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+	_player->SetUInt32Value(UNIT_FIELD_POWER1, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+	_player->SetUInt32Value(UNIT_FIELD_POWER4, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER4));
+
+	LocationVector vec(_player->GetBindPositionX(), _player->GetBindPositionY(), _player->GetBindPositionZ());
+	_player->SafeTeleport(_player->GetBindMapId(), 0, vec);
+}
+
+void WorldSession::HandleGameobjReportUseOpCode( WorldPacket& recv_data )   // CMSG_GAMEOBJ_REPORT_USE
+{
+	CHECK_INWORLD_RETURN;
+	uint64 guid;
+	recv_data >> guid;
+	GameObject* gameobj = _player->GetMapMgr()->GetGameObject((uint32)guid);
+
+	if( gameobj== NULL )
+		return;
+
+	if( gameobj->CanActivate() )
+	{
+		sQuestMgr.OnGameObjectActivate(_player, gameobj);
+	}
+	return;
+}
+
+void WorldSession::HandleReadyForAccountDataTimes(WorldPacket &recv_data)
+{
+	DEBUG_LOG( "WORLD","Received CMSG_READY_FOR_ACCOUNT_DATA_TIMES" );
+
+	// account data == UI config
+	WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
+
+	data << uint32(UNIXTIME) << uint8(1) << uint32(0x15);
+
+	for (int i = 0; i < 8; i++)
+	{
+		if(0x15 & (1 << i))
+		{
+			data << uint32(0);
+		}
+	}
 	SendPacket(&data);
 }

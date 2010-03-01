@@ -677,6 +677,7 @@ void WorldSession::HandleVehicleDismiss(WorldPacket & recv_data)
 	if (GetPlayer() == NULL || !GetPlayer()->m_CurrentVehicle)
 		return;
 
+	HandleMovementOpcodes(recv_data);
 	GetPlayer()->m_CurrentVehicle->RemovePassenger(GetPlayer());
 }
 

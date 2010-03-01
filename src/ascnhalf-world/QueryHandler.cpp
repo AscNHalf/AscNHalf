@@ -125,10 +125,10 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 		data << ci->unkfloat1;
 		data << ci->unkfloat2;
 		data << ci->Leader;
-		data << uint32(0);	// unk
-		data << uint32(0);	// unk
-		data << uint32(0);	// unk
-		data << uint32(0);	// unk
+		for(uint32 i = 0; i < 6; ++i)
+		{
+			data << uint32(0);	//QuestItems
+		}
 		data << uint32(0);	// unk
 	}
 
@@ -169,7 +169,12 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 	else
 		data << goinfo->Name;
 
-	data << uint8(0) << uint8(0) << uint8(0) << uint8(0) << uint8(0) << uint8(0);   // new string in 1.12
+	data << uint8(0);
+	data << uint8(0);
+	data << uint8(0);
+	data << uint8(0);
+	data << uint8(0);
+	data << uint8(0);
 	data << goinfo->SpellFocus;
 	data << goinfo->sound1;
 	data << goinfo->sound2;
@@ -194,6 +199,9 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 	data << goinfo->Unknown12;
 	data << goinfo->Unknown13;
 	data << goinfo->Unknown14;
+	data << float(1);
+	for(uint32 i = 0; i < 6; ++i)
+		data << uint32(0);			// itemId[6], quest drop
 
 	SendPacket( &data );
 }
@@ -260,9 +268,11 @@ void WorldSession::HandlePageTextQueryOpcode( WorldPacket & recv_data )
 {
 	CHECK_PACKET_SIZE(recv_data, 4);
 	uint32 pageid = 0;
+	uint64 itemguid;
 	uint8 buffer[10000];
 	StackPacket data(SMSG_PAGE_TEXT_QUERY_RESPONSE,buffer, 10000);
 	recv_data >> pageid;
+	recv_data >> itemguid;
 
 	while(pageid)
 	{
@@ -294,19 +304,29 @@ void WorldSession::HandleItemNameQueryOpcode( WorldPacket & recv_data )
 	StackPacket reply(SMSG_ITEM_NAME_QUERY_RESPONSE, databuffer, 1000);
 
 	uint32 itemid;
+	uint64 guid;
 	recv_data >> itemid;
+	recv_data >> guid;
+
 	reply << itemid;
-	ItemPrototype *proto=ItemPrototypeStorage.LookupEntry(itemid);
+	ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(itemid);
 	if(!proto)
 		reply << "Unknown Item";
 	else
 	{
-		LocalizedItem* li = (language>0) ? sLocalizationMgr.GetLocalizedItem(itemid, language) : NULL;
+		LocalizedItem* li = (language > 0) ? sLocalizationMgr.GetLocalizedItem(itemid, language) : NULL;
 		if(li)
 			reply << li->Name;
 		else
 			reply << proto->Name1;
 	}
+	if(!proto)
+		reply << uint32(0);
+	else
+	{
+		reply << uint32(proto->InventoryType);
+	}
+
 	SendPacket(&reply);	
 }
 

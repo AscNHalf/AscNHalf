@@ -20,7 +20,7 @@
 
 #include "StdAfx.h"
 
-//Pakcet Building
+//Packet Building
 /////////////////
 
 WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
@@ -29,11 +29,12 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 	// better to allocate more at startup than have to realloc the buffer later on.
 
 	WorldPacket *data = new WorldPacket(SMSG_QUEST_QUERY_RESPONSE, 2048);
-	LocalizedQuest * lci = (language>0) ? sLocalizationMgr.GetLocalizedQuest(qst->id, language) : NULL;
-   
+	LocalizedQuest * lci = (language > 0) ? sLocalizationMgr.GetLocalizedQuest(qst->id, language) : NULL;
+
 	*data << uint32(qst->id);						// Quest ID
 	*data << uint32(2);								// Unknown, always seems to be 2
 	*data << uint32(qst->max_level);				// Quest level
+	*data << uint32(qst->min_level);				// minlevel !!!
 
 	if(qst->quest_sort > 0)
 		*data << int32(-(int32)qst->quest_sort);	// Negative if pointing to a sort.
@@ -41,23 +42,26 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 		*data << uint32(qst->zone_id);				// Positive if pointing to a zone.
 
 	*data << uint32(qst->type);						// Info ID / Type
-	*data << uint32(0);								// suggested players
+	*data << uint32(qst->suggested_players);		// suggested players
 	*data << uint32(qst->required_rep_faction);		// Faction ID
 	*data << uint32(qst->required_rep_value);		// Faction Amount
-	*data << uint32(0);								// Unknown (always 0)
-	*data << uint32(0);								// Unknown (always 0)
 	*data << uint32(qst->next_quest_id);			// Next Quest ID
+	*data << uint32(0);								// 3.3.0
+
 	*data << uint32(sQuestMgr.GenerateRewardMoney(_player, qst));	// Copper reward
-	
 	*data << uint32(qst->required_money);			// Required Money
 	*data << uint32(qst->effect_on_player);			// Spell casted on player upon completion
 	*data << uint32(qst->reward_spell);				// Spell added to spellbook upon completion
 	*data << uint32(qst->reward_honor);				// 2.3.0 - bonus honor
+	*data << float(0);								// unknown
 	*data << uint32(qst->srcitem);					// Item given at the start of a quest (srcitem)
 	*data << uint32(qst->quest_flags);				// Quest Flags
 	*data << uint32(qst->reward_title);				// Reward Title Id - Player is givn this title upon completion
-	*data << uint32(qst->required_kill_player);		// 3.0.2
+	*data << uint64(qst->required_kill_player);		// 3.0.2
 	*data << uint32(qst->reward_talents);			// 3.0.2
+	*data << uint32(0);								// bonus arena points
+	*data << uint32(0);								// Arena Points
+	*data << uint32(0);								// Arena Points Multiplicator.
 
 	// (loop 4 times)
 	for(uint32 i = 0; i < 4; ++i)
@@ -72,6 +76,18 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 		*data << qst->reward_choiceitem[i];			// Choice Reward Item [i]
 		*data << qst->reward_choiceitemcount[i];	// Choice Reward Item Count [i]
 	}
+
+	// 3.3 Faction Reward Stuff.
+	for(uint32 i = 0; i < 5; ++i)
+		*data << uint32(0);
+
+	for(uint32 i = 0; i < 5; ++i)
+		*data << uint32(0);
+
+	for(uint32 i = 0; i < 5; ++i)
+		*data << uint32(0);
+
+	//end
 
 	*data << qst->point_mapid;						// Unknown
 	*data << qst->point_x;							// Unknown
@@ -93,22 +109,21 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 		*data << qst->endtext;						// Subdescription
 	}
 
+	*data << uint8(0); //unk string
+
 	// (loop 4 times)
 	for(uint32 i = 0; i < 4; ++i)
 	{
 		*data << qst->required_mob[i];				// Kill mob entry ID [i]
-		*data << qst->required_mobcount[i];			// Kill mob count [i]
+		*data << uint64(qst->required_mobcount[i]);	// Kill mob count [i]
 		*data << uint32(0);							// 3.0.2
 	}
 
-	for(uint32 i = 0; i < 4; ++i)
+	for(uint32 i = 0; i < 6; ++i)
 	{
 		*data << qst->required_item[i];				// Collect item [i]
 		*data << qst->required_itemcount[i];		// Collect item count [i]
 	}
-
-	*data << uint32(0);	// more items?
-	*data << uint32(0);	// count
 
 	if(lci)
 	{
@@ -278,7 +293,7 @@ bool QuestLogEntry::CanBeFinished()
 		}
 	}
 
-	for(i = 0; i < 4; ++i)
+	for(i = 0; i < 6; ++i)
 	{
 		if(m_quest->required_item[i])
 		{
@@ -367,10 +382,10 @@ void QuestLogEntry::UpdatePlayerFields()
 	if(!m_plr)
 		return;
 
-	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 0, m_quest->id);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*5 + 0, m_quest->id);
 
 	// next field is kills and shit like that
-	uint32 field1 = 0;
+	uint64 field1 = 0;
 	int i;
 	
 	// explored areas
@@ -402,13 +417,13 @@ void QuestLogEntry::UpdatePlayerFields()
 		for(int i = 0; i < 4; ++i)
 		{
 			if( m_quest->required_mob[i] && m_mobcount[i] > 0 )
-				p[i] |= (uint8)m_mobcount[i];
+				p[2*i] |= (uint8)m_mobcount[i];
 		}
 	}
 
-	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 1, 0);
-	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 2, field1);
-	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 3, ( m_time_left ? static_cast<uint32>(time(NULL) + (m_time_left/1000)) : 0 ));
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*5 + 1, 0);
+	m_plr->SetUInt64Value(PLAYER_QUEST_LOG_1_1 + m_slot*5 + 2, field1);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*5 + 3, ( m_time_left ? static_cast<uint32>(time(NULL) + (m_time_left/1000)) : 0 ));
 
 	// Timed quest handler.
 	if(m_time_left && !sEventMgr.HasEvent( m_plr,EVENT_TIMED_QUEST_EXPIRE ))

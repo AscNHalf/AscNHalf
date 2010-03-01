@@ -120,7 +120,8 @@ struct OpcodeHandler
 enum SessionStatus
 {
 	STATUS_AUTHED = 0,
-	STATUS_LOGGEDIN
+	STATUS_LOGGEDIN,
+	STATUS_IN_OR_LOGGINGOUT
 };
 
 struct AccountDataEntry
@@ -363,6 +364,7 @@ protected:
 	void HandleLootMasterGiveOpcode(WorldPacket& recv_data);
 	void HandleLootRollOpcode(WorldPacket& recv_data);
 	void HandleWhoOpcode(WorldPacket& recvPacket);
+	void HandleHAndROpcode(WorldPacket& recv_data);
 	void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
 	void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
 	void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
@@ -386,12 +388,14 @@ protected:
 	void HandleTogglePVPOpcode(WorldPacket& recvPacket);
 	void HandleAmmoSetOpcode(WorldPacket& recvPacket);
 	void HandleGameObjectUse(WorldPacket& recvPacket);
+	void HandleGameobjReportUseOpCode(WorldPacket& recv_data);
 	//void HandleJoinChannelOpcode(WorldPacket& recvPacket);
 	//void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
 	void HandlePlayedTimeOpcode(WorldPacket & recv_data);
 	void HandleSetSheathedOpcode(WorldPacket & recv_data);
 	void HandleCompleteCinematic(WorldPacket & recv_data);
 	void HandleInspectOpcode( WorldPacket & recv_data );
+	void HandleTimeSyncResp(WorldPacket& recv_data);
 
 	/// Gm Ticket System in GMTicket.cpp:
 	void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
@@ -727,11 +731,14 @@ protected:
 	// VOICECHAT
 	void HandleEnableMicrophoneOpcode(WorldPacket & recv_data);
 	void HandleVoiceChatQueryOpcode(WorldPacket & recv_data);
-	void HandleChannelVoiceQueryOpcode(WorldPacket & recv_data);
+	void HandleChannelVoiceOnOpcode(WorldPacket & recv_data);
+	void HandleChannelWatchOpcode(WorldPacket & recv_data);
+
+	// Auto Loot Pass
 	void HandleSetAutoLootPassOpcode(WorldPacket & recv_data);
 
 	void HandleSetFriendNote(WorldPacket & recv_data);
-	void Handle38C(WorldPacket & recv_data);
+	void HandleRealmSplit(WorldPacket & recv_data);
 	void HandleInrangeQuestgiverQuery(WorldPacket & recv_data);
 
 	// Misc Opcodes
@@ -747,6 +754,7 @@ protected:
 	void HandleEjectPassengerOpcode(WorldPacket & recv_data);
 
 	//MISC
+	void HandleReadyForAccountDataTimes(WorldPacket &recv_data);
 	void HandleWorldStateUITimerUpdate( WorldPacket & recv_data );
 
 public:
@@ -762,7 +770,6 @@ public:
 	void SendAuctionList(Creature* pCreature);
 	void SendSpiritHealerRequest(Creature* pCreature);
 	void FullLogin(Player* plr);
-	void SendAccountDataTimes(uint32 mask);
 #ifdef CLUSTERING
 	bool ClusterTryPlayerLogin(uint32 Guid, uint32 ClientBuild, string GMPermissions, uint32 Account_Flags);
 #endif
@@ -799,6 +806,7 @@ private:
 	int permissioncount;
 
 	bool _loggingOut;
+	bool _recentlogout;
 	uint32 _latency;
 	uint32 client_build;
 	uint32 instanceId;

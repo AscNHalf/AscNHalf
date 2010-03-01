@@ -26,8 +26,8 @@ GameObject::GameObject(uint64 guid)
 	m_uint32Values = _fields;
 	memset(m_uint32Values, 0,(GAMEOBJECT_END)*sizeof(uint32));
 	m_updateMask.SetCount(GAMEOBJECT_END);
-	SetUInt32Value( OBJECT_FIELD_TYPE,TYPE_GAMEOBJECT|TYPE_OBJECT);
-	SetUInt64Value( OBJECT_FIELD_GUID,guid);
+	SetUInt32Value( OBJECT_FIELD_TYPE, TYPE_GAMEOBJECT|TYPE_OBJECT);
+	SetUInt64Value( OBJECT_FIELD_GUID, guid);
 	m_wowGuid.Init(GetGUID());
  
 	SetFloatValue( OBJECT_FIELD_SCALE_X, 1);//info->Size  );
@@ -73,7 +73,7 @@ GameObject::~GameObject()
 			plr->SetSummonedObject(NULLOBJ);
 
 		if(plr == m_summoner)
-			m_summoner = NULLUNIT;
+			m_summoner = NULLOBJ;
 	}
 
 	if(m_respawnCell != NULL)
@@ -394,13 +394,13 @@ void GameObject::InitAI()
 					}
 				}
 			}
-		}break; 
-	 
-       case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING: 
-            { 
-		      Health = pInfo->SpellFocus + pInfo->sound5; 
-		      }break; 
-	} 
+		}break;
+
+		case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+			{
+				Health = pInfo->SpellFocus + pInfo->sound5;
+			}break;
+	}
 	
 	myScript = sScriptMgr.CreateAIScriptClassForGameObject(GetEntry(), this);
 
@@ -707,6 +707,11 @@ void GameObject::_Expire()
 	Destructor();
 }
 
+void GameObject::ExpireAndDelete()
+{
+	ExpireAndDelete(1); // Defaults to 1, so set to 1 for non delay including calls.
+}
+
 void GameObject::ExpireAndDelete(uint32 delay)
 {
 	if(m_deleted)
@@ -805,60 +810,62 @@ void GameObject::UpdateRotation(float orientation3, float orientation4)
 	SetFloatValue(GAMEOBJECT_PARENTROTATION_3, orientation4);
 }
 
-//	custom functions for scripting
+// custom functions for scripting
 void GameObject::SetState(uint8 state)
 {
 	SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, state);
 }
 
-// Destructable Buildings 
-void GameObject::TakeDamage(uint32 ammount) 
-{ 
-	        if(pInfo->Type != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING) 
-	                return; 
-	 
-	        if(Health > ammount) 
-	                Health -= ammount; 
-	        else if(Health < ammount) 
-                 Health = 0; 
-	 
-	        if(Health = 0) 
-	                return; 
- 
-	        if(HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DESTROYED)) 
-	        { 
-	                if(Health <= 0) 
-	                { 
-	                        RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_DAMAGED); 
-	                        SetFlag(GAMEOBJECT_FLAGS,GO_FLAG_DESTROYED); 
-	                        SetUInt32Value(GAMEOBJECT_DISPLAYID,pInfo->Unknown1); 
-	 
-	                        sHookInterface.OnDestroyBuilding(this); 
-	                } 
-	        } 
-	        else if(!HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DESTROYED)) 
-	        { 
-	                if(Health <= pInfo->sound5) 
-                 { 
-	                        if(pInfo->Unknown1 == 0) 
-                                Health = 0; 
-	                        else if(Health == 0) 
-	                                Health = 1; 
-	 
- 		                        SetFlag(GAMEOBJECT_FLAGS,GO_FLAG_DAMAGED); 
- 		                        SetUInt32Value(GAMEOBJECT_DISPLAYID,pInfo->sound4); 
- 		                        sHookInterface.OnDamageBuilding(this); 
- 		                } 
- 		        } 
- 		} 
- 		 
-void GameObject::Rebuild() 
- 	{ 
- 	 RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); 
- 	 RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_DESTROYED); 
- 	 SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->DisplayID); 
- 	 Health = pInfo->SpellFocus + pInfo->sound5; 
- 	} 
+// Destructable Buildings
+void GameObject::TakeDamage(uint32 ammount)
+{
+	if(pInfo->Type != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+		return;
+
+	if(Health > ammount)
+		Health -= ammount;
+
+	else if(Health < ammount)
+		Health = 0;
+
+	if(Health = 0)
+		return;
+
+	if(HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+	{
+		if(Health <= 0)
+		{
+			RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->Unknown1);
+
+
+			sHookInterface.OnDestroyBuilding(TO_GAMEOBJECT(this));
+		}
+	}
+	else if(!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+	{
+		if(Health <= pInfo->sound5)
+		{
+			if(pInfo->Unknown1 == 0)
+				Health = 0;
+			else if(Health == 0)
+				Health = 1;
+
+			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->sound4);
+			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
+		}
+	}
+}
+
+void GameObject::Rebuild()
+{
+	RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+	RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+	SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->DisplayID);
+	Health = pInfo->SpellFocus + pInfo->sound5;
+}
 
 uint8 GameObject::GetState()
 {

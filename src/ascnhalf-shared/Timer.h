@@ -21,6 +21,14 @@
 #ifndef WOW_TIMER_H
 #define WOW_TIMER_H
 
+INLINE uint32 getMSTimeDiff(uint32 oldMSTime, uint32 newMSTime)
+{
+	if(oldMSTime > newMSTime)
+		return (0xFFFFFFFF - oldMSTime) + newMSTime;
+	else
+		return newMSTime - oldMSTime;
+}
+
 #ifdef WIN32
 __forceinline uint32 getMSTime() { return GetTickCount(); }
 #else

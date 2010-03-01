@@ -149,8 +149,8 @@ struct Quest
 
 	char * objectivetexts[4];
 
-	uint32 required_item[4];
-	uint32 required_itemcount[4];
+	uint32 required_item[6];
+	uint32 required_itemcount[6];
 
 	uint32 required_kill_player;
 
@@ -253,7 +253,7 @@ public:
 
 	INLINE uint32 GetBaseField(uint32 slot)
 	{
-		return PLAYER_QUEST_LOG_1_1 + (slot * 4);
+		return PLAYER_QUEST_LOG_1_1 + (slot * 5);
 	}
 
 private:
@@ -264,7 +264,7 @@ private:
 
 	Quest *m_quest;
 	Player* m_plr;
-	
+
 	uint32 m_mobcount[4];
 	uint32 m_explored_areas[4];
 

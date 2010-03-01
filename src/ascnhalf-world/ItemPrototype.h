@@ -679,7 +679,7 @@ struct ItemPrototype
 	uint32 MaxCount;
 	uint32 ContainerSlots;
 	ItemStat Stats[10];
-	ItemDamage Damage[5];
+	ItemDamage Damage[2];
 	uint32 Armor;
 	uint32 HolyRes;
 	uint32 FireRes;
@@ -713,6 +713,7 @@ struct ItemPrototype
 	uint32 SocketBonus;
 	uint32 GemProperties;
 	int32 DisenchantReqSkill;
+	int32 Lootgold;
 	uint32 ArmorDamageModifier;
 	bool heirloom;
 	uint32 ScaleDistributeId;

@@ -28,7 +28,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     CHECK_INWORLD_RETURN;
 
 	uint64 guid;
-	WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
+	WorldPacket data(SMSG_QUESTGIVER_STATUS, 9);
     Object* qst_giver = NULLOBJ;
 
 	recv_data >> guid;
@@ -189,9 +189,9 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	
 	if ((status == QMGR_QUEST_AVAILABLE) || (status == QMGR_QUEST_REPEATABLE) || (status == QMGR_QUEST_CHAT))
 	{
-		sQuestMgr.BuildQuestDetails(&data, qst,qst_giver,1, language, _player);	 // 0 because we want goodbye to function
+		sQuestMgr.BuildQuestDetails(&data, qst, qst_giver, 1, language, _player);	// 0 because we want goodbye to function
 		SendPacket(&data);
-		DEBUG_LOG( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
+		OUT_DEBUG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 	}
 	/*else if (status == QMGR_QUEST_FINISHED)
 	{
@@ -372,6 +372,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 			if(!_player->GetItemInterface()->AddItemToFreeSlot(item))
 			{
 				item->Destructor();
+				item = NULLITEM;
 			}
 		}
 	}
@@ -400,7 +401,7 @@ void WorldSession::HandleQuestlogRemoveQuestOpcode(WorldPacket& recvPacket)
 {
 	CHECK_INWORLD_RETURN;
 
-	OUT_DEBUG( "QuestHandler","Received CMSG_QUESTLOG_REMOVE_QUEST" );
+	DEBUG_LOG( "QuestHandler","Received CMSG_QUESTLOG_REMOVE_QUEST" );
 
 	uint8 quest_slot;
 	recvPacket >> quest_slot;
@@ -863,7 +864,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 	if(GetPlayer()->GetQuestSharer())
 	{
 		Player* pPlayer = objmgr.GetPlayer(GetPlayer()->GetQuestSharer());
-		if(pPlayer && pPlayer->GetSession())
+		if(pPlayer)
 		{
 			WorldPacket data(MSG_QUEST_PUSH_RESULT, 13);
 			data << guid;

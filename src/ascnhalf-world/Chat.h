@@ -80,6 +80,8 @@ enum ChatMsg
 	CHAT_MSG_RESTRICTED								= 46,
 	CHAT_MSG_ACHIEVEMENT							= 47,
 	CHAT_MSG_GUILD_ACHIEVEMENT						= 48,
+	CHAT_MSG_UNK									= 50, 
+	CHAT_MSG_PARTY_LEADER							= 51 
 };
 
 enum Languages

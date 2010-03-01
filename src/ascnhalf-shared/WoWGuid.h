@@ -125,7 +125,7 @@ public:
 		ASSERT(fieldcount < BitCount8(guidmask));
 
 		guidfields[fieldcount++] = field;
-   
+
 		if (fieldcount == BitCount8(guidmask))
 			_CompileByNew();
 	}

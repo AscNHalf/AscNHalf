@@ -86,7 +86,11 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 		float c_tposz = pTrans->GetPositionZ() + _player->m_TransporterZ;
 
 		WorldPacket dataw(SMSG_NEW_WORLD, 20);
-		dataw << pTrans->GetMapId() << c_tposx << c_tposy << c_tposz << _player->GetOrientation();
+		dataw << pTrans->GetMapId();
+		dataw << c_tposx;
+		dataw << c_tposy;
+		dataw << c_tposz;
+		dataw << _player->GetOrientation();
 		SendPacket(&dataw);
 
 		_player->SetMapId(_player->m_CurrentTransporter->GetMapId());
@@ -146,7 +150,7 @@ void _HandleBreathing(MovementInfo &movement_info, Player* _player, WorldSession
 {
 
 	// Very dirty way of fixing swim bug in serpent lake :(
-	// The waterlavel at the entrance is NOT the same as where you surface again.
+	// The waterlevel at the entrance is NOT the same as where you surface again.
 	// This keeps players in breathing mode until they drown.
 	if( _player->GetAreaID() == 3653 )
 	{
@@ -343,9 +347,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 	/************************************************************************/
 	/* Read Movement Data Packet                                            */
 	/************************************************************************/
-	WoWGuid guid;
-	recv_data >> guid;
- 	movement_info.init(recv_data);
+	WoWGuid wguid;
+	recv_data >> wguid; // active mover guid?
+	uint64 guid = wguid.GetOldGuid();
+	movement_info.init(recv_data);
 	m_MoverWoWGuid = guid;
 
 	/************************************************************************/
@@ -391,7 +396,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 	/************************************************************************/
 	if( !((movement_info.y >= _minY) && (movement_info.y <= _maxY)) || !((movement_info.x >= _minX) && (movement_info.x <= _maxX)) )
 	{
-		//Disconnect();
+		Disconnect();
 		return;
 	}
 
@@ -433,7 +438,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			&& _player->m_runSpeed < 50.0f && !_player->m_TransporterGUID)
 		{
 			sCheatLog.writefromsession(this, "Used teleport hack {3}, speed was %f", _player->m_runSpeed);
-			//Disconnect();
+			Disconnect();
 			return;
 		}
 	}
@@ -462,7 +467,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		move_time = (movement_info.time - (mstime - m_clientTimeDelay)) + MOVEMENT_PACKET_TIME_DELAY + mstime;
 //		memcpy(&movement_packet[pos], recv_data.contents(), recv_data.size());
 		memcpy(&movement_packet[0], recv_data.contents(), recv_data.size());
- 		movement_packet[pos+6]=0;
+ 		movement_packet[pos+6] = 0;
 
 		/************************************************************************/
 		/* Distribute to all inrange players.                                   */
@@ -502,7 +507,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		if (recv_data.GetOpcode() == MSG_MOVE_JUMP)
 		{
 			if (m_isFalling)
-				//Disconnect();
+				Disconnect();
 			m_isFalling = true;
 		}
 
@@ -694,43 +699,29 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
-	WoWGuid guid;
-	recv_data >> guid;
- 
-	if(guid == m_MoverWoWGuid)
+	WoWGuid wguid;
+	uint32 time_dif;
+	uint8 buf[16];
+	StackPacket data(0x319, buf, 16);
+
+	recv_data >> wguid;
+	recv_data >> time_dif;
+
+	uint64 guid = wguid.GetOldGuid();
+
+	// Ignore updates for not us
+	if( guid != _player->GetGUID() )
 		return;
- 
-	movement_info.init(recv_data);
 
-	if(guid != uint64(0))
-		m_MoverWoWGuid = guid;
-	else
-		m_MoverWoWGuid.Init(_player->GetGUID());
-
-	// set up to the movement packet
-	movement_packet[0] = m_MoverWoWGuid.GetNewGuidMask();
-	memcpy(&movement_packet[1], m_MoverWoWGuid.GetNewGuid(), m_MoverWoWGuid.GetNewGuidLen());
-
+	// send to other players
+	data << _player->GetNewGUID();
+	data << time_dif;
+	_player->SendMessageToSet(&data, false);
 }
 
 void WorldSession::HandleMoveNotActiveMoverOpcode( WorldPacket & recv_data )
 {
-	WoWGuid guid;
-	recv_data >> guid;
- 
-	if(guid == m_MoverWoWGuid)
-		return;
- 
-	movement_info.init(recv_data);
 
-	if(guid != uint64(0))
-		m_MoverWoWGuid = guid;
-	else
-		m_MoverWoWGuid.Init(_player->GetGUID());
-
-	// set up to the movement packet
-	movement_packet[0] = m_MoverWoWGuid.GetNewGuidMask();
-	memcpy(&movement_packet[1], m_MoverWoWGuid.GetNewGuid(), m_MoverWoWGuid.GetNewGuidLen());
 }
 
 

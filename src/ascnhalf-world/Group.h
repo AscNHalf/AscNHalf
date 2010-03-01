@@ -229,6 +229,7 @@ protected:
 	PlayerInfo* m_voiceMembersList[41];
 #endif	// VOICE_CHAT
 
+public:
 	INLINE void SetFlag(uint8 groupflag) { m_groupFlags |= groupflag; }
 	INLINE void RemoveFlag(uint8 groupflag) { m_groupFlags &= ~groupflag; }
 	INLINE bool HasFlag(uint8 groupflag) { return (m_groupFlags & groupflag) > 0 ? true : false; }

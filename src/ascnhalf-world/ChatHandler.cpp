@@ -245,6 +245,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			delete data;
 		} break;
 	case CHAT_MSG_PARTY:
+	case CHAT_MSG_PARTY_LEADER:
 	case CHAT_MSG_RAID:
 	case CHAT_MSG_RAID_LEADER:
 	case CHAT_MSG_RAID_WARNING:
@@ -260,7 +261,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 				data=sChatHandler.FillMessageData( type, GetPlayer()->m_modlanguage,  msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
 			else
 				data=sChatHandler.FillMessageData( type, (CanUseCommand('c') && lang != -1) ? LANG_UNIVERSAL : lang, msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0);
-			if(type == CHAT_MSG_PARTY && pGroup->GetGroupType() == GROUP_TYPE_RAID)
+			if((type == CHAT_MSG_PARTY || type == CHAT_MSG_PARTY_LEADER) && pGroup->GetGroupType() == GROUP_TYPE_RAID)
 			{
 				// only send to that subgroup
 				SubGroup * sgr = _player->GetGroup() ?

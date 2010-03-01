@@ -41,7 +41,7 @@ Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 	m_uint32Values = 0;
 	m_objectUpdated = false;
 
-	m_valuesCount = 0;
+	m_valuesCount = OBJECT_END;
 
 	//official Values
 	m_walkSpeed = 2.5f;
@@ -1895,6 +1895,49 @@ void Object::DealDamage(Unit* pVictim, uint32 damage, uint32 targetEvent, uint32
 	/* -------------------------- HIT THAT CAUSES VICTIM TO DIE ---------------------------*/
 	if ((isCritter || health <= damage) )
 	{
+		if(pVictim->IsCreature() && plr != NULL) // Just in case
+		{
+			if(plr->GetGroup())
+			{
+				if(plr->GetGroup()->GetGroupType() == GROUP_TYPE_LFD)
+				{
+					if(plr->GetMapId() == plr->GetRandHAD()->dungeonid)
+					{
+						RandHeroicAndDungeon* randhd = plr->GetRandHAD();
+						Creature* ctr = TO_CREATURE(pVictim);
+						uint32 required = randhd->requiredkillmobscount;
+
+						bool killedrequired[10];
+						uint32 killcount[10];
+
+						for( uint16 i = 0; i < required; i++)
+						{
+							killedrequired[i] = false;
+							killcount[i] = 0;
+							if(randhd->requiredkillmob[i] != 0)
+							{
+								if(ctr->GetProto()->Id = randhd->requiredkillmob[i])
+									killcount[i]++;
+
+								if(killcount[i] = randhd->requiredkillmobcount[i])
+								{
+									killedrequired[i] = true;
+								}
+							}
+						}
+
+						if(killedrequired[1] = true)
+						{
+							// Add in the required send data.
+							Item* item = objmgr.CreateItem( randhd->itemreward ? randhd->itemreward : 47241, plr);
+							item->SetUInt32Value(ITEM_FIELD_STACK_COUNT, randhd->itemrewardcount ? randhd->itemrewardcount : 2);
+							plr->GetItemInterface()->AddItemToFreeSlot(item);
+						}
+					}
+				}
+			}
+		}
+
 		if( pVictim->HasDummyAura(SPELL_HASH_GUARDIAN_SPIRIT) )
 		{
 			pVictim->CastSpell(pVictim, dbcSpell.LookupEntry(48153), true);
@@ -2179,39 +2222,29 @@ void Object::DealDamage(Unit* pVictim, uint32 damage, uint32 targetEvent, uint32
 				// TODO: lots of casts are bad make a temp member pointer to use for batches like this
 				// that way no local loadhitstore and its just one assignment 
 
-				//Not all NPC's give XP, check for it in proto no_XP
-				bool can_give_xp = true;
-				if(pVictim->IsCreature())
+				// Is this player part of a group
+				if( TO_PLAYER(this)->InGroup() )
 				{
-					if(TO_CREATURE(pVictim)->GetProto())
-						can_give_xp = (TO_CREATURE(pVictim)->GetProto()->no_xp ? false : true);
-					else
-						can_give_xp = false; // creatures without proto should no give any xp
+					//Calc Group XP
+					TO_PLAYER(this)->GiveGroupXP( pVictim, TO_PLAYER(this) );
+					//TODO: pet xp if player in group
 				}
-				if(can_give_xp)
+				else
 				{
-					// Is this player part of a group
-					if( TO_PLAYER(this)->InGroup() )
+					uint32 xp = CalculateXpToGive( pVictim, TO_UNIT(this) );
+					if( xp > 0 )
 					{
-						//Calc Group XP
-						TO_PLAYER(this)->GiveGroupXP( pVictim, TO_PLAYER(this) );
-						//TODO: pet xp if player in group
-					}
-					else
-					{
-						uint32 xp = CalculateXpToGive( pVictim, TO_UNIT(this) );
-						if( xp > 0 )
+						TO_PLAYER(this)->GiveXP( xp, victimGuid, true );
+						if( TO_PLAYER(this)->GetSummon() && TO_PLAYER(this)->GetSummon()->GetUInt32Value( UNIT_CREATED_BY_SPELL ) == 0 )
 						{
-							TO_PLAYER(this)->GiveXP( xp, victimGuid, true );
-							if( TO_PLAYER(this)->GetSummon() && TO_PLAYER(this)->GetSummon()->GetUInt32Value( UNIT_CREATED_BY_SPELL ) == 0 )
-							{
-								xp = CalculateXpToGive( pVictim, TO_PLAYER(this)->GetSummon() );
-								if( xp > 0 )
+							xp = CalculateXpToGive( pVictim, TO_PLAYER(this)->GetSummon() );
+
+							if( xp > 0 )
 								TO_PLAYER(this)->GetSummon()->GiveXP( xp );
-							}
 						}
 					}
 				}
+
 				// Achievement: on kill unit
 				if( !pVictim->IsPlayer() && IsPlayer() )
 				{

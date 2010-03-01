@@ -1,0 +1,10 @@
+ALTER TABLE `items` ADD `Lootgold` int(30) NOT NULL DEFAULT '0' after `ReqDisenchantSkill`;
+ALTER TABLE `items` DROP COLUMN `dmg_min3`;
+ALTER TABLE `items` DROP COLUMN `dmg_max3`;
+ALTER TABLE `items` DROP COLUMN `dmg_type3`;
+ALTER TABLE `items` DROP COLUMN `dmg_min4`;
+ALTER TABLE `items` DROP COLUMN `dmg_max4`;
+ALTER TABLE `items` DROP COLUMN `dmg_type4`;
+ALTER TABLE `items` DROP COLUMN `dmg_min5`;
+ALTER TABLE `items` DROP COLUMN `dmg_max5`;
+ALTER TABLE `items` DROP COLUMN `dmg_type5`;

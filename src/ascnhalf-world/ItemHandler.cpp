@@ -1889,7 +1889,7 @@ void WorldSession::HandleCancelTemporaryEnchantmentOpcode(WorldPacket &recvPacke
 void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 {
 	uint64 itemguid;
-	uint64 gemguid;
+	uint64 gemguid[3];
 	GemPropertyEntry * gp;
 	EnchantEntry * Enchantment;
 	recvPacket >> itemguid;
@@ -1909,9 +1909,9 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 	uint32 FilledSlots=0;
 
 	bool ColorMatch = true;
-	for(uint32 i = 0;i<TargetItem->GetSocketsCount();i++)
+	for(uint32 i = 0; i < TargetItem->GetSocketsCount(); i++)
 	{
-		recvPacket >> gemguid;
+		recvPacket >> gemguid[i];
 		EnchantmentInstance * EI= TargetItem->GetEnchantment(2+i);
 		if(EI)
 		{
@@ -1926,9 +1926,9 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 				ColorMatch=false;
 		}
 
-		if(gemguid)//add or replace gem
+		if(gemguid[i])//add or replace gem
 		{
-			Item* it=_player->GetItemInterface()->SafeRemoveAndRetreiveItemByGuid(gemguid,true);
+			Item* it=_player->GetItemInterface()->SafeRemoveAndRetreiveItemByGuid(gemguid[i], true);
 			if(!it)
 				continue;
 

@@ -257,7 +257,7 @@ void Player::Init()
 		m_casted_amount[x] = 0;
 	} 
 
-	for(uint32 a = 0; a < 6; a++)
+	for(uint32 a = 0; a < 5; a++)
 	{
 		for(uint32 x = 0; x < 7; x++)
 		{	
@@ -394,14 +394,12 @@ void Player::Init()
 	m_rap_mod_pct = 0;
 	m_modblockabsorbvalue = 0;
 	m_modblockvaluefromspells = 0;
-	m_summoner = m_summonInstanceId = m_summonMapId = 0;
+	m_summoner = NULLOBJ;
+	m_summonInstanceId = m_summonMapId = 0;
 	m_lastMoveType = 0;
 	m_tempSummon = NULLCREATURE;
 	m_spellcomboPoints = 0;
-
-	for(uint8 i = 0; i < 3 ; ++i)
-		m_pendingBattleground[i] = NULLBATTLEGROUND;
-
+	memset( &m_pendingBattleground, 0, sizeof(CBattleground*) * 3);
 	m_deathVision = false;
 	m_retainComboPoints = false;
 	last_heal_spell = NULL;
@@ -483,6 +481,11 @@ void Player::Init()
 	for(uint32 i = 0; i < 21; ++i)
 		m_WeaponSubClassDamagePct[i] = 1.0f;
 
+	// Random Dungeon
+	firstrandheroic = true;
+	firstranddungeon = true;
+	m_randhad = NULL;
+
 	Unit::Init();
 }
 
@@ -490,7 +493,6 @@ void Player::OnLogin()
 {
 
 }
-
 
 Player::~Player ( )
 {
@@ -530,10 +532,7 @@ Player::~Player ( )
 	pTarget = NULLPLR;
 
 	if(m_Summon)
-	{
-		m_Summon->Dismiss(true);
-		m_Summon->ClearPetOwner();
-	}
+		m_Summon->Remove(true, true, false);
 
 	if (m_GM_SelectedGO)
 		m_GM_SelectedGO = NULLGOB;
@@ -1154,6 +1153,8 @@ void Player::Update( uint32 p_time )
 		_FlyhackCheck();
 		m_flyhackCheckTimer = mstime + 5000;
 	}
+
+	PlayerOnUpdate(this);
 }
 
 void Player::EventDismount(uint32 money, float x, float y, float z)
@@ -2275,7 +2276,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	// dump exploration data
 	<< "'";
 
-	for(uint32 i = 0; i < 64; ++i)
+	for(uint32 i = 0; i < 128; ++i)
 		ss << m_uint32Values[PLAYER_EXPLORED_ZONES_1 + i] << ",";
 
 	ss << "','0', "; //skip saving oldstyle skills, just fill with 0
@@ -2952,7 +2953,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	uint32 Counter = 0;
 	char * end;
 	char * start = (char*)get_next_field.GetString();//buff;
-	while(Counter <64) 
+	while(Counter < 128) 
 	{
 		end = strchr(start,',');
 		if(!end)break;
@@ -3507,10 +3508,10 @@ void Player::_LoadQuestLogEntry(QueryResult * result)
 	// clear all fields
 	for(int i = 0; i < 25; ++i)
 	{
-		baseindex = PLAYER_QUEST_LOG_1_1 + (i * 4);
+		baseindex = PLAYER_QUEST_LOG_1_1 + (i * 5);
 		SetUInt32Value(baseindex + 0, 0);
 		SetUInt32Value(baseindex + 1, 0);
-		SetUInt32Value(baseindex + 2, 0);
+		SetUInt64Value(baseindex + 2, 0);
 		SetUInt32Value(baseindex + 3, 0);
 	}
 
@@ -5301,7 +5302,7 @@ void Player::UpdateAttackSpeed()
 }
 
 void Player::UpdateStats()
-{   
+{
 	UpdateAttackSpeed();
 
 	// formulas from wowwiki
@@ -5320,130 +5321,119 @@ void Player::UpdateStats()
 	switch (cl)
 	{
 	case DRUID:
-        //(Strength x 2) - 20           
-        AP = str * 2 - 20;
-        //Agility - 10
-        RAP = agi - 10;
-    
-        if( GetShapeShift() == FORM_MOONKIN )
-        {
-            //(Strength x 2) + (Character Level x 1.5) - 20
-            AP += float2int32( static_cast<float>(lev) * 1.5f );
-        }
-        if( GetShapeShift() == FORM_CAT )
 		{
-            //(Strength x 2) + Agility + (Character Level x 2) - 20
-            AP += agi + (lev *2);
-        }
-        if( GetShapeShift() == FORM_BEAR || GetShapeShift() == FORM_DIREBEAR )
-        {
-            //(Strength x 2) + (Character Level x 3) - 20
-            AP += (lev *3);
-		}
-		if( GetShapeShift() == FORM_MOONKIN || GetShapeShift() == FORM_CAT
-			|| GetShapeShift() == FORM_BEAR || GetShapeShift() == FORM_DIREBEAR ) {
+			//(Strength x 2) - 20
+			AP = str * 2 - 20;
+			//Agility - 10
+			RAP = agi - 10;
 
-			Item *it = this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND); 
-			float dps = 0; 
-			// counting and adding AP from weapon to total AP.
-			if ( it ) {
-				ItemPrototype *ip = it->GetProto();  
-				if ( ip && !ip->heirloom ) { 
-					dps = ( ( ( ip->Damage->Max + ip->Damage->Min ) / 2 ) / (ip->Delay / 1000) ) ; 
-				}
-				if(ip->heirloom)
+			if( GetShapeShift() == FORM_MOONKIN )
+			{
+				// Checked 3.3.2 No AP modifiers
+			}
+			if( GetShapeShift() == FORM_CAT )
+			{
+				// Checked 3.3.2, Agil + 40
+				AP += agi + 40;
+			}
+			if( GetShapeShift() == FORM_DIREBEAR)
+			{
+				// Checked 3.3.2, 120
+				AP += 120;
+			}
+			if( GetShapeShift() == FORM_BEAR)
+			{
+				// Checked 3.3.2, 30
+				AP += 30;
+			}
+
+			if( GetShapeShift() == FORM_MOONKIN || GetShapeShift() == FORM_CAT
+				|| GetShapeShift() == FORM_BEAR || GetShapeShift() == FORM_DIREBEAR )
+			{
+				// counting and adding AP from weapon to total AP.
+				Item* it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+				float dps = 0;
+				if(it)
 				{
-					int32 col = 0;
-					col = GetStatScalingStatValueColumn(ip, 2); // Damage
-					float scaledmindmg, scaledmaxdmg;
-					if(col != -1)
+					ItemPrototype *ip = it->GetProto();
+					if(ip)
 					{
-						ScalingStatValuesEntry *ssvrow = dbcScalingStatValues.LookupEntry(SSVDBCEByLevel[getLevel() - 1]);
-						uint32 scaleddps = ssvrow->multiplier[col];
-						float dpsmod = 1.0;
-
-						if(ip->ScaleFlags & 0x1400)
-							dpsmod = 0.2f;
-						else
-							dpsmod = 0.3f;
-
-						scaledmindmg = (scaleddps - (scaleddps * dpsmod)) * (ip->Delay/1000);
-						scaledmaxdmg = (scaleddps * (dpsmod+1.0f)) * (ip->Delay/1000);
+						float wpndmg = ((ip->Damage[0].Max + ip->Damage[0].Min)/2);
+						float wpnspeed = (float(ip->Delay))/1000;
+						dps = wpndmg/wpnspeed;
 					}
-
-					float wpndmg = ((scaledmindmg + scaledmaxdmg)/2);
-					float wpnspeed = (float(ip->Delay))/1000;
-					dps = wpndmg/wpnspeed;
-				}
-				if ( dps > 54.8 )  {
-					dps =( dps - 54.8f ) * 14 ; //bonus AP = (dps - 54.8) * 14 ; if greater then 54.8, else 0 
-					//sLog.outString("%s - get %f AP from weapon.",this->GetName(),dps);
-					AP += (int32) dps;
+					if(dps > 54.8)
+					{
+						dps = ((dps - 54.8) * 14);
+						int32 feralAP = float2int32(dps);
+						AP += feralAP;
+					}
 				}
 			}
-		}
-		break;
+		}break;
 
 
 	case ROGUE:
-		//Strength + Agility + (Character Level x 2) - 20
-		AP = str + agi + (lev *2) - 20;
-		//Character Level + Agility - 10
-		RAP = lev + agi - 10;
-
-		break;
+		{
+			//Strength + Agility + (Character Level x 2) - 20
+			AP = str + agi + (lev *2) - 20;
+			//Character Level + Agility - 10
+			RAP = lev + agi - 10;
+		}break;
 
 
 	case HUNTER:
-		//Strength + Agility + (Character Level x 2) - 20
-		 AP = str + agi + (lev *2) - 20;
-		//(Character Level x 2) + Agility - 10
-		RAP = (lev *2) + agi - 10;
+		{
+			//Strength + Agility + (Character Level x 2) - 20
+			AP = str + agi + (lev *2) - 20;
+			//(Character Level x 2) + Agility - 10
+			RAP = (lev *2) + agi - 10;
+		}break;
 
-		break;
-
-	case SHAMAN:   
-		//(Strength) + (Agility) + (Character Level x 2) - 20
-		AP = str + agi + (lev *2) - 20;
-		//Agility - 10
-		RAP = agi - 10;
-		
-		break;
+	case SHAMAN:
+		{
+			//(Strength) + (Agility) + (Character Level x 2) - 20
+			AP = str + agi + (lev *2) - 20;
+			//Agility - 10
+			RAP = agi - 10;
+		}break;
 
 	case PALADIN:
-		//(Strength x 2) + (Character Level x 3) - 20
-		AP = (str *2) + (lev *3) - 20;
-		//Agility - 10
-		RAP = agi - 10;
-	
-		break;
+		{
+			//(Strength x 2) + (Character Level x 3) - 20
+			AP = (str *2) + (lev *3) - 20;
+			//Agility - 10
+			RAP = agi - 10;
+		}break;
 
 
 	case WARRIOR:
 	case DEATHKNIGHT:
-	{
-		//(Strength x 2) + (Character Level x 3) - 20
-		AP = (str *2) + (lev *3) - 20;
-		uint32 divi = 0; 
-		uint32 sprank = 0; 
-		if     ( HasSpell(49393) ) { sprank = 5; divi = 180;} // Death Knight: Bladed Armor 
-		else if( HasSpell(49392) ) { sprank = 4; divi = 180;} // Increases your attack power by <spellrank> for every 180 armor value you have. 
-		else if( HasSpell(49391) ) { sprank = 3; divi = 180;} 
-		else if( HasSpell(49390) ) { sprank = 2; divi = 180;} 
-		else if( HasSpell(48978) ) { sprank = 1; divi = 180;} 
-		else if( HasSpell(61222) ) { sprank = 3; divi = 108;} // Warrior: Armored to the Teeth 
-		else if( HasSpell(61221) ) { sprank = 2; divi = 108;} //Increases your attack power by <spellrank> for every 108 armor value you have. 
-		else if( HasSpell(61216) ) { sprank = 1; divi = 108;} 
-		if(divi && sprank ) 
-			AP += sprank * (GetUInt32Value(UNIT_FIELD_RESISTANCES)/divi);
-	}
-		//Character Level + Agility - 10
-		RAP = lev + agi - 10;
-		
-		break;
+		{
+			{
+				//(Strength x 2) + (Character Level x 3) - 20
+				AP = (str *2) + (lev *3) - 20;
+				uint32 divi = 0;
+				uint32 sprank = 0;
+				if     ( HasSpell(49393) ) { sprank = 5; divi = 180;} // Death Knight: Bladed Armor
+				else if( HasSpell(49392) ) { sprank = 4; divi = 180;} // Increases your attack power by <spellrank> for every 180 armor value you have.
+				else if( HasSpell(49391) ) { sprank = 3; divi = 180;}
+				else if( HasSpell(49390) ) { sprank = 2; divi = 180;}
+				else if( HasSpell(48978) ) { sprank = 1; divi = 180;}
+				else if( HasSpell(61222) ) { sprank = 3; divi = 108;} // Warrior: Armored to the Teeth
+				else if( HasSpell(61221) ) { sprank = 2; divi = 108;} //Increases your attack power by <spellrank> for every 108 armor value you have.
+				else if( HasSpell(61216) ) { sprank = 1; divi = 108;}
+				if(divi && sprank )
+					AP += sprank * (GetUInt32Value(UNIT_FIELD_RESISTANCES)/divi);
+			}
+			//Character Level + Agility - 10
+			RAP = lev + agi - 10;
+		}break;
 
-	default:    //mage,priest,warlock
-		AP = agi - 10;
+	default: //mage,priest,warlock
+		{
+			AP = agi - 10;
+		}
 	}
 
 	/* modifiers */
@@ -6032,7 +6022,7 @@ bool Player::HasQuestForItem(uint32 itemid)
 			if( !qst->count_required_item )
 				continue;
 
-			for( uint32 j = 0; j < 4 && j < 4; ++j )
+			for( uint32 j = 0; j < 6; ++j )
 				if( qst->required_item[j] == itemid && ( GetItemInterface()->GetItemCount( itemid ) < qst->required_itemcount[j] ) )
 					return true;
 		}
@@ -6088,7 +6078,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 	// add to looter set
 	lootObj->m_loot.looters.insert(GetLowGUID());
 		
-	WorldPacket data, data2(28);
+	WorldPacket data, data2(32);
 	data.SetOpcode (SMSG_LOOT_RESPONSE);
    
    
@@ -6247,7 +6237,9 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 					else
 						data2 << uint32(0);
 
+					data2 << iter->iItemsCount;
 					data2 << uint32(60000); // countdown
+					data2 << uint8(7);
 				}
 
 				Group * pGroup = m_playerInfo->m_Group;
@@ -10262,7 +10254,7 @@ void Player::UnPossess()
 	m_session->SendPacket(&data);
 }
 
-void Player::SummonRequest(uint32 Requestor, uint32 ZoneID, uint32 MapID, uint32 InstanceID, const LocationVector & Position)
+void Player::SummonRequest(Object* Requestor, uint32 ZoneID, uint32 MapID, uint32 InstanceID, const LocationVector & Position)
 {
 	m_summonInstanceId = InstanceID;
 	m_summonPos = Position;
@@ -10270,7 +10262,7 @@ void Player::SummonRequest(uint32 Requestor, uint32 ZoneID, uint32 MapID, uint32
 	m_summonMapId = MapID;
 
 	WorldPacket data(SMSG_SUMMON_REQUEST, 16);
-	data << uint64(Requestor) << ZoneID << uint32(120000);		// 2 minutes
+	data << Requestor->GetGUID() << ZoneID << uint32(120000);		// 2 minutes
 	m_session->SendPacket(&data);
 }
 
@@ -10774,7 +10766,7 @@ void Player::RecalculateHonor()
 }
 
 //wooot, crapy code rulez.....NOT
-void Player::EventTalentHearthOfWildChange(bool apply)
+void Player::EventTalentHeartOfWildChange(bool apply)
 {
 	if(!hearth_of_wild_pct)
 		return;
@@ -10788,7 +10780,7 @@ void Player::EventTalentHearthOfWildChange(bool apply)
 	uint32 SS=GetShapeShift();
 
 	//increase stamina if :
-	if(SS==FORM_BEAR || SS==FORM_DIREBEAR)
+	if(SS == FORM_BEAR || SS == FORM_DIREBEAR)
 	{
 		TotalStatModPctPos[STAT_STAMINA] += tval; 
 		CalcStat(STAT_STAMINA);	
@@ -12726,4 +12718,54 @@ void Player::SetTaximaskNode(uint32 nodeidx, bool Unset)
 		if ((GetTaximask(field)& submask) != submask)  
 			SetTaximask(field,(GetTaximask(field)|submask));
 	}
+}
+
+uint16 Player::FindQuestSlot( uint32 questid )
+{
+	for ( uint16 i = 0; i < 25; ++i )
+		if( (GetUInt32Value(PLAYER_QUEST_LOG_1_1 + i * 5)) == questid )
+			return i;
+
+	return 25;
+}
+
+void Player::PlayerOnUpdate(Player* plr)
+{
+	if(plr->GetMapId() == 595 || plr->GetMapId() == 560)
+	{
+		if(plr->GetTeam() == 1)
+		{
+			if(!plr->HasAura(35480) && !plr->HasAura(35481)) // Have as and, otherwise will always cast.
+			{
+				if(plr->getGender() == 1)
+					plr->CastSpell(TO_UNIT(plr), 35481, true);
+				else
+					plr->CastSpell(TO_UNIT(plr), 35480, true);
+			}
+		}
+		else
+		{
+			if(plr->getRace() == RACE_NIGHTELF || plr->getRace() == RACE_DRAENEI)
+			{
+				if(!plr->HasAura(35482) && !plr->HasAura(35483)) // Have as and, otherwise will always cast.
+				{
+					if(plr->getGender() == 1)
+						plr->CastSpell(TO_UNIT(plr), 35483, true);
+					else
+						plr->CastSpell(TO_UNIT(plr), 35482, true);
+				}
+			}
+		}
+	}
+	else
+	{
+		if(plr->GetSession()->CanUseCommand('z') == false)
+		{
+			plr->RemoveAura(35483, plr->GetGUID());
+			plr->RemoveAura(35482, plr->GetGUID());
+			plr->RemoveAura(35481, plr->GetGUID());
+			plr->RemoveAura(35480, plr->GetGUID());
+		}
+	}
+	return;
 }

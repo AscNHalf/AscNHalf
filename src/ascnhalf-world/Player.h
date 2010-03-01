@@ -20,6 +20,7 @@
 
 #ifndef _PLAYER_H
 #define _PLAYER_H
+
 struct BGScore;
 class Channel;
 class Creature;
@@ -34,12 +35,14 @@ class Pet;
 class Charter;
 class LFGMatch;
 struct LevelInfo;
+
 #define MAX_PET_NO 3
 #define PLAYER_NORMAL_RUN_SPEED 7.0f
 #define PLAYER_NORMAL_SWIM_SPEED 4.722222f
 #define PLAYER_NORMAL_FLIGHT_SPEED 7.0f
 #define PLAYER_HONORLESS_TARGET_SPELL 2479
 #define MONSTER_NORMAL_RUN_SPEED 8.0f
+
 /* action button defines */
 #define PLAYER_ACTION_BUTTON_COUNT 132
 #define PLAYER_ACTION_BUTTON_SIZE PLAYER_ACTION_BUTTON_COUNT * sizeof(ActionButton)
@@ -136,21 +139,21 @@ enum RankTitles
 	PVPTITLE_HAND_OF_ADAL			= 39,
 	PVPTITLE_VENGEFUL_GLADIATOR		= 40,
 	TITLE_BATTLEMASTER				= 41,
-	TITLE_ELDER						= 42,
-	TITLE_FLAME_WARDEN				= 43,
-	TITLE_FLAME_KEEPER				= 44,
-	TITLE_THE_EXALTED				= 45,
-	TITLE_THE_EXPLORER				= 46,
-	TITLE_THE_DIPLOMAT				= 47,
-	TITLE_BRUTAL_GLADIATOR			= 48,
-	TITLE_SEEKER					= 49,
+	TITLE_THE_SEEKER				= 42,
+	TITLE_ELDER						= 43,
+	TITLE_FLAME_WARDEN				= 44,
+	TITLE_FLAME_KEEPER				= 45,
+	TITLE_THE_EXALTED				= 46,
+	TITLE_THE_EXPLORER				= 47,
+	TITLE_THE_DIPLOMAT				= 48,
+	TITLE_BRUTAL_GLADIATOR			= 49,
 	TITLE_ARENA_MASTER				= 50,
 	TITLE_SALTY						= 51,
 	TITLE_CHEF						= 52,
 	TITLE_THE_SUPREME				= 53,
 	TITLE_OF_THE_TEN_STORMS			= 54,
-	TITLE_ARCH_DRUID				= 55,
-	TITLE_CRUSADER					= 56,
+	TITLE_OF_THE_EMERALD_DREAM		= 55,
+	TITLE_DEADLY_GLADIATOR			= 56,
 	TITLE_PROPHET					= 57,
 	TITLE_THE_MALEFIC				= 58,
 	TITLE_STALKER					= 59,
@@ -158,40 +161,40 @@ enum RankTitles
 	TITLE_ARCHMAGE					= 61,
 	TITLE_WARBRINGER				= 62,
 	TITLE_ASSASSIN					= 63,
-	TITLE_GRND_MSTR_ALCHEMIST		= 64,
-	TITLE_GRND_MSTR_BLACKSMITH		= 65,
+	TITLE_GRAND_MASTER_ALCHEMIST	= 64,
+	TITLE_GRAND_MASTER_BLACKSMITH	= 65,
 	TITLE_IRON_CHEF					= 66,
-	TITLE_GRND_MSTR_ENCHANTER		= 67,
-	TITLE_GRND_MSTR_ENGINEER		= 68,
+	TITLE_GRAND_MASTER_ENCHANTER	= 67,
+	TITLE_GRAND_MASTER_ENGINEER		= 68,
 	TITLE_DOCTOR					= 69,
-	TITLE_GRND_MSTR_ANGLER			= 70,
-	TITLE_GRND_MSTR_HERBALIST		= 71,
-	TITLE_GRND_MSTR_SCRIBE			= 72,
-	TITLE_GRND_MSTR_JEWELCRAFT		= 73,
-	TITLE_GRND_MSTR_LEATHERWORK		= 74,
-	TITLE_GRND_MSTR_MINER			= 75,
-	TITLE_GRND_MSTR_SKINNER			= 76,
-	TITLE_GRND_MSTR_TAILOR			= 77,
+	TITLE_GRAND_MASTER_ANGLER		= 70,
+	TITLE_GRAND_MASTER_HERBALIST	= 71,
+	TITLE_GRAND_MASTER_SCRIBE		= 72,
+	TITLE_GRAND_MASTER_JEWLCRAFTER	= 73,
+	TITLE_GRAND_MASTER_LETHERWORKER	= 74,
+	TITLE_GRAND_MASTER_MINER		= 75,
+	TITLE_GRAND_MASTER_SKINNER		= 76,
+	TITLE_GRAND_MASTER_TAILOR		= 77,
 	TITLE_OF_QUEL_THALAS			= 78,
 	TITLE_OF_ARGUS					= 79,
 	TITLE_OF_KHAZ_MODAN				= 80,
-	TITLE_GNOMEREGAN				= 81,
-	TITLE_LION_HEARTED				= 82,
+	TITLE_OF_GNOMEREGAN				= 81,
+	TITLE_THE_LION_HEARTHED			= 82,
 	TITLE_CHAMPION_OF_ELUNE			= 83,
-	TITLE_HERO_OF_ORGRIMMAR			= 84,
+	TITLE_HERO_OF_ORGIMMAR			= 84,
 	TITLE_PLAINSRUNNER				= 85,
-	TITLE_OF_THE_DARKSPEAR			= 86,
+	TITLE_OF_THE_DARKSPEARTRIPE		= 86,
 	TITLE_THE_FORSAKEN				= 87,
 	TITLE_THE_MAGIC_SEEKER			= 88,
 	TITLE_TWILIGHT_VANQUISHER		= 89,
-	TITLE_CONQUEROR_OF_NAXXRAMA		= 90,
+	TITLE_CONQUEROR_OF_NAXXRAMAS	= 90,
 	TITLE_HERO_OF_NORTHREND			= 91,
 	TITLE_THE_HALLOWED				= 92,
 	TITLE_LOREMASTER				= 93,
 	TITLE_OF_THE_ALLIANCE			= 94,
 	TITLE_OF_THE_HORDE				= 95,
 	TITLE_THE_FLAWLESS_VICTOR		= 96,
-	TITLE_CHAMP_OF_FROZEN_WASTE		= 97,
+	TITLE_CHAMPION_OF_THE_FROZEN_WASTES	= 97,
 	TITLE_AMBASSADOR				= 98,
 	TITLE_THE_ARGENT_CHAMPION		= 99,
 	TITLE_GUARDIAN_OF_CENARIUS		= 100,
@@ -206,7 +209,38 @@ enum RankTitles
 	TITLE_THE_UNDYING				= 109,
 	TITLE_JENKINS					= 110,
 	TITLE_BLOODSAIL_ADMIRAL			= 111,
-	TITLE_END						= 112,
+	TITLE_THE_INSANE				= 112,
+	TITLE_OF_THE_EXODAR				= 113,
+	TITLE_OF_DARNASSUS				= 114,
+	TITLE_OF_IRONFORGE				= 115,
+	TITLE_OF_STORMWIND				= 116,
+	TITLE_OF_ORGRIMMAR				= 117,
+	TITLE_OF_SENJIN					= 118,
+	TITLE_OF_SILVERMOON				= 119,
+	TITLE_OF_TUNDERBLUFF			= 120,
+	TITLE_OF_THE_UNDERCITY			= 121,
+	TITLE_THE_NOBLE					= 122,
+	TITLE_CRUSADER					= 123,
+	TITLE_DEATHS_DEMISE				= 124,
+	TITLE_CELESTIAL_DEFENDER		= 125,
+	TITLE_CONQUEROR_OF_ULDUAR		= 126,
+	TITLE_CHAMPION_OF_ULDUAR		= 127,
+	TITLE_VANQUISHER				= 128,
+	TITLE_STARCALLER				= 129,
+	TITLE_THE_ASTRAL_WALKER			= 130,
+	TITLE_HERALD_OF_THE_TITANS		= 131,
+	TITLE_FURIOUS_GLADIATOR			= 132,
+	TITLE_THE_PILGRIM				= 133,
+	TITLE_RELENTLESS_GLADIATOR		= 134,
+	TITLE_GRAND_CRUSADER			= 135,
+	TITLE_THE_ARGENT_DEFENDER		= 136,
+	TITLE_THE_PATIENT				= 137,
+	TITLE_THE_LIGHT_OF_DAWN			= 138,
+	TITLE_BANE_OF_THE_FALLEN_KING	= 139,
+	TITLE_THE_KINGSLAYER			= 140,
+	TITLE_OF_THE_ASHEN_VERDICT		= 141,
+	TITLE_WRATHFUL_GLADIATOR		= 142,
+	TITLE_END						= 143
 };
 
 enum PvPAreaStatus
@@ -302,6 +336,21 @@ enum LootType
 	LOOT_MILLING				= 2                         // 7 unsupported by client, sending LOOT_SKINNING instead
 };
 
+struct RandHeroicAndDungeon
+{
+	uint32 dungeonid; // What is the dungeon? Based on map.
+	uint32 requiredkillmobscount; // How many different mobs do we need to kill?
+	uint32 requiredkillmob[10]; // What do we need to kill, this is repeated based on previous uint32.
+	uint32 requiredkillmobcount[10]; // How many of said mob do we need to kill?
+	uint32 requiredbeatmobscount[10]; // How many mobs do we have to beat?
+	uint32 requiredbeatmobid[10]; // Do we not have to kill the mob?
+	uint32 requiredbeathealth[10]; // What health do they have to be at? % based.
+	uint32 itemreward; // Item reward, might not need.
+	uint32 itemrewardcount; // Item reward count, might not need.
+	float goldreward; // Gold reward, might not need.
+	// In 3.3.0, first random heroics give 2 Emblem of Frost(49426).
+};
+
 struct spells
 {
 	uint16  spellId;
@@ -365,11 +414,11 @@ struct PlayerCreateInfo{
 	float   mindmg;
 	float   maxdmg;
 	std::list<CreateInfo_ItemStruct> items;
-	
+
 	std::list<CreateInfo_SkillStruct> skills;
 	std::list<CreateInfo_ActionBarStruct> actionbars;
 	std::set<uint32> spell_list;
-	
+
 	//uint32 item[10];
 	//uint8 item_slot[10];
 	//uint16 spell[10];
@@ -765,8 +814,6 @@ typedef std::set<Player* *>					ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
 
 
-//#define OPTIMIZED_PLAYER_SAVING
-
 class SERVER_DECL Player : public Unit
 {
 	friend class WorldSession;
@@ -858,9 +905,11 @@ public:
 	void AddToWorld(MapMgr* pMapMgr);
 	void RemoveFromWorld();
 	bool Create ( WorldPacket &data );
-	
+
 	void Update( uint32 time );
-	
+
+	void PlayerOnUpdate(Player* plr);
+
     void BuildFlagUpdateForNonGroupSet(uint32 index, uint32 flag);
 	std::string m_afk_reason;
 	void SetAFKReason(std::string reason) { m_afk_reason = reason; };
@@ -945,6 +994,7 @@ public:
 	void				RemoveQuestMob(uint32 entry);
 	void				RemoveQuestsFromLine(int skill_line);
 	void				ResetDailyQuests();
+	uint16				FindQuestSlot(uint32 questid);
 
 	//Quest related variables
 	uint32 m_questbarrier1[25];
@@ -1251,8 +1301,8 @@ public:
 	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, Player* target );
 	void DestroyForPlayer( Player* target ) const;
 	void SetTalentHearthOfWildPCT(int value){hearth_of_wild_pct=value;}
-	void EventTalentHearthOfWildChange(bool apply);
-	
+	void EventTalentHeartOfWildChange(bool apply);
+
 	std::list<LoginAura> loginauras;
 
 	std::set<uint32> OnMeleeAuras;
@@ -1854,7 +1904,7 @@ public:
 
 	LocationVector m_last_group_position;
 	int32 m_rap_mod_pct;
-	void SummonRequest(uint32 Requestor, uint32 ZoneID, uint32 MapID, uint32 InstanceID, const LocationVector & Position);
+	void SummonRequest(Object* Requestor, uint32 ZoneID, uint32 MapID, uint32 InstanceID, const LocationVector & Position);
 	uint8 m_lastMoveType;
 #ifdef OPTIMIZED_PLAYER_SAVING
 	void save_LevelXP();
@@ -1938,7 +1988,7 @@ protected:
 	LocationVector m_summonPos;
 	uint32 m_summonInstanceId;
 	uint32 m_summonMapId;
-	uint32 m_summoner;
+	Object* m_summoner;
 
 	uint32 iActivePet;
 	void _SetCreateBits(UpdateMask *updateMask, Player* target) const;
@@ -2228,6 +2278,7 @@ private:
 	#define TALENT_INSPECT_BYTES 71
 	uint8 m_talentInspectBuffer[TALENT_INSPECT_BYTES];
 	void SetTaximaskNode(uint32 nodeidx, bool UnSet = false);
+
 public:
 	void AddTaximaskNode(uint32 nodeidx){SetTaximaskNode(nodeidx, false);}
 	void RemoveTaximaskNode(uint32 nodeidx){SetTaximaskNode(nodeidx, true);}
@@ -2240,6 +2291,14 @@ public:
 	void GenerateLoot(Corpse* pCorpse);
 	void EventClusterMapChange(uint32 mapid, uint32 instanceid, LocationVector location);
 	void HandleClusterRemove();
+
+public: // Random Dungeon Player Public
+	bool firstrandheroic;
+	bool firstranddungeon;
+	INLINE RandHeroicAndDungeon* GetRandHAD() {return m_randhad; };
+
+private:
+	RandHeroicAndDungeon* m_randhad;
 };
 
 class SkillIterator
