@@ -7792,8 +7792,30 @@ void Spell::SpellEffectActivateTalentSpec(uint32 i)
 {
 	if(!p_caster)
 		return;
+		
+	if(p_caster->m_bg)
+	{
+		SendCastResult(SPELL_FAILED_NOT_IN_BATTLEGROUND);
+		return;
+	}
 
 	// 1 = primary, 2 = secondary
 	p_caster->ApplySpec(uint8(damage - 1), false);
 
+	// Use up all our power.
+	switch(p_caster->GetPowerType())
+	{
+	case POWER_TYPE_MANA:
+		p_caster->SetPower(POWER_TYPE_MANA, 0);
+		break;
+	case POWER_TYPE_RAGE:
+		p_caster->SetPower(POWER_TYPE_RAGE, 0);
+		break;
+	case POWER_TYPE_ENERGY:
+		p_caster->SetPower(POWER_TYPE_ENERGY, 0);
+		break;
+	case POWER_TYPE_RUNE:
+		p_caster->SetPower(POWER_TYPE_RUNE, 0);
+		break;
+	}
 }
