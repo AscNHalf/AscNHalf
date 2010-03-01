@@ -440,6 +440,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ascnhalf-world\MainServerDefines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascnhalf-world\Master.cpp"
 				>
 			</File>
@@ -625,6 +629,26 @@
 			</File>
 			<File
 				RelativePath="..\..\src\ascnhalf-world\Object.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\ObjectDefines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\ObjectMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\ObjectMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\ObjectStorage.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\ObjectStorage.h"
 				>
 			</File>
 			<File
@@ -1024,11 +1048,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ascnhalf-world\SharedDefines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascnhalf-world\Spell.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\ascnhalf-world\Spell.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascnhalf-world\SpellAuraDefines.h"
 				>
 			</File>
 			<File
@@ -1289,39 +1321,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ascnhalf-world\MainServerDefines.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\ascnhalf-world\MiscHandler.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ascnhalf-world\ObjectDefines.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\ObjectMgr.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\ObjectMgr.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\ObjectStorage.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\ObjectStorage.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\SharedDefines.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\ascnhalf-world\SpellAuraDefines.h"
+			RelativePath="..\..\src\ascnhalf-world\resources.rc"
 			>
 		</File>
 		<File

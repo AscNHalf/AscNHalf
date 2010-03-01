@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="ascnhalf-realmserver"
 	ProjectGUID="{B6F51344-229B-4E72-AD84-DB1271C5CFA2}"
 	RootNamespace="realmserver"
@@ -601,6 +601,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\src\ascnhalf-realmserver\ClusterServerDefines.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\ascnhalf-realmserver\Main.cpp"
 			>
 		</File>
@@ -613,7 +617,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ascnhalf-realmserver\ClusterServerDefines.h"
+			RelativePath="..\..\src\ascnhalf-realmserver\resources.rc"
 			>
 		</File>
 		<File
