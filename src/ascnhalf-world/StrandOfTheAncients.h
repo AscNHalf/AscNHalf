@@ -91,8 +91,10 @@ public:
 
 	void SetIsWeekend(bool isweekend);
 	void HookOnUnitKill(Player* plr, Unit* pVictim);
-	/*void HookOnGobjectDestroy(Player* plr, Gameobject* pGO);*/
-	//void SpawnSalesman(uint8 Id);
+	//void StrandOfTheAncients::OnDestroyBuilding(GameObject* go);
+	//void StrandOfTheAncients::OnDamageBuilding(GameObject* go);
+	void SpawnWSVehicle(uint32 Team, uint32 Id);
+	void Updateworkshop(uint32 Team, uint32 Id);
 	void SetTime(uint32 secs, uint32 WorldState);
 	uint32 GetRoundTime(){ return RoundTime; };
 	void SetRoundTime(uint32 secs){ RoundTime = secs; };
@@ -107,6 +109,7 @@ protected:
 	Creature* m_cannons[10];
 	Creature* m_npcs[2];
 	Creature* m_demolisher[6];
+	Creature* m_wsveh[8];
 	Creature* m_spiritGuides[3];
 	GameObject* m_relic;
 	GameObject* m_endgate;
