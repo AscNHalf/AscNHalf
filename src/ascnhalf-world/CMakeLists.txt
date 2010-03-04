@@ -224,6 +224,18 @@ SET(ascnhalf_world_SCRS
 
 add_executable(ascnhalf_world ${ascnhalf_world_SCRS})
 
+IF(DO_DEV)
+
+target_link_libraries(
+    ascnhalf_world
+    shared
+    pcre
+	dev
+    ${SSLLIB}
+    ${MYSQL_LIBRARIES}
+    ${POSTGRESQL_LIBRARIES}
+)
+ELSE(DO_DEV)
 target_link_libraries(
     ascnhalf_world
     shared
@@ -232,5 +244,6 @@ target_link_libraries(
     ${MYSQL_LIBRARIES}
     ${POSTGRESQL_LIBRARIES}
 )
+ENDIF(DO_DEV)
 
 install(TARGETS ascnhalf_world DESTINATION bin)

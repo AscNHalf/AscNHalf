@@ -36,6 +36,7 @@ public:
 
             // Send "you cannot enter" message.
             objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), FactMessages[Team], plr);
+	    
         }
         else
         {
