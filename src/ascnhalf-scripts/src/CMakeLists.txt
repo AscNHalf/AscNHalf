@@ -68,6 +68,7 @@ SET(spell_SRCS
    SpellHandlers/PaladinSpells.cpp     
    SpellHandlers/WarriorSpells.cpp
    SpellHandlers/PriestSpells.cpp
+   SpellHandlers/DeathKnightSpells.cpp
    SpellHandlers/Setup.cpp
    SpellHandlers/Setup.h
    Common/Base.cpp
