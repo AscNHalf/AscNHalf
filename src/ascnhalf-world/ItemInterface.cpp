@@ -1369,8 +1369,8 @@ int16 ItemInterface::GetInventorySlotByGuid(uint64 guid)
 		}
 	}
 
-	ItemPrototype* proto = GetItemByGUID(guid)->GetProto();
-	if(proto->BagFamily & ITEM_TYPE_CURRENCY)
+	ItemPrototype* proto = GetItemByGUID(guid) ? GetItemByGUID(guid)->GetProto() : NULL;
+	if(proto && proto->BagFamily & ITEM_TYPE_CURRENCY)
 	{
 		CurrencyTypesEntry* store = dbcCurrencyTypesStore.LookupEntry(proto->ItemId);
 		if(store)
