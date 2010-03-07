@@ -1545,14 +1545,6 @@ INLINE bool IsTargetingStealthed(SpellEntry *sp)
 typedef void(Spell::*pSpellEffect)(uint32 i);
 typedef void(Spell::*pSpellTarget)(uint32 i, uint32 j);
 
-#define POWER_TYPE_HEALTH -2
-#define POWER_TYPE_MANA 0
-#define POWER_TYPE_RAGE 1
-#define POWER_TYPE_FOCUS 2
-#define POWER_TYPE_ENERGY 3
-#define POWER_TYPE_RUNE 5
-#define POWER_TYPE_RUNIC 6
-// we have power type 15 and 31 :S
 
 #define GO_FISHING_BOBBER 35591
 

@@ -2558,6 +2558,9 @@ void Unit::RegeneratePower(bool isinterrupted)
 		case POWER_TYPE_MANA:
 			TO_CREATURE(this)->RegenerateMana(isinterrupted);
 			break;
+		case POWER_TYPE_ENERGY:
+			TO_CREATURE(this)->RegenerateEnergy();
+			break;
 		case POWER_TYPE_FOCUS:
 			TO_CREATURE(this)->RegenerateFocus();
 			break;
@@ -7161,8 +7164,9 @@ void Unit::RemovePvPFlag()
 
 void Unit::SetPowerType(uint8 type)
 {
-	SetByte(UNIT_FIELD_BYTES_0,3,type);
-	if (type == POWER_TYPE_RUNIC && IsPlayer())
+	SetByte(UNIT_FIELD_BYTES_0, 3, type);
+
+	if(type == POWER_TYPE_RUNIC && IsPlayer())
 	{
 		SetFloatValue(PLAYER_RUNE_REGEN_1, 0.100000f);
 		SetFloatValue(PLAYER_RUNE_REGEN_1_1, 0.100000f);

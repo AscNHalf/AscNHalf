@@ -710,6 +710,22 @@ void Creature::RegenerateFocus()
 	SetUInt32Value(UNIT_FIELD_POWER3, (cur>=mm)? mm : cur);
 }
 
+void Creature::RegenerateEnergy()
+{
+	if(m_interruptRegen)
+		return;
+
+	uint32 cur = GetUInt32Value(UNIT_FIELD_POWER4);
+	uint32 mm = GetUInt32Value(UNIT_FIELD_MAXPOWER4);
+
+	if(cur >= mm)
+		return;
+
+	float amt = 1.0f * PctPowerRegenModifier[POWER_TYPE_ENERGY];
+	cur += (uint32)amt;
+	SetUInt32Value(UNIT_FIELD_POWER4,(cur>=mm) ? mm : cur);
+}
+
 void Creature::CallScriptUpdate()
 {
 	ASSERT(_myScriptClass);
@@ -842,7 +858,8 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 		return false;
 	proto_heroic = NULL;
 	uint32 health = 0;
-	uint32 mana = 0;
+	uint8 powertype = 0;
+	uint32 power = 0;
 	float mindmg = 0.0f;
 	float maxdmg = 0.0f;
 	uint32 level = 0;
@@ -869,7 +886,8 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 		if(proto_heroic != NULL)
 		{
 			health = proto_heroic->Minhealth + RandomUInt(proto_heroic->Maxhealth - proto_heroic->Minhealth);
-			mana = proto_heroic->mana;
+			powertype = proto_heroic->Powertype;
+			power = proto_heroic->Power;
 			mindmg = proto_heroic->Mindmg;
 			maxdmg = proto_heroic->Maxdmg;
 			level =  proto_heroic->Minlevel + (RandomUInt(proto_heroic->Maxlevel - proto_heroic->Minlevel));
@@ -879,11 +897,12 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 		else
 		{
 			health = long2int32(double(proto->MinHealth + RandomUInt(proto->MaxHealth - proto->MinHealth)) * 1.5);
+			powertype = POWER_TYPE_MANA;
 			mindmg = proto->MinDamage * 1.2f;
 			maxdmg = proto->MaxDamage * 1.2f;
 			level = proto->MinLevel + RandomUInt(proto->MaxLevel - proto->MinLevel) + RandomUInt(10);
-			if(proto->Mana)
-				mana = proto->Mana * 1.2;
+			if(proto->Power)
+				power = proto->Power * 1.2;
 			for(uint32 i = 0; i < 7; ++i)
 				SetUInt32Value(UNIT_FIELD_RESISTANCES+i, proto->Resistances[i]);
 		}
@@ -891,7 +910,8 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	else
 	{
 		health = proto->MinHealth + RandomUInt(proto->MaxHealth - proto->MinHealth);
-		mana = proto->Mana;
+		powertype = proto->Powertype;
+		power = proto->Power;
 		mindmg = proto->MinDamage;
 		maxdmg = proto->MaxDamage;
 		level = proto->MinLevel + (RandomUInt(proto->MaxLevel - proto->MinLevel));
@@ -902,10 +922,6 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetUInt32Value(UNIT_FIELD_HEALTH, health);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, health);
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, health);
-
-	SetUInt32Value(UNIT_FIELD_POWER1, mana);
-	SetUInt32Value(UNIT_FIELD_MAXPOWER1, mana);
-	SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
 
 	SetUInt32Value(UNIT_FIELD_BYTES_0, spawn->bytes);
 	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
@@ -1061,11 +1077,17 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 		m_useAI = false;
 	}
 
-	/* more hacks! */
-	if(proto->Mana != 0)
-		SetPowerType(POWER_TYPE_MANA);
-	else
-		SetPowerType(0);
+	if(powertype == POWER_TYPE_HAPPINESS || powertype >= MAX_POWER_TYPE)
+		sLog.outError("Creature %u has an incorrect powertype.", this->GetEntry());
+ 
+	if(powertype == POWER_TYPE_RAGE || powertype == POWER_TYPE_RUNIC)
+		power = power*10;
+ 
+	SetByte(UNIT_FIELD_BYTES_0, 3, powertype);
+	SetUInt32Value(UNIT_FIELD_POWER1 + powertype, power);
+	SetUInt32Value(UNIT_FIELD_MAXPOWER1 + powertype, power);
+	if(powertype == POWER_TYPE_MANA)
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, power);
 
 	has_combat_text = objmgr.HasMonsterSay(GetEntry(), MONSTER_SAY_EVENT_ENTER_COMBAT);
 	has_waypoint_text = objmgr.HasMonsterSay(GetEntry(), MONSTER_SAY_EVENT_RANDOM_WAYPOINT);
@@ -1114,10 +1136,6 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	SetUInt32Value(UNIT_FIELD_HEALTH, health);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, health);
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, health);
-
-	SetUInt32Value(UNIT_FIELD_POWER1, proto->Mana);
-	SetUInt32Value(UNIT_FIELD_MAXPOWER1, proto->Mana);
-	SetUInt32Value(UNIT_FIELD_BASE_MANA, proto->Mana);
 
 	uint32 model;
 	uint32 gender = creature_info->GenerateModelId(&model);
@@ -1244,11 +1262,17 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 		m_useAI = false;
 	}
 
-	/* more hacks! */
-	if(proto->Mana != 0)
-		SetPowerType(POWER_TYPE_MANA);
+	uint32 power = 0;
+	if(proto->Powertype == POWER_TYPE_RAGE)
+		power = proto->Power* 10;
 	else
-		SetPowerType(0);
+		power = proto->Power;
+		
+	SetByte(UNIT_FIELD_BYTES_0, 3, proto->Powertype);
+	SetUInt32Value(UNIT_FIELD_POWER1 + proto->Powertype, power);
+	SetUInt32Value(UNIT_FIELD_MAXPOWER1 + proto->Powertype, power);
+	if(proto->Powertype == POWER_TYPE_MANA)
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, power);
 
 	has_combat_text = objmgr.HasMonsterSay(GetEntry(), MONSTER_SAY_EVENT_ENTER_COMBAT);
 	has_waypoint_text = objmgr.HasMonsterSay(GetEntry(), MONSTER_SAY_EVENT_RANDOM_WAYPOINT);

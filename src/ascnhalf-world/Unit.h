@@ -115,6 +115,22 @@ enum DeathState
 	DEAD		// Unit is dead and his corpse is gone from the world
 };
 
+enum PowerType
+{
+	POWER_TYPE_HEALTH	= -2,
+	POWER_TYPE_MANA		= 0,
+	POWER_TYPE_RAGE		= 1,
+	POWER_TYPE_FOCUS	= 2,
+	POWER_TYPE_ENERGY	= 3,
+	POWER_TYPE_HAPPINESS= 4, // Not used in creature powertypes.
+	POWER_TYPE_RUNE		= 5,
+	POWER_TYPE_RUNIC	= 6,
+	MAX_POWER_TYPE		= 7
+};
+// Vehicle DBC Power Types
+#define POWER_TYPE_PYRITE 41
+#define POWER_TYPE_STEAM 61
+
 #define HIGHEST_FACTION = 46
 enum Factions {
 	FACTION_BLOODSAIL_BUCCANEERS,
@@ -1118,7 +1134,6 @@ public:
 	int32 PctRegenModifier;
 	float m_toRegen;
 	float PctPowerRegenModifier[4];
-	INLINE uint32 GetPowerType(){ return (GetByte(UNIT_FIELD_BYTES_0,3));}
 	void RemoveSoloAura(uint32 type);
 
 	void RemoveAurasByInterruptFlag(uint32 flag);
@@ -1174,8 +1189,6 @@ public:
 
 	INLINE void DisableAI() { m_useAI = false; }
 	INLINE void EnableAI() { m_useAI = true; }
-
-	void SetPowerType(uint8 type);
 
 	INLINE bool IsSpiritHealer()
 	{
@@ -1287,6 +1300,10 @@ public:
 	void CancelSpell(Spell* ptr);
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);
+	
+	void SetPowerType(uint8 type);
+	INLINE uint32 GetPowerType(){ return (GetByte(UNIT_FIELD_BYTES_0,3));}
+	uint32 GetPower(uint8 power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
 
 	void SetPower(uint32 type, int32 value);
 
