@@ -188,7 +188,12 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 		}
 	}
 
-	unit->Destructor();
+//	unit->RemoveFromWorld(false,true);
+
+	if(unit->IsVehicle())
+		TO_VEHICLE(unit)->Destructor();
+	else
+		unit->Destructor();
 
 	return true;
 }

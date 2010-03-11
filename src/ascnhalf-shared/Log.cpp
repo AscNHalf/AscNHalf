@@ -176,16 +176,40 @@ void oLog::outDebug( const char * str, ... )
 	vsnprintf(buf, 32768, str, ap);
 	va_end(ap);
 
-	if(m_screenLogLevel >= 3)
+	if(m_screenLogLevel == 3 || m_screenLogLevel == 6)
 	{
 		printf(buf);
 		putc('\n', stdout);
 	}
-	if(m_fileLogLevel >= 3 && m_file)
+	if(m_fileLogLevel == 3 && m_file || m_fileLogLevel == 6 && m_file)
 	{
 		outTime();
 		fprintf(m_file, buf);
 		putc('\n', m_file);
+	}
+}
+
+void oLog::outDebugInLine(const char * str, ...)
+{
+	if(!str)
+		return;
+
+	va_list ap;
+	char buf[32768];
+
+	va_start(ap, str);
+	vsnprintf(buf, 32768, str, ap);
+	va_end(ap);
+
+	if(m_screenLogLevel == 5 || m_screenLogLevel == 6)
+	{
+		printf(buf);
+	}
+
+	if(m_fileLogLevel == 5 && m_file || m_fileLogLevel == 6 && m_file)
+	{
+		outTime();
+		fprintf(m_file, buf);
 	}
 }
 

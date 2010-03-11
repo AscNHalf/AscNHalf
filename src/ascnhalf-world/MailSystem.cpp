@@ -562,10 +562,14 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	}
 
 	// Check stationary
-	if( msg.stationary == 0x3d && !HasGMPermissions())
+	if(msg.stationary != STATIONERY_GM && HasGMPermissions())
 	{
-		SendMailError(MAIL_ERR_INTERNAL_ERROR);
-		return;
+		msg.stationary = STATIONERY_GM; // GM mail always has GM Stationary.
+	}
+	
+	if( msg.stationary == STATIONERY_GM && !HasGMPermissions())
+	{
+		msg.stationary = STATIONERY_NORMAL; // Send stationary as normal instead.
 	}
 
 	// Set up the cost
@@ -800,7 +804,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 		_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -int32(message->cod));
 		string subject = "COD Payment: ";
 		subject += message->subject;
-		sMailSystem.DeliverMessage(NORMAL, message->player_guid, message->sender_guid, subject, "", message->cod, 0, 0, 1, true);
+		sMailSystem.DeliverMessage(MAILTYPE_NORMAL, message->player_guid, message->sender_guid, subject, "", message->cod, 0, 0, 1, true);
 
 		message->cod = 0;
 	}

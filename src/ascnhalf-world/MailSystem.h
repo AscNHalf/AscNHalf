@@ -43,9 +43,23 @@ enum MailFlags
 
 enum MailTypes
 {
-	NORMAL,
-	COD,
-	AUCTION,
+	MAILTYPE_NORMAL,
+	MAILTYPE_COD,
+	MAILTYPE_AUCTION,
+	MAILTYPE_CREATURE,
+	MAILTYPE_GAMEOBJECT,
+	MAILTYPE_ITEM
+};
+
+enum MailStationery
+{
+	STATIONERY_UNK		=  1,
+	STATIONERY_NORMAL	= 41, // Normal Stationary.
+	STATIONERY_GM		= 61, // Sent from Gamemaster.
+	STATIONERY_AUCTION	= 62, // Auctionhouse Stationary.
+	STATIONERY_UNK2		= 64, // No clue.
+	STATIONERY_UNK3		= 65, // No clue.
+	STATIONERY_UNK4		= 67, // Sent from Orphan.
 };
 
 enum MailError

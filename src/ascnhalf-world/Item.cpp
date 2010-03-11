@@ -1084,7 +1084,7 @@ uint32 Item::GenerateRandomSuffixFactor( ItemPrototype* m_itemProto )
 //////////////////////////////////////////////////////////////////////////
 // Item Links
 //////////////////////////////////////////////////////////////////////////
-static const char *g_itemQualityColours[7] = {
+static const char *g_itemQualityColours[9] = {
 	"|cff9d9d9d",		// Grey
 	"|cffffffff",		// White
 	"|cff1eff00",		// Green
@@ -1092,11 +1092,13 @@ static const char *g_itemQualityColours[7] = {
 	"|cffa335ee",		// Purple
 	"|cffff8000",		// Orange
 	"|cffe6cc80",		// Artifact
+	"|cffe5cc80",		// Heirloom
+	"|cff00ffff",		// Gamemaster
 };
 
 string ItemPrototype::ConstructItemLink(uint32 random_prop, uint32 random_suffix, uint32 stack)
 {
-	if( Quality > 6 )
+	if( Quality > 8 )
 		return "INVALID_ITEM";
 
 	char buf[1000];

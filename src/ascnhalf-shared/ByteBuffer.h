@@ -24,6 +24,7 @@
 #include "Common.h"
 #include "WoWGuid.h"
 #include "LocationVector.h"
+#include "Log.h"
 
 class SERVER_DECL ByteBuffer {
 public:
@@ -232,12 +233,16 @@ public:
 		_rpos += sizeof(T);
 		return r;
 	};
-	template <typename T> T read(size_t pos) const {
+	template <typename T> T read(size_t pos) const
+	{
 		//ASSERT(pos + sizeof(T) <= size());
 		if(pos + sizeof(T) > size())
 		{
+			sLog.outColor(TRED, "\n ERROR: Packet size is smaller than what we are trying to read. Size is %u, readsize is %u\n\r", size(), pos + sizeof(T));
 			return (T)0;
-		} else {
+		}
+		else
+		{
 			return *((T*)&_storage[pos]);
 		}
 	}
@@ -300,6 +305,8 @@ public:
 	//}
 
 	void hexlike()
+	{
+		if(sLog.IsOutProccess())
 		{
 			uint32 j = 1, k = 1;
 			printf("STORAGE_SIZE: %u\n", (unsigned int)size() );
@@ -354,6 +361,7 @@ public:
 			}
 			printf("\n");
 		}
+	}
 
 	INLINE void reverse()
 	{

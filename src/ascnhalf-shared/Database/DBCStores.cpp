@@ -168,7 +168,7 @@ const char* spellshapeshiftformformat = "uxxxxxxxxxxxxxxxxxxxxxxxxxxxuuuuuuu";
 const char* vehicleseatentryFormat = "uuuffffffffffuuuuuufffffffuuufffuuuuuuuffuuuuuxxxxxxxxxxxx";
 const char* vehicleentryFormat = "uuffffuuuuuuuufffffffffffffffssssfufuxxx";
 
-const char* achievementfmt=
+const char* achievementfmt =
 	"n" // Index
 	"i" // Faction
 	"i" // Mapid

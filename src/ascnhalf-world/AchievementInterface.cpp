@@ -51,7 +51,7 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 	// don't allow GMs to complete achievements
 	if( m_player->GetSession()->HasGMPermissions() )
 	{
-		CharacterDatabase.Query("DELETE FROM achievements WHERE player = %u;", m_player->GetGUID());
+		CharacterDatabase.Execute("DELETE FROM achievements WHERE player = %u;", m_player->GetGUID());
 		return;
 	}
 
@@ -193,31 +193,39 @@ void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
 	// Reward: Item
 	if( ar->ItemID )
 	{
-		// Just use the in-game mail system and mail it to him.
-		MailMessage msg;
-		memset(&msg, 0, sizeof(MailMessage));
-		
-		Item* pItem = objmgr.CreateItem( ar->ItemID, NULLPLR );
-		if(!pItem) return;
-
-		pItem->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
-		msg.items.push_back(pItem->GetUInt32Value(OBJECT_FIELD_GUID));
-
-		msg.body = "Your reward for completing this achievement is attached below.";
-		msg.subject = string(ae->name);
-
-		msg.sender_guid = m_player->GetGUID();
-		msg.player_guid = m_player->m_playerInfo->guid;
-		msg.delivery_time = (uint32)UNIXTIME;
-		msg.expire_time = 0; // This message NEVER expires.
-		
-		DEBUG_LOG("AchievementInterface","GiveRewardsForAchievement disabled until properly fixed");
-//		sMailSystem.DeliverMessage(&msg);
-
-		pItem->Destructor();
+		m_player->GetGUID();
+		Item* pItem = objmgr.CreateItem(ar->ItemID, m_player);
+		m_player->GetItemInterface()->AddItemToFreeSlot(pItem);
+		if( !m_player->GetItemInterface()->AddItemToFreeSlot(pItem) )
+		{
+			// Inventory full? Send it by mail.
+			m_player->GetSession()->SendNotification("No free slots were found in your inventory, item has been mailed.");
+			sMailSystem.DeliverMessage(MAILTYPE_NORMAL, m_player->GetGUID(), m_player->GetGUID(), "Achievement Reward", "Here is your reward.", 0, 0, ar->ItemID, 1, true);
+			pItem->Destructor();
+		}
 	}
 
-	// Reward: Title. We don't yet support titles due to a lack of uint128.
+	// Define: Alliance Title
+	if(m_player->GetTeam() == ALLIANCE)
+	{
+		if( ar->AllianceTitle )
+		{
+			m_player->SetKnownTitle(ar->AllianceTitle, true);
+			// Set title to Alliance Reward, forced by Blizzard.
+			m_player->SetUInt32Value( PLAYER_CHOSEN_TITLE, ar->AllianceTitle);
+		}
+	}
+
+	// Define: Horde Title
+	if(m_player->GetTeam() == HORDE)
+	{
+		if( ar->HordeTitle )
+		{
+			m_player->SetKnownTitle(ar->HordeTitle, true);
+			// Set title to Horde Reward, forced by Blizzard.
+			m_player->SetUInt32Value( PLAYER_CHOSEN_TITLE, ar->HordeTitle);
+		}
+	}
 }
 
 void AchievementInterface::EventAchievementEarned(AchievementData * pData)
@@ -299,7 +307,8 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 	if( m_player->GetSession()->HasGMPermissions() )
 		return false;
 
-	if( ad->completed ) return false;
+	if( ad->completed )
+		return false;
 
 	bool hasCompleted = false;
 	AchievementEntry * ach = dbcAchievement.LookupEntry(ad->id);
