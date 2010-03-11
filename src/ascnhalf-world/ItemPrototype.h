@@ -714,14 +714,14 @@ struct ItemPrototype
 	int32 DisenchantReqSkill;
 	int32 Lootgold;
 	uint32 ArmorDamageModifier;
-	bool heirloom;
-	uint32 ScaleDistributeId;
-	uint32 ScaleFlags;
 
 	string lowercase_name;	// used in auctions
 	uint32 FoodType;		//pet food type
 	GossipScript * gossip_script;
 	int32 ForcedPetId;
+	bool heirloom;
+	uint32 ScaleDistributeId;
+	uint32 ScaleFlags;
 
 	string ConstructItemLink(uint32 random_prop, uint32 random_suffix, uint32 stack);
 	bool ValidateItemLink(const char *szLink);
