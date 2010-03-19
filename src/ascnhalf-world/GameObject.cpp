@@ -819,17 +819,19 @@ void GameObject::SetState(uint8 state)
 // Destructable Buildings
 void GameObject::TakeDamage(uint32 ammount)
 {
+	DestructibleModelDataEntry* disp = dbcDestructibleModelData.LookupEntry(pInfo->Unknown9);
+	
 	if(pInfo->Type != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
 		return;
 
+	if (Health <= 0)
+		return;
+		
 	if(Health > ammount)
 		Health -= ammount;
 
 	else if(Health < ammount)
 		Health = 0;
-
-	if(Health = 0)
-		return;
 
 	if(HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
 	{
@@ -837,24 +839,44 @@ void GameObject::TakeDamage(uint32 ammount)
 		{
 			RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->Unknown1);
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
 
 
 			sHookInterface.OnDestroyBuilding(TO_GAMEOBJECT(this));
 		}
+		else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.6)/* && Health >= ((pInfo->SpellFocus + pInfo->sound5)*0.3)*/)
+		{
+			if(GetUInt32Value(GAMEOBJECT_DISPLAYID) != disp->GetDisplayId(0))
+			{
+				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
+			}
+			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
+		}
+		/*else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.3) && Health > 0)
+		{
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(4));	// smoke
+			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
+		}*/
 	}
 	else if(!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
 	{
-		if(Health <= pInfo->sound5)
+		if(Health <= pInfo->sound5 && Health > (pInfo->sound5)*0.6)
 		{
-			if(pInfo->Unknown1 == 0)
-				Health = 0;
-			else if(Health == 0)
-				Health = 1;
-
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->sound4);
 			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
+		}
+		else if(Health <= ((pInfo->sound5)*0.6) && Health > 0 /*&& Health >= (pInfo->sound5)*0.3*/)
+		{
+			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
+			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
+		}
+		else if(Health <= 0)
+		{
+			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
+
+			sHookInterface.OnDestroyBuilding(TO_GAMEOBJECT(this));
 		}
 	}
 }

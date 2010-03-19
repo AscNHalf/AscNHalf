@@ -715,7 +715,7 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
 }
 
 void WorldSession::HandleBoardPlayerVehicleOpcode(WorldPacket &recv_data)
-{
+{/*
 	CHECK_PACKET_SIZE(recv_data, 1);
 	CHECK_INWORLD_RETURN;
 
@@ -729,7 +729,7 @@ void WorldSession::HandleBoardPlayerVehicleOpcode(WorldPacket &recv_data)
 	if( pVehicle->IsPlayer() && (!TO_PLAYER(pVehicle)->GetGroup() || TO_PLAYER(pVehicle)->GetGroup() != GetPlayer()->GetGroup()) )
 		return;
 
-	TO_VEHICLE(pVehicle)->AddPassenger(GetPlayer());
+	TO_VEHICLE(pVehicle)->AddPassenger(GetPlayer());*/
 }
 
 void WorldSession::HandleEjectPassengerOpcode(WorldPacket &recv_data)

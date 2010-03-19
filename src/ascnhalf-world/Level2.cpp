@@ -826,6 +826,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 	case GAMEOBJECT_TYPE_FLAGSTAND:	 sstext << "Flag Stand";	break;
 	case GAMEOBJECT_TYPE_FISHINGHOLE:   sstext << "Fishing Hole";	break;
 	case GAMEOBJECT_TYPE_FLAGDROP:	  sstext << "Flag Drop";	break;
+	case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:	sstext << "Destructible";	break;
 	default:							sstext << "Unknown.";	break;
 	}
 
@@ -899,6 +900,69 @@ bool ChatHandler::HandleGOActivate(const char* args, WorldSession *m_session)
 	return true;
 }
 
+bool ChatHandler::HandleGORebuild(const char* args, WorldSession* m_session)
+{
+	GameObject* go = m_session->GetPlayer()->m_GM_SelectedGO;
+	if( !go )
+	{
+		RedSystemMessage(m_session, "No selected GameObject...");
+		return true;
+	}
+	if(go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+	{
+		RedSystemMessage(m_session, "You must select a Destructible gameobject!");
+		return true;
+	}
+	go->Rebuild();
+	BlueSystemMessage(m_session, "Gameobject Rebuilt.");
+	return true;
+}
+
+bool ChatHandler::HandleGODestroy(const char* args, WorldSession* m_session)
+{
+	GameObject* go = m_session->GetPlayer()->m_GM_SelectedGO;
+	if( !go )
+	{
+		RedSystemMessage(m_session, "No selected GameObject...");
+		return true;
+	}
+	if(go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+	{
+		RedSystemMessage(m_session, "You must select a Destructible gameobject!");
+		return true;
+	}
+	uint32 hp = go->Health;
+	go->TakeDamage(hp);		// Destroy it
+	BlueSystemMessage(m_session, "Gameobject Destroyed.");
+	return true;
+}
+
+bool ChatHandler::HandleGODamage(const char* args, WorldSession* m_session)
+{
+	GameObject* go = m_session->GetPlayer()->m_GM_SelectedGO;
+	if( !go )
+	{
+		RedSystemMessage(m_session, "No selected GameObject...");
+		return true;
+	}
+	if(go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+	{
+		RedSystemMessage(m_session, "You must select a Destructible gameobject!");
+		return true;
+	}
+	if(!args)
+	{
+		RedSystemMessage(m_session, "Invalid syntax. Should be .gobject damage 1.0");
+		return false;
+	}
+	float damage = (float)atof(args);
+	if(!damage) 
+		damage = 1;
+	go->TakeDamage(damage);		// Destroy it
+	BlueSystemMessage(m_session, "Gameobject Damaged %u .", damage);
+	return true;
+}
+	
 bool ChatHandler::HandleGOScale(const char* args, WorldSession* m_session)
 {
 	GameObject* go = m_session->GetPlayer()->m_GM_SelectedGO;

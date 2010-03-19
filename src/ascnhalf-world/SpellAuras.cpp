@@ -6447,7 +6447,7 @@ void Aura::SpellAuraMounted(bool apply)
 		CreatureProto* cp = CreatureProtoStorage.LookupEntry(mod->m_miscValue);
 		if(ci != NULL && ci->Male_DisplayID != 0 && (!cp || !cp->vehicle_entry) ) // regular mount
 			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , ci->Male_DisplayID);
-		else
+		/*else
 		{
 			// some complicated shit goes here!
 			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->Male_DisplayID );
@@ -6462,13 +6462,13 @@ void Aura::SpellAuraMounted(bool apply)
 			// fill the first slot
 			VehicleSeatEntry* vse = dbcVehicleSeat.LookupEntry( cp->vehicle_entry );
 			//m_target->m_CurrentVehicle = vse;
-			TO_VEHICLE(m_target)->SetVehiclePassenger(0, m_target/*->GetGUID()*/);
+			TO_VEHICLE(m_target)->SetVehiclePassenger(0, m_target->GetGUID());
 			
 			WorldPacket data(SMSG_CONVERT_VEHICLE, 12);
 			data << m_target->GetNewGUID();
 			data << cp->vehicle_entry;
 			m_target->SendMessageToSet(&data, true);
-		}
+		}*/
 	}
 	else
 	{
@@ -6495,7 +6495,7 @@ void Aura::SpellAuraMounted(bool apply)
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
 		
 		// Vehicle stuff
-		CreatureProto* cp = CreatureProtoStorage.LookupEntry(mod->m_miscValue);
+		/*CreatureProto* cp = CreatureProtoStorage.LookupEntry(mod->m_miscValue);
 		if( cp && cp->vehicle_entry )
 		{
 			if( TO_PLAYER(m_target) && TO_PLAYER(m_target)->GetGroup() )
@@ -6515,7 +6515,7 @@ void Aura::SpellAuraMounted(bool apply)
 			for(uint8 i = 1; i < 8; ++i)
 			{
 				Unit* pPassenger = TO_VEHICLE(m_target)->GetPassengerUnit(i);
-				/*if( pPassenger )
+				if( pPassenger )
 				{
 					if( pPassenger->IsPlayer() )
 					{
@@ -6523,10 +6523,10 @@ void Aura::SpellAuraMounted(bool apply)
 					}
 					else
 						TO_CREATURE(pPassenger)->SafeDelete();
-				}*/
+				}
 				TO_VEHICLE(m_target)->SetVehiclePassenger(i, NULL);
 			}
-		}
+		}*/
 	}
 }
 

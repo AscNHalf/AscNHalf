@@ -507,6 +507,29 @@ struct CurrencyTypesEntry
     uint32    BitIndex;                                   // 3 bit index in PLAYER_FIELD_KNOWN_CURRENCIES (1 << (index-1))
 };
 
+struct DestructibleModelDataEntry
+{
+	uint32 entry; //Unknown9 from gameobject_names
+	uint32 displayId[4];
+
+	uint32 GetDisplayId(uint8 state)
+	{
+		if(state > 3)
+			return 0;
+
+		if(!displayId[state])
+		{
+			for(int32 i = state-1; i > -1; --i)
+			{
+				if(displayId[i])
+					return displayId[i];
+			}
+		}
+
+		return displayId[state];
+	}
+};
+
 
 struct ItemSetEntry
 {
@@ -1727,6 +1750,7 @@ extern SERVER_DECL DBCStorage<SummonPropertiesEntry> dbcSummonProps;
 extern SERVER_DECL DBCStorage<ScalingStatDistributionEntry> dbcScalingStatDistribution;
 extern SERVER_DECL DBCStorage<ScalingStatValuesEntry> dbcScalingStatValues;
 extern SERVER_DECL DBCStorage<CurrencyTypesEntry> dbcCurrencyTypesStore;
+extern SERVER_DECL DBCStorage<DestructibleModelDataEntry> dbcDestructibleModelData;
 
 bool LoadDBCs();
 bool LoadRSDBCs();
