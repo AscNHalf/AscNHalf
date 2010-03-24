@@ -127,7 +127,7 @@ const static uint32 BGMinimumPlayers[BATTLEGROUND_NUM_TYPES] = {
 	0,							// Non existant.
 	0,							// Non existant.
 	0,							// Non existant.
- 	40,							// IOC
+ 	20,							// IOC
 	0,							// Non existant.
 	0,							// Unknown
 };
@@ -296,10 +296,15 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 		return;
 	}
 
-	MapInfo * inf = WorldMapInfoStorage.LookupEntry(BGMapIds[bgtype]);
-	if(inf->minlevel > m_session->GetPlayer()->getLevel())
+	uint32 minlvl = GetBGMinlevel(BGMapIds[bgtype]);
+	if(!minlvl)
 	{
-		m_session->GetPlayer()->GetSession()->SendNotification("You have to reach level %u before you can join this battleground.",inf->minlevel);
+		MapInfo * inf = WorldMapInfoStorage.LookupEntry(BGMapIds[bgtype]);
+		minlvl = (inf->minlevel);
+	}
+	if(minlvl > m_session->GetPlayer()->getLevel())
+	{
+		m_session->GetPlayer()->GetSession()->SendNotification("You have to reach level %u before you can join this battleground.", minlvl);
 		return;
 	}
 
@@ -1240,7 +1245,7 @@ CBattleground* CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGro
 	if(Type == BATTLEGROUND_ARENA_2V2 || Type == BATTLEGROUND_ARENA_3V3 || Type == BATTLEGROUND_ARENA_5V5)
 	{
 		/* arenas follow a different procedure. */
-		static const uint32 arena_map_ids[6] = { 559, 562, 572, 617, 618 };
+		static const uint32 arena_map_ids[5] = { 559, 562, 572, 617, 618 };
 		uint32 mapid = arena_map_ids[RandomUInt(5)];
 		uint32 players_per_side;
 		mgr = sInstanceMgr.CreateBattlegroundInstance(mapid);

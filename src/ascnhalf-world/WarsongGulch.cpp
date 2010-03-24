@@ -46,7 +46,12 @@ WarsongGulch::WarsongGulch(MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t) : CB
 	m_flagAtBase[0] = m_flagAtBase[1] = 0;
 	m_scores[0] = m_scores[1] = 0;
 
-	m_playerCountPerTeam = 10;
+	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(489);
+	if(bl)
+		m_playerCountPerTeam = bl->maxplayersperteam;
+	else	// shouldn't happen
+		m_playerCountPerTeam = 10;
+		
 	m_lgroup = lgroup;
 }
 

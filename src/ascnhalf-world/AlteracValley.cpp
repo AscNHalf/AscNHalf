@@ -1377,7 +1377,12 @@ void AVNode::Capture()
 
 AlteracValley::AlteracValley( MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
-	m_playerCountPerTeam = 40;
+	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(30);
+	if(bl)
+		m_playerCountPerTeam = bl->maxplayersperteam;
+	else	// shouldn't happen
+		m_playerCountPerTeam = 40;
+	
 	m_reinforcements[0] = AV_NUM_REINFORCEMENTS;
 	m_reinforcements[1] = AV_NUM_REINFORCEMENTS;
 	m_LiveCaptain[0] = true;

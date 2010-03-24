@@ -124,7 +124,7 @@ int32 GetBattlegroundTypeFromCreature(Creature* pCreature)
 	else if( string(pCreature->GetCreatureInfo()->SubName).find("Eye of the Storm") != string::npos )
 		return BATTLEGROUND_EYE_OF_THE_STORM;
 
-	//Isle os Conquest
+	//Isle of Conquest
 	if( string(pCreature->GetCreatureInfo()->Name).find("Isle of Conquest") != string::npos )
 		return BATTLEGROUND_ISLE_OF_CONQUEST;
 

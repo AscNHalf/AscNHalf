@@ -22,7 +22,7 @@
 #include "DataStore.h"
 #include "NGLog.h"
 
-SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
+// SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
 SERVER_DECL DBCStorage<AreaGroup> dbcAreaGroup;
 SERVER_DECL DBCStorage<CharTitlesEntry> dbcCharTitlesEntry;
 SERVER_DECL DBCStorage<CurrencyTypesEntry> dbcCurrencyTypesStore;
@@ -85,6 +85,8 @@ SERVER_DECL DBCStorage<VehicleSeatEntry> dbcVehicleSeat;
 SERVER_DECL DBCStorage<WorldMapOverlayEntry> dbcWorldMapOverlay;
 SERVER_DECL DBCStorage<SummonPropertiesEntry> dbcSummonProps;
 SERVER_DECL DBCStorage<DestructibleModelDataEntry> dbcDestructibleModelData;
+SERVER_DECL DBCStorage<PvPDifficultyEntry> dbcPvPDifficulty;
+SERVER_DECL DBCStorage<BattlemasterListEntry> dbcBattlemasterList;
 
 const char* SummonPropertiesfmt = "uuuuuu";
 const char* AreaTriggerFormat = "uuffffffff";
@@ -188,6 +190,9 @@ const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 
 const char* DestructibleModelDataFormat = "uxxuxxxuxxxuxxxuxxx";
 
+const char* PvPDifficultyFormat = "xuuuuu";
+const char* BattlemasterListFormat = "uiiiiiiiiuuxssssssssssssssssxxx";
+
 
 template<class T>
 bool loader_stub(const char * filename, const char * format, bool ind, T& l, bool loadstrs)
@@ -286,6 +291,9 @@ bool LoadDBCs()
 	LOAD_DBC("DBC/WorldMapOverlay.dbc", WorldMapOverlayfmt, true, dbcWorldMapOverlay, true);
 	
 	LOAD_DBC("DBC/DestructibleModelData.dbc", DestructibleModelDataFormat, true, dbcDestructibleModelData, false);
+	
+	LOAD_DBC("DBC/PvpDifficulty.dbc", PvPDifficultyFormat, true, dbcPvPDifficulty, false);
+	LOAD_DBC("DBC/BattlemasterList.dbc", BattlemasterListFormat, true, dbcBattlemasterList, false);
 
 	return true;
 }

@@ -413,7 +413,12 @@ ArathiBasin::ArathiBasin( MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t) : CBa
 	m_pvpData.clear();
 	m_resurrectMap.clear();
 
-	m_playerCountPerTeam=15;
+	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(529);
+	if(bl)
+		m_playerCountPerTeam = bl->maxplayersperteam;
+	else	// shouldn't happen
+		m_playerCountPerTeam = 15;
+	
 	m_lgroup = lgroup;
 
 	m_bonusHonor = HonorHandler::CalculateHonorPointsFormula(lgroup*10,lgroup*10);

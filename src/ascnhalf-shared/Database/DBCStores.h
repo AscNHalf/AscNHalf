@@ -530,6 +530,28 @@ struct DestructibleModelDataEntry
 	}
 };
 
+struct PvPDifficultyEntry
+{
+    //uint32      id;                                       // 0        m_ID
+    uint32      mapId;                                      // 1
+    uint32      bracketId;                                  // 2
+    uint32      minLevel;                                   // 3
+    uint32      maxLevel;                                   // 4
+    uint32      difficulty; 								// 5
+};
+
+struct BattlemasterListEntry
+{
+    uint32  id;                                             // 0
+    int32   mapid[8];                                       // 1-8 mapid
+    uint32  type;                                           // 9 (3 - BG, 4 - arena)
+    uint32  maxplayersperteam;                              // 10
+    //uint32 unk1;                                          // 11 (0 or 1)
+    char*   name[16];                                       // 12-27
+    //char* unk2                                            // 28 string flag, unused
+    //uint32 unk3                                           // 29 unused
+    //uint32 unk4;                                          // 30 new 3.1
+};
 
 struct ItemSetEntry
 {
@@ -1751,6 +1773,8 @@ extern SERVER_DECL DBCStorage<ScalingStatDistributionEntry> dbcScalingStatDistri
 extern SERVER_DECL DBCStorage<ScalingStatValuesEntry> dbcScalingStatValues;
 extern SERVER_DECL DBCStorage<CurrencyTypesEntry> dbcCurrencyTypesStore;
 extern SERVER_DECL DBCStorage<DestructibleModelDataEntry> dbcDestructibleModelData;
+extern SERVER_DECL DBCStorage<PvPDifficultyEntry> dbcPvPDifficulty;
+extern SERVER_DECL DBCStorage<BattlemasterListEntry> dbcBattlemasterList;
 
 bool LoadDBCs();
 bool LoadRSDBCs();

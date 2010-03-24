@@ -48,6 +48,15 @@ enum BattleGroundTypes
 	BATTLEGROUND_NUM_TYPES				= 33,
 };
 
+enum BattleGroundBracketId                                  // bracketId for level ranges
+{
+    BG_BRACKET_ID_FIRST          = 0,
+    BG_BRACKET_ID_LAST           = 15
+};
+
+// must be max value in PvPDificulty slot+1
+#define MAX_BATTLEGROUND_BRACKETS  16
+
 struct BGScore
 {
 	uint32 KillingBlows;
@@ -74,8 +83,8 @@ struct BGScore
 #define BG_SCORE_EOTS_FLAG_CAPTURES			0
 #define BG_SCORE_SOTA_DESTROY_DEMOLISHER	0
 #define BG_SCORE_SOTA_DESTROY_GATE			1
-#define BG_SCORE_SOTA_BASE_ASSAULTED		0
-#define BG_SCORE_SOTA_BASE_DEFENDED			1
+#define BG_SCORE_SOTA_BASE_ASSAULTED		2
+#define BG_SCORE_SOTA_BASE_DEFENDED			3
 #define BG_SCORE_IOC_BASE_ASSAULTED			0
 #define BG_SCORE_IOC_BASE_DEFENDED			1
 
@@ -221,6 +230,19 @@ public:
 
 	/* Adds a new queueTime for average calculation */
 	void AddAverageQueueTime(uint32 BgType, uint32 queueTime);
+	
+	uint32 GetBGMinlevel(uint32 mapid)
+	{
+		for(uint32 i = 0; i < dbcPvPDifficulty.GetNumRows(); ++i)
+		{
+			if (PvPDifficultyEntry* entry = dbcPvPDifficulty.LookupEntry(i))
+				if (entry->mapId == mapid && entry->bracketId == 0)
+				{
+					return (entry->minLevel);			
+				}
+		}
+		return 0;
+	}
 };
 
 class SERVER_DECL CBattleground : public EventableObject

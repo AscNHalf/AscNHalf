@@ -162,7 +162,12 @@ EyeOfTheStorm::EyeOfTheStorm( MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t) :
 	m_flagHolder = 0;
 	m_points[0] = m_points[1] = 0;
 	m_towerCount[0] = m_towerCount[1] = 0;
-	m_playerCountPerTeam = 15;
+	
+	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(566);
+	if(bl)
+		m_playerCountPerTeam = bl->maxplayersperteam;
+	else	// shouldn't happen
+		m_playerCountPerTeam = 15;
 
 	m_resourceRewards[0] = m_resourceRewards[1] = 330;
 

@@ -174,6 +174,11 @@ StrandOfTheAncients::StrandOfTheAncients(MapMgr* mgr, uint32 id, uint32 lgroup, 
 	allywins = 0;
 	m_started = false;
 	m_ended = false;
+	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(607);
+	if(bl)
+		m_playerCountPerTeam = bl->maxplayersperteam;
+	else	// shouldn't happen
+		m_playerCountPerTeam = 15;
 
 	for(uint8 i = 0; i < 3; ++i)
 	{
