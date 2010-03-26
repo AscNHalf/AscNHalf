@@ -745,8 +745,6 @@ struct SpellEntry
 	uint32 Effect[3];                       //68 - 70
 	uint32 EffectDieSides[3];               //71 - 73
 	uint32 EffectBaseDice[3];               //74 - 76
-	float  EffectDicePerLevel[3];           //77 - 79
-	float  EffectRealPointsPerLevel[3];     //80 - 82
 	int32  EffectBasePoints[3];             //83 - 85
 	int32  EffectMechanic[3];               //86 - 88       Related to SpellMechanic.dbc
 	uint32 EffectImplicitTargetA[3];        //89 - 91

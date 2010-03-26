@@ -925,7 +925,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 	}
 
 	Item* pItem = objmgr.CreateItem(8383, _player);
-	pItem->SetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID, message_id);
+	pItem->SetUInt32Value(ITEM_FIELD_PAD, message_id);
 	if( _player->GetItemInterface()->AddItemToFreeSlot(pItem) )
 	{
 		// mail now has an item after it

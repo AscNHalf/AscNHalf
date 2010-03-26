@@ -182,14 +182,14 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 
 			uint32 enchantid;
 			EnchantEntry * enc;
-			memset(items, 0, sizeof(player_item) * 20);
+			memset(items, 0, sizeof(player_item) * EQUIPMENT_SLOT_END);
 			if(res)
 			{
 				do
 				{
 					containerslot = res->Fetch()[0].GetInt8();
 					slot = res->Fetch()[1].GetInt8();
-					if( containerslot == -1 && slot < 19 && slot >= 0 )
+					if( containerslot == -1 && slot < EQUIPMENT_SLOT_END && slot >= 0 )
 					{
 						proto = ItemPrototypeStorage.LookupEntry(res->Fetch()[2].GetUInt32());
 						if(proto)
@@ -219,8 +219,12 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 				delete res;
 			}
 
-			for( i = 0; i < 20; ++i )
+			for( i = 0; i < EQUIPMENT_SLOT_END; ++i )
 				data << items[i].displayid << items[i].invtype << uint32(items[i].enchantment);
+
+			for(uint8 c = 0; c < 4; ++c)
+				data << uint32(0)/*bags[i].displayid*/ << uint8(18) << uint32(0);
+				//			Displayid						  // Bag	  // Enchant
 
 			num++;
 		}
