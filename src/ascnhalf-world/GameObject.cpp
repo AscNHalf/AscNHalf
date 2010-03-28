@@ -856,10 +856,10 @@ void GameObject::TakeDamage(uint32 ammount)
 		}
 		else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.6)/* && Health >= ((pInfo->SpellFocus + pInfo->sound5)*0.3)*/)
 		{
-			if(GetUInt32Value(GAMEOBJECT_DISPLAYID) != disp->GetDisplayId(0))
-			{
+			/*if(GetUInt32Value(GAMEOBJECT_DISPLAYID) != disp->GetDisplayId(0))
+			{*/
 				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
-			}
+			/*}*/
 			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
 		}
 		/*else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.3) && Health > 0)
@@ -870,12 +870,12 @@ void GameObject::TakeDamage(uint32 ammount)
 	}
 	else if(!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
 	{
-		if(Health <= pInfo->sound5 && Health > (pInfo->sound5)*0.6)
+		if(Health <= (pInfo->SpellFocus + pInfo->sound5) && Health > (pInfo->SpellFocus + pInfo->sound5)*0.6)
 		{
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
 			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
 		}
-		else if(Health <= ((pInfo->sound5)*0.6) && Health > 0 /*&& Health >= (pInfo->sound5)*0.3*/)
+		else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.6) && Health > 0 /*&& Health >= (pInfo->sound5)*0.3*/)
 		{
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
 			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
