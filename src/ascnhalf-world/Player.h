@@ -810,7 +810,7 @@ typedef std::map<uint32, uint64>                    SoloSpells;
 typedef std::map<SpellEntry*, pair<uint32, uint32> >StrikeSpellMap;
 typedef std::map<uint32, OnHitSpell >               StrikeSpellDmgMap;
 typedef std::map<uint32, PlayerSkill>				SkillMap;
-typedef std::set<Player* *>					ReferenceSet;
+typedef std::set<Player* *>							ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
 
 
@@ -1473,15 +1473,7 @@ public:
 
 	INLINE InRangeSet::iterator GetVisibleSetBegin() { return m_visibleObjects.begin(); }
 	INLINE InRangeSet::iterator GetVisibleSetEnd() { return m_visibleObjects.end(); }
-	
-	//Transporters
-	bool m_lockTransportVariables;
-	uint64 m_TransporterGUID;
-	float m_TransporterX;
-	float m_TransporterY;
-	float m_TransporterZ;
-	float m_TransporterO;
-	float m_TransporterUnk;
+
 	// Misc
 	void EventReduceDrunk(bool full);
 	bool m_AllowAreaTriggerPort;
@@ -1615,6 +1607,7 @@ public:
 #endif
 	void AddItemsToWorld();
 	void RemoveItemsFromWorld();
+	uint32 GetTotalItemLevel();
 	void UpdateKnownCurrencies(uint32 itemId, bool apply);
 	
 	uint32 m_ShapeShifted;
@@ -1827,11 +1820,12 @@ public:
 	bool resend_speed;
 	bool rename_pending;
 	uint32 iInstanceType;
+	uint32 iRaidType;
 	INLINE void SetName(string& name) { m_name = name; }
 	// spell to (delay, last time)
-	
+
 	FactionReputation * reputationByListId[128];
-	
+
 	uint64 m_comboTarget;
 	int8 m_comboPoints;
 	bool m_retainComboPoints;

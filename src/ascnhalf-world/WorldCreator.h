@@ -34,25 +34,40 @@ enum INSTANCE_TYPE
 	INSTANCE_MULTIMODE,
 };
 
+enum MAPENTRY_TYPE
+{
+	BATTLEGROUND	= 0,
+	INSTANCE		= 1,
+	RAID			= 2,
+	ARENA			= 4,
+};
+
 enum INSTANCE_MODE
 {
-    MODE_NORMAL = 0,
-    MODE_HEROIC = 1,
-    MODE_EPIC   = 2,
+	MODE_5PLAYER_NORMAL	= 0,
+	MODE_5PLAYER_HEROIC	= 1,
+	MODE_5PLAYER_EPIC	= 2
+};
+
+enum RAID_MODE
+{
+	MODE_10PLAYER_NORMAL	=	0,
+	MODE_25PLAYER_NORMAL	=	1,
+	MODE_10PLAYER_HEROIC	=	2,
+	MODE_25PLAYER_HEROIC	=	3
 };
 
 enum INSTANCE_ABORT_ERROR
 {
-	INSTANCE_ABORT_ERROR_ERROR	 = 0x00,
-	INSTANCE_ABORT_FULL	  = 0x01,
-	INSTANCE_ABORT_NOT_FOUND = 0x02,
-	INSTANCE_ABORT_TOO_MANY  = 0x03,
-	INSTANCE_ABORT_ENCOUNTER = 0x04,
-	INSTANCE_ABORT_NON_CLIENT_TYPE = 0x05,
-	INSTANCE_ABORT_HEROIC_MODE_NOT_AVAILABLE = 0x06,
-	INSTANCE_ABORT_NOT_IN_RAID_GROUP = 0x07,
-
-	INSTANCE_OK = 0x10,
+	INSTANCE_ABORT_ERROR_ERROR					= 0x01,
+	INSTANCE_ABORT_FULL							= 0x02,
+	INSTANCE_ABORT_NOT_FOUND					= 0x03,
+	INSTANCE_ABORT_TOO_MANY						= 0x04,
+	INSTANCE_ABORT_ENCOUNTER					= 0x05,
+	INSTANCE_ABORT_NON_CLIENT_TYPE				= 0x06,
+	INSTANCE_ABORT_HEROIC_MODE_NOT_AVAILABLE	= 0x07,
+	INSTANCE_ABORT_NOT_IN_RAID_GROUP			= 0x08,
+	INSTANCE_OK	= 0x10,
 };
 
 enum OWNER_CHECK
@@ -162,8 +177,8 @@ public:
 			return OWNER_CHECK_EXPIRED;
 		}
 
-		//Valid map?
-		if( !pInstance->m_mapInfo )
+		// Valid map?
+		if( !pInstance->m_mapInfo || !dbcMap.LookupEntry(pInstance->m_mapId)) // ITS A TARP!
 			return OWNER_CHECK_NOT_EXIST;
 
 		// Triggercheat in use?
@@ -171,7 +186,7 @@ public:
 			return OWNER_CHECK_TRIGGERPASS;
 
 		// Matching the requested mode?
-		if( pInstance->m_difficulty != pPlayer->iInstanceType )
+		if( pInstance->m_difficulty != (dbcMap.LookupEntry(pInstance->m_mapId)->israid() ? pPlayer->iRaidType : pPlayer->iInstanceType) )
 			return OWNER_CHECK_DIFFICULT;
 
 		//Reached player limit?
@@ -220,8 +235,12 @@ public:
 	// has an instance expired?
 	INLINE bool HasInstanceExpired(Instance * pInstance)
 	{
+		MapEntry* map = dbcMap.LookupEntry(pInstance->m_mapId);
+		if(map && map->israid())
+			return false;
+
 		// expired? (heroic instances never expire, they are reset every day at 05:00).
-		if( pInstance->m_difficulty != MODE_HEROIC && pInstance->m_expiration && (UNIXTIME+20) >= pInstance->m_expiration)
+		if( pInstance->m_difficulty == 0 && pInstance->m_expiration && (UNIXTIME+20) >= pInstance->m_expiration)
 			return true;
 
 		return false;
@@ -244,7 +263,7 @@ public:
 	MapMgr* GetMapMgr(uint32 mapId);
 
 	//Find saved instance for player at given mapid
-	Instance* GetSavedInstance(uint32 map_id, uint32 guid);
+	Instance* GetSavedInstance(uint32 map_id, uint32 guid, uint32 difficulty);
 	InstanceMap * GetInstancesForMap(uint32 map_id) {return m_instances[map_id];}
 
 private:

@@ -190,6 +190,9 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 
 //	unit->RemoveFromWorld(false,true);
 
+	if(unit->GetAIInterface())
+		unit->GetAIInterface()->StopMovement(10000);
+
 	if(unit->IsVehicle())
 		TO_VEHICLE(unit)->Destructor();
 	else

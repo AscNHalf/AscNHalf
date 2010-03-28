@@ -55,6 +55,7 @@ enum QuickGroupUpdateFlags
 {
 	PARTY_UPDATE_FLAG_POSITION			= 1,
 	PARTY_UPDATE_FLAG_ZONEID			= 2,
+//	GROUP_UPDATE_FLAG_VEHICLE_SEAT
 };
 
 enum GroupFlags
@@ -207,8 +208,6 @@ public:
 	INLINE PlayerInfo * GetMainTank() { return m_mainTank; }
 	INLINE PlayerInfo * GetMainAssist() { return m_mainAssist; }
 
-	void SetDifficulty(uint8 difficulty);
-	
 	/************************************************************************/
 	/* Voicechat                                                            */
 	/************************************************************************/
@@ -233,6 +232,10 @@ public:
 	INLINE void SetFlag(uint8 groupflag) { m_groupFlags |= groupflag; }
 	INLINE void RemoveFlag(uint8 groupflag) { m_groupFlags &= ~groupflag; }
 	INLINE bool HasFlag(uint8 groupflag) { return (m_groupFlags & groupflag) > 0 ? true : false; }
+	INLINE int8 GetDifficulty() { return m_difficulty; }
+	INLINE int8 GetRaidDifficulty() { return m_raiddifficulty; }
+	INLINE void SetDifficulty(uint8 diff) { m_difficulty = diff; }
+	INLINE void SetRaidDifficulty(uint8 diff) { m_raiddifficulty = diff; }
 
 protected:
 	PlayerInfo * m_Leader;
@@ -253,6 +256,7 @@ protected:
 	bool m_dirty;
 	bool m_updateblock;
 	uint8 m_difficulty;
+	uint8 m_raiddifficulty;
 	uint8 m_groupFlags;
 
 	// Evil prayer of mending stuff

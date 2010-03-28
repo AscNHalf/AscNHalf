@@ -805,7 +805,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 60893:
 				{
 					sp->Effect[1]	=	0;
-					sp->EffectBaseDice[1]	=	0;
+					//sp->EffectBaseDice[1]	=	0;
 					sp->EffectBasePoints[1]	=	0;
 					sp->EffectImplicitTargetA[1]	=	0;
 					sp->EffectDieSides[1]	=	0;
@@ -2499,8 +2499,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[1] = 108;
 					sp->EffectDieSides[0] = 1;
 					sp->EffectDieSides[1] = 1;
-					sp->EffectBaseDice[0] = 1;
-					sp->EffectBaseDice[1] = 1;
+					//sp->EffectBaseDice[0] = 1;
+					//sp->EffectBaseDice[1] = 1;
 					sp->EffectBasePoints[0] = 9;
 					sp->EffectBasePoints[1] = 9;
 					sp->EffectMiscValue[0] = 7;
@@ -2600,7 +2600,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 							sp->EffectSpellClassMask[1][2] = sp2->EffectSpellClassMask[0][2];
 							sp->EffectBasePoints[1] = sp2->EffectBasePoints[0];
 							sp->EffectDieSides[1]= sp2->EffectDieSides[0];
-							sp->EffectBaseDice[1]= sp2->EffectBaseDice[0] ;
+							//sp->EffectBaseDice[1]= sp2->EffectBaseDice[0] ;
 						}
 				}break;
 		
@@ -3986,7 +3986,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[0] = 2;
 					sp->Effect[1] = 0;
 					sp->EffectDieSides[1] = 0;
-					sp->EffectBaseDice[1] = 0;
+					//sp->EffectBaseDice[1] = 0;
 					sp->EffectBasePoints[0] = sp->EffectBasePoints[1];
 					sp->EffectBasePoints[1] = 0;                  
 					sp->EffectImplicitTargetA[0] = 6;
@@ -5435,6 +5435,118 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
 					sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 				}break;
+		
+				//////////////////////////////////////////
+				// TRINKETS								//
+				//////////////////////////////////////////
+
+			// Herkuml War Token ICC 
+		case 71397:
+			{
+				sp->procChance	=	100;
+				sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION;
+				sp->EffectTriggerSpell[0]	=	71396;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Althor's Abacus ICC 
+		case 71611:
+			{
+				sp->procChance	=	30;
+				sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION;
+				sp->EffectTriggerSpell[0]	=	71610;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Corpse Tongue Coin ICC 
+		case 71634:
+			{
+				sp->procChance	=	100;
+				sp->procFlags	=	PROC_ON_MELEE_ATTACK;
+				sp->EffectTriggerSpell[0]	=	71633;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Dislodged Foreign Object ICC 
+		case 71602:
+			{
+				sp->procChance	=	10;
+				sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM;
+				sp->EffectTriggerSpell[0]	=	71601;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Ephemeral Snowflake ICC 
+		case 71567:
+			{
+				sp->procChance	=	100;
+				sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM;
+				sp->EffectTriggerSpell[0]	=	71566;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Muradin's Spyglass(H) ICC 
+		case 71573:
+			{
+				sp->procChance	=	100;
+				sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM;
+				sp->EffectTriggerSpell[0]	=	71572;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Muradin's Spyglass ICC 
+		case 71571:
+			{
+				sp->procChance	=	100;
+				sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM;
+				sp->EffectTriggerSpell[0]	=	71570;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Needle-Encrusted Scorpion ICC 
+		case 71404:
+			{
+				sp->procChance	=	10;
+				sp->procFlags	=	PROC_ON_CRIT_ATTACK | PROC_ON_RANGED_CRIT_ATTACK;
+				sp->EffectTriggerSpell[0]	=	71403;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Purified Lunar Dust ICC 
+		case 71585:
+			{
+				sp->procChance	=	10;
+				sp->procFlags	=	PROC_ON_CAST_SPELL;
+				sp->EffectTriggerSpell[0]	=	71584;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Unidentifiable Organ ICC 
+		case 71578:
+			{
+				sp->procChance	=	60;
+				sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
+				sp->EffectTriggerSpell[0]	=	71577;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			// Whispering Fanged Skull ICC 
+		case 71402:
+			{
+				sp->procChance	=	60;
+				sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION;
+				sp->EffectTriggerSpell[0]	=	71401;
+				sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+			}break;
+
+			//////////////////////////////////////////
+			// ITEMSETS								//
+			//////////////////////////////////////////
+		case 70765:
+			{
+				sp->procChance	=	40;
+				sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION;
+			}
 		}
 
 		//////////////////////////////////////////////////////////////////
@@ -5661,7 +5773,7 @@ void ApplyNormalFixes()
 					float ftemp;
 					temp = sp->Effect[col1_swap];			sp->Effect[col1_swap] = sp->Effect[col2_swap] ;						sp->Effect[col2_swap] = temp;
 					temp = sp->EffectDieSides[col1_swap];	sp->EffectDieSides[col1_swap] = sp->EffectDieSides[col2_swap] ;		sp->EffectDieSides[col2_swap] = temp;
-					temp = sp->EffectBaseDice[col1_swap];	sp->EffectBaseDice[col1_swap] = sp->EffectBaseDice[col2_swap] ;		sp->EffectBaseDice[col2_swap] = temp;
+					//temp = sp->EffectBaseDice[col1_swap];	sp->EffectBaseDice[col1_swap] = sp->EffectBaseDice[col2_swap] ;		sp->EffectBaseDice[col2_swap] = temp;
 					temp = sp->EffectBasePoints[col1_swap];	sp->EffectBasePoints[col1_swap] = sp->EffectBasePoints[col2_swap] ;	sp->EffectBasePoints[col2_swap] = temp;
 					temp = sp->EffectMechanic[col1_swap];	sp->EffectMechanic[col1_swap] = sp->EffectMechanic[col2_swap] ;	sp->EffectMechanic[col2_swap] = temp;
 					temp = sp->EffectImplicitTargetA[col1_swap];	sp->EffectImplicitTargetA[col1_swap] = sp->EffectImplicitTargetA[col2_swap] ;	sp->EffectImplicitTargetA[col2_swap] = temp;

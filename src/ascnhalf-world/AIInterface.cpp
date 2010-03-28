@@ -1966,10 +1966,11 @@ void AIInterface::UpdateMove()
 		if( distance < DISTANCE_TO_SMALL_TO_WALK || (creature->proto && creature->proto->CanMove == LIMIT_ROOT ) )
 			return; 
 
-		// check if we're returning to our respawn location. if so, reset back to default orientation.
+		// check if we're returning to our respawn location. if so, reset back to default
+		// orientation
 		if(creature->GetSpawnX() == m_destinationX && creature->GetSpawnY() == m_destinationY)
 		{
-			angle = m_Unit->GetOrientation();
+			angle = creature->GetSpawnO();
 			creature->SetOrientation(angle);
 		}
 		else

@@ -6405,7 +6405,11 @@ void Aura::SpellAuraMounted(bool apply)
 		m_target->RemoveAura(id);
 	}
 
-	bool isVehicleSpell  = m_spellProto->Effect[1] == SPELL_EFFECT_SUMMON ? true : false;
+	bool isVehicleSpell = m_spellProto->Effect[1] == SPELL_EFFECT_SUMMON ? true : false;
+	bool warlockpet;
+ 
+	if(TO_PLAYER(m_target)->GetSummon() && TO_PLAYER(m_target)->GetSummon()->IsWarlockPet() == true)
+		warlockpet = true;
 
 	if(apply)
 	{   
@@ -6480,6 +6484,10 @@ void Aura::SpellAuraMounted(bool apply)
 			m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 
 		uint8 petnum = TO_PLAYER(m_target)->GetUnstabledPetNumber();
+
+		if(warlockpet && !petnum)
+			petnum = TO_PLAYER(m_target)->GetFirstPetNumber();
+
 		if( petnum && TO_PLAYER(m_target)->hasqueuedpet )
 		{
 			//unstable selected pet
@@ -6488,7 +6496,8 @@ void Aura::SpellAuraMounted(bool apply)
 			if( TO_PLAYER(m_target) != NULL && pPet != NULL )
 			{
 				TO_PLAYER(m_target)->SpawnPet(petnum);
-				pPet->stablestate = STABLE_STATE_ACTIVE;
+				if(!warlockpet)
+					pPet->stablestate = STABLE_STATE_ACTIVE;
 			}
 			TO_PLAYER(m_target)->hasqueuedpet = false;
 		}

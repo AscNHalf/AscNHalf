@@ -1186,6 +1186,9 @@ void World::Rehash(bool load)
 
 	if(!MailSystem::getSingletonPtr())
 		new MailSystem;
+	
+	if(load) // Non Rehashable.
+		AHEnabled = true; // Auto enabled.
 
 #ifndef CLUSTERING
 channelmgr.seperatechannels = Config.MainConfig.GetBoolDefault("Server", "SeperateChatChannels", false);

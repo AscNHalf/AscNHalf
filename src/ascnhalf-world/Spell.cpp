@@ -33,7 +33,7 @@ enum SpellTargetSpecification
     TARGET_SPEC_DEAD        = 2,
 };
 
-void SpellCastTargets::read( WorldPacket & data,uint64 caster )
+void SpellCastTargets::read( WorldPacket & data, uint64 caster )
 {
 	m_unitTarget = m_itemTarget = 0;
 	m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0;
@@ -151,7 +151,7 @@ void SpellCastTargets::write( StackPacket& data )
 Spell::Spell(Object* Caster, SpellEntry *info, bool triggered, Aura* aur)
 {
 	ASSERT( Caster != NULL && info != NULL );
-  
+
 	m_spellInfo = info;
 	m_caster = Caster;
 	duelSpell = false;
@@ -159,47 +159,64 @@ Spell::Spell(Object* Caster, SpellEntry *info, bool triggered, Aura* aur)
 
 	switch( Caster->GetTypeId() )
 	{
-		case TYPEID_PLAYER:
-        {
-		    g_caster = NULLGOB;
-		    i_caster = NULLITEM;
-		    u_caster = TO_UNIT( Caster );
-		    p_caster = TO_PLAYER( Caster );
+	case TYPEID_PLAYER:
+		{
+			g_caster = NULLGOB;
+			i_caster = NULLITEM;
+			u_caster = TO_UNIT( Caster );
+			p_caster = TO_PLAYER( Caster );
+			v_caster = NULLVEHICLE;
+			if(Caster->IsVehicle())
+				v_caster = TO_VEHICLE( Caster );
 			if( p_caster->GetDuelState() == DUEL_STATE_STARTED )
-			    duelSpell = true;
-        }break;
+				duelSpell = true;
+		}break;
 
-		case TYPEID_UNIT:
-        {
-		    g_caster = NULLGOB;
-		    i_caster = NULLITEM;
-		    p_caster = NULLPLR;
-		    u_caster = TO_UNIT( Caster );
-		    if( u_caster->IsPet() && TO_PET( u_caster)->GetPetOwner() != NULL && TO_PET( u_caster )->GetPetOwner()->GetDuelState() == DUEL_STATE_STARTED )
-			    duelSpell = true;
-        }break;
+	case TYPEID_UNIT:
+		{
+			g_caster = NULLGOB;
+			i_caster = NULLITEM;
+			p_caster = NULLPLR;
+			v_caster = NULLVEHICLE;
+			u_caster = TO_UNIT( Caster );
+			if(Caster->IsVehicle())
+			{
+ 				v_caster = TO_VEHICLE( Caster );
+				if(!p_caster)
+					p_caster = v_caster->m_redirectSpellPackets;
+			}
+			if( u_caster->IsPet() && TO_PET( u_caster)->GetPetOwner() != NULL && TO_PET( u_caster )->GetPetOwner()->GetDuelState() == DUEL_STATE_STARTED )
+				duelSpell = true;
+		}break;
 
-		case TYPEID_ITEM:
-		case TYPEID_CONTAINER:
-        {
-		    g_caster = NULLGOB;
-		    u_caster = NULLUNIT;
-		    p_caster = NULLPLR;
-		    i_caster = TO_ITEM( Caster );
+	case TYPEID_ITEM:
+	case TYPEID_CONTAINER:
+		{
+			g_caster = NULLGOB;
+			u_caster = NULLUNIT;
+			p_caster = NULLPLR;
+			v_caster = NULLVEHICLE;
+			i_caster = TO_ITEM( Caster );
 			if( i_caster->GetOwner() && i_caster->GetOwner()->GetDuelState() == DUEL_STATE_STARTED )
 				duelSpell = true;
-        }break;
-		
-		case TYPEID_GAMEOBJECT:
-        {
-		    u_caster = NULLUNIT;
-		    p_caster = NULLPLR;
-		    i_caster = NULLITEM;
-		    g_caster = TO_GAMEOBJECT( Caster );
-        }break;
-        default:
-            OUT_DEBUG("[DEBUG][SPELL] Incompatible object type, please report this to the dev's");
-        break;
+		}break;
+
+	case TYPEID_GAMEOBJECT:
+		{
+			u_caster = NULLUNIT;
+			p_caster = NULLPLR;
+			v_caster = NULLVEHICLE;
+			i_caster = NULLITEM;
+			g_caster = TO_GAMEOBJECT( Caster );
+		}break;
+
+	default:
+		{
+			if(sLog.IsOutDevelopement())
+				printf("[DEBUG][SPELL] Incompatible object type, please report this to the dev's\n");
+			else
+				OUT_DEBUG("[DEBUG][SPELL] Incompatible object type, please report this to the dev's");
+		}break;
 	}
 
 	m_spellState = SPELL_STATE_NULL;
@@ -1167,7 +1184,7 @@ void Spell::cancel()
 				if(m_AreaAura)//remove of blizz and shit like this
 				{
 					
-					DynamicObject* dynObj=m_caster->GetMapMgr()->GetDynamicObject(m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
+					DynamicObject* dynObj = m_caster->GetMapMgr()->GetDynamicObject(m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
 					if(dynObj)
 					{
 						dynObj->RemoveFromWorld(true);
@@ -1931,7 +1948,7 @@ void Spell::finish()
 				if(!pTarget)
 					pTarget = p_caster->GetMapMgr()->GetUnit(p_caster->GetSelection());
 			}
-			   
+
 			if(pTarget)
 			{
 				pTarget->RemoveAura(m_spellInfo->Id, m_caster->GetGUID());
@@ -1973,7 +1990,9 @@ void Spell::finish()
 void Spell::SendCastResult(uint8 result)
 {
 	uint32 Extra = 0;
-	if(result == SPELL_CANCAST_OK) return;
+
+	if(result == SPELL_CANCAST_OK)
+		return;
 
 	SetSpellFailed();
 
@@ -2431,16 +2450,13 @@ void Spell::SendChannelUpdate(uint32 time)
 		u_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
 	}
 
-	if (!p_caster)
-		return;
-
 	/*WorldPacket data(MSG_CHANNEL_UPDATE, 18);*/
 	uint8 buf[20];
 	StackPacket data(MSG_CHANNEL_UPDATE, buf, 20);
 
-	data << p_caster->GetNewGUID();
-	data << time;	
-	p_caster->SendMessageToSet(&data, true);	
+	data << m_caster->GetNewGUID();
+	data << time;
+	m_caster->SendMessageToSet(&data, true);	
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -2769,7 +2785,7 @@ void Spell::_SetTargets(const uint64& guid)
 }
 
 void Spell::HandleEffects(uint32 i)
-{   
+{
 	// Try a dummy SpellHandler
 	if(sScriptMgr.CallScriptedDummySpell(m_spellInfo->Id, i, this ))
 	{
@@ -2779,11 +2795,14 @@ void Spell::HandleEffects(uint32 i)
 
 	damage = CalculateEffect(i,unitTarget);  
 	DEBUG_LOG( "Spell","Handling Effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
-	
-	if( m_spellInfo->Effect[i]<TOTAL_SPELL_EFFECTS)
+
+	if( m_spellInfo->Effect[i] < TOTAL_SPELL_EFFECTS)
 		(*this.*SpellEffectsHandler[m_spellInfo->Effect[i]])(i);
 	else
-		DEBUG_LOG("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
+		if(sLog.IsOutDevelopement())
+			printf("Unknown spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
+		else
+			DEBUG_LOG("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
 }
 
 void Spell::HandleAddAura(uint64 guid)
@@ -2827,12 +2846,6 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 6788;
 	else if( m_spellInfo->Id == 45438) // Cast spell Hypothermia
 		spellid = 41425;
-	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47549))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
-		spellid = 47894;
-	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47551))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
-		spellid = 47895;
-	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47552))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
-		spellid = 47896;
 	else if( m_spellInfo->AdditionalAura )
 		spellid = m_spellInfo->AdditionalAura;
 	else if( m_spellInfo->NameHash == SPELL_HASH_HEROISM )
@@ -4241,6 +4254,9 @@ int32 Spell::CalculateEffect(uint32 i,Unit* target)
 
 	int32 value = 0;
 
+	float basePointsPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
+	float randomPointsPerLevel = 1;
+
 	int32 basePoints = m_spellInfo->EffectBasePoints[i] + 1;
 	int32 randomPoints = m_spellInfo->EffectDieSides[i];
 
@@ -4287,6 +4303,8 @@ exit:*/
 			diff +=m_spellInfo->maxLevel;
 		else
 			diff +=u_caster->getLevel();
+		basePoints += float2int32(diff * basePointsPerLevel );
+		randomPoints += float2int32(diff * randomPointsPerLevel);
 	}
 
 	if(randomPoints <= 1)

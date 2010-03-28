@@ -132,94 +132,98 @@ void MapCell::LoadEventIdObjects(CellSpawns * sp, uint8 eventId)
 {
 	Instance * pInstance = _mapmgr->pInstance;
 
-	if(sp->CreatureSpawns.size())//got creatures
+	if(sp)
 	{
-		Vehicle* v;
-		Creature* c;
-		for(CreatureSpawnList::iterator i=sp->CreatureSpawns.begin();i!=sp->CreatureSpawns.end();i++)
+		if(sp->CreatureSpawns.size())//got creatures
 		{
-			if(pInstance)
+			Vehicle* v;
+			Creature* c;
+			for(CreatureSpawnList::iterator i = sp->CreatureSpawns.begin(); i != sp->CreatureSpawns.end(); ++i)
 			{
-				if(pInstance->m_killedNpcs.find((*i)->id) != pInstance->m_killedNpcs.end())
-					continue;
-			}
-			if((*i)->eventid && (*i)->eventid == eventId)
-			{
-				if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
-					continue;
-				if((*i)->vehicle != 0)
+				if(pInstance)
 				{
-					v=_mapmgr->CreateVehicle((*i)->entry);
+					if(pInstance->m_killedNpcs.find((*i)->id) != pInstance->m_killedNpcs.end())
+						continue;
+				}
+				if((*i)->eventid && (*i)->eventid == eventId)
+				{
+					if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
+						continue;
 
-					v->SetMapId(_mapmgr->GetMapId());
-					v->SetInstanceID(_mapmgr->GetInstanceID());
-					v->m_loadedFromDB = true;
-
-					if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+					if((*i)->vehicle != 0)
 					{
-						if(!v->CanAddToWorld())
+						v=_mapmgr->CreateVehicle((*i)->entry);
+
+						v->SetMapId(_mapmgr->GetMapId());
+						v->SetInstanceID(_mapmgr->GetInstanceID());
+						v->m_loadedFromDB = true;
+
+						if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+						{
+							if(!v->CanAddToWorld())
+							{
+								v->Destructor();
+								continue;
+							}
+
+							v->PushToWorld(_mapmgr);
+						}
+						else
 						{
 							v->Destructor();
-							continue;
 						}
-
-						v->PushToWorld(_mapmgr);
 					}
 					else
 					{
-						v->Destructor();
-					}
-				}
-				else
-				{
-					c=_mapmgr->CreateCreature((*i)->entry);
+						c = _mapmgr->CreateCreature((*i)->entry);
 
-					c->SetMapId(_mapmgr->GetMapId());
-					c->SetInstanceID(_mapmgr->GetInstanceID());
-					c->m_loadedFromDB = true;
+						c->SetMapId(_mapmgr->GetMapId());
+						c->SetInstanceID(_mapmgr->GetInstanceID());
+						c->m_loadedFromDB = true;
 
-					if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
-					{
-						if(!c->CanAddToWorld())
+						if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+						{
+							if(!c->CanAddToWorld())
+							{
+								c->Destructor();
+								continue;
+							}
+
+							c->PushToWorld(_mapmgr);
+						}
+						else
 						{
 							c->Destructor();
-							continue;
 						}
-
-						c->PushToWorld(_mapmgr);
-					}
-					else
-					{
-						c->Destructor();
 					}
 				}
 			}
 		}
-	}
 
-	if(sp->GOSpawns.size())//got GOs
-	{
-		GameObject* go;
-		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
+		if(sp->GOSpawns.size())//got GOs
 		{
-			if((*i)->eventid && (*i)->eventid == eventId)
+			GameObject* go;
+			for(GOSpawnList::iterator i = sp->GOSpawns.begin(); i != sp->GOSpawns.end(); ++i)
 			{
-				if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
-					continue;
-				
-				go = _mapmgr->CreateGameObject((*i)->entry);
-				if(go == NULL)
-					continue;
+				if((*i)->eventid && (*i)->eventid == eventId)
+				{
+					if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
+						continue;
+					
+					go = _mapmgr->CreateGameObject((*i)->entry);
+					if(go == NULL)
+						continue;
 
-				if(go->Load(*i))
-				{
-					go->m_loadedFromDB = true;
-					go->PushToWorld(_mapmgr);
-					CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
-				}
-				else
-				{
-					go->Destructor();
+					if(go->Load(*i))
+					{
+						go->m_loadedFromDB = true;
+						go->PushToWorld(_mapmgr);
+						CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
+					}
+					else
+					{
+						go->Destructor();
+					}
 				}
 			}
 		}
@@ -437,7 +441,7 @@ void DayWatcherThread::update_event_settings(uint8 eventid, time_t activated)
 	if(activated)
 		CharacterDatabase.Execute("REPLACE INTO events_settings VALUES('%u','%u')", eventid, activated);
 	else
-		CharacterDatabase.Execute("DELETE FROM events_settings where eventid = '%u')", eventid);
+		CharacterDatabase.Execute("DELETE FROM events_settings where eventid = '%u'", eventid);
 }
 
 bool DayWatcherThread::SpawnEventId(uint8 eventId, bool activate)

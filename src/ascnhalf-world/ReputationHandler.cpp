@@ -480,7 +480,7 @@ void Player::Reputation_OnKilledUnit(Unit* pUnit, bool InnerLoop)
 				continue;
 
 			/* rep limit? */
-			if (!IS_INSTANCE(GetMapId()) || (IS_INSTANCE(GetMapId()) && this->iInstanceType != MODE_HEROIC))
+			if (!IS_INSTANCE(GetMapId()) || (IS_INSTANCE(GetMapId()) && this->iInstanceType != MODE_5PLAYER_HEROIC))
 			{
 				if((*itr).replimit)
 				{

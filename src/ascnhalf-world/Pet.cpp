@@ -30,7 +30,7 @@ uint32 GetAutoCastTypeForSpell(SpellEntry * ent)
 	{
 
 	/************************************************************************/
-	/* Warlock Pet Spells													*/
+	/*					          Warlock Pet Spells                                                */
 	/************************************************************************/
 
 	case SPELL_HASH_FIREBOLT:			// Firebolt
@@ -124,11 +124,8 @@ void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, Creature* created_from_
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);	// better set this one
 
 	// Fields common to both lock summons and pets
-	uint32 level = (m_Owner->GetUInt32Value( UNIT_FIELD_LEVEL ) - 5);
-	if( type & 0x2 && created_from_creature != NULL && created_from_creature->getLevel() > level)
-	{
-		level = created_from_creature->getLevel();
-	}
+	uint32 level = (m_Owner->GetUInt32Value( UNIT_FIELD_LEVEL ) + (m_Owner->getClass() == HUNTER ? - 5 : 0)) < 1 ?
+		1 : (m_Owner->GetUInt32Value( UNIT_FIELD_LEVEL ) + (m_Owner->getClass() == HUNTER ? - 5 : 0));
 
 	SetUInt32Value( UNIT_FIELD_LEVEL, level);
 
@@ -1219,7 +1216,10 @@ void Pet::ApplySummonLevelAbilities()
 
 	if(stat_index < 0)
 	{
-		OUT_DEBUG("PETSTAT: No stat index found for entry %u, `%s`!", GetEntry(), creature_info->Name);
+		if(sLog.IsOutDevelopement())
+			printf("PETSTAT: No stat index found for entry %u, `%s`!\n", GetEntry(), creature_info->Name);
+		else
+			OUT_DEBUG("PETSTAT: No stat index found for entry %u, `%s`!", GetEntry(), creature_info->Name);
 		return;
 	}
 
@@ -1451,7 +1451,10 @@ void Pet::AddPetSpellToOwner(uint32 spellId)
 	
 	}
 	else
-		OUT_DEBUG("WORLD: Could not find teaching spell for spell %u", spellId);
+		if(sLog.IsOutDevelopement())
+			printf("WORLD: Could not find teaching spell for spell %u\n", spellId);
+		else
+			OUT_DEBUG("WORLD: Could not find teaching spell for spell %u", spellId);
 }
 
 uint32 Pet::GetHighestRankSpell(uint32 spellId)

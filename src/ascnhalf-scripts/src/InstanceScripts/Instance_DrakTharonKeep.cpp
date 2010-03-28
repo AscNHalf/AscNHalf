@@ -44,7 +44,7 @@ public:
 
     TROLLGORE_AI(Creature * pCreature) : CreatureAIScript(pCreature)
     {
-		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_HEROIC );
+		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC );
 		invastion_timer = 0;
 		spells.clear();
 		/* SPELLS INIT */
@@ -234,7 +234,7 @@ public:
 
     NOVOS_THE_SUMMONER_AI(Creature * pCreature) : CreatureAIScript(pCreature)
     {
-		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_HEROIC );
+		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC );
 		phase = 0;
 		invasion_timer = 0;
 		handler_timer = 0;
@@ -570,7 +570,7 @@ public:
 
     CRYSTAL_HANDLER_AI(Creature * pCreature) : CreatureAIScript(pCreature)
     {
-		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_HEROIC );
+		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC );
 		spells.clear();
 		/* SPELLS INIT */
 		ScriptSpell* FlashofDarkness = new ScriptSpell;
@@ -708,7 +708,7 @@ public:
 
     KING_DRED_AI(Creature * pCreature) : CreatureAIScript(pCreature)
     {
-		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_HEROIC );
+		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC );
 		spells.clear();
 		/* SPELLS INIT */
 		ScriptSpell* BellowingRoar = new ScriptSpell;
@@ -866,7 +866,7 @@ public:
 
     THE_PROPHET_THARONJA(Creature * pCreature) : CreatureAIScript(pCreature)
     {
-		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_HEROIC );
+		heroic = ( _unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC );
 		spells.clear();
 		phase_timer = 0;
 		phase_length = 0;

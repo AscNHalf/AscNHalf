@@ -663,6 +663,32 @@ enum Powers
 
 typedef std::list<struct ProcTriggerSpellOnSpell> ProcTriggerSpellOnSpellList;
 
+class MovementInfo
+{
+public:
+	uint64 guid;
+	uint32 time;
+	float pitch;// -1.55=looking down, 0=looking forward, +1.55=looking up
+	float jump_sinAngle;//on slip 8 is zero, on jump some other number
+	float jump_cosAngle, jump_xySpeed;//9,10 changes if you are not on foot
+	float jumpspeed;//something related to collision, CROW: Might be used for other knockback information.
+	uint32 unk11;
+	uint32 spline_unk;
+	uint8 unk13;
+	uint16 flag16;
+
+	float x, y, z, orientation;
+	uint32 flags;
+	uint32 FallTime;
+	WoWGuid transGuid;
+	float transX, transY, transZ, transO;
+	uint32 transTime;
+	uint8 transSeat;
+
+	void init(WorldPacket & data);
+	void write(WorldPacket & data);
+};
+
 /************************************************************************/
 /* "In-Combat" Handler                                                  */
 /************************************************************************/
@@ -1097,6 +1123,8 @@ public:
 	//Vehicle
 	uint8 m_inVehicleSeatId;
 	Vehicle* m_CurrentVehicle;
+	
+	INLINE int8 GetSeatID() { return m_inVehicleSeatId; }
 
 	//Pet
 	INLINE void SetIsPet(bool chck) { m_isPet = chck; }
@@ -1321,8 +1349,26 @@ public:
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
 
+	//Transporters
+	bool m_lockTransportVariables;
+	uint64 m_TransporterGUID;
+	float m_TransporterX;
+	float m_TransporterY;
+	float m_TransporterZ;
+	float m_TransporterO;
+	float m_TransporterUnk;
+	LocationVector* m_transportPosition;
+	WoWGuid m_transportNewGuid;
+
+	// Movement Info.
+	MovementInfo* GetMovementInfo() { return &movement_info; }
+	MovementInfo movement_info;
+
 protected:
-	Unit ();
+	/* Preallocated buffers for movement handlers */
+	uint8 movement_packet[90];
+ 
+	Unit();
 
 	uint32 m_meleespell;
 	uint8 m_meleespell_cn;

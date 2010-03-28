@@ -380,8 +380,8 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 	CHECK_INWORLD_RETURN;
 	CHECK_PACKET_SIZE(recv_data, 2);
 	WorldPacket data;
-	int8 srcslot=0, dstslot=0;
-	int8 error=0;
+	int8 srcslot = 0, dstslot = 0;
+	int8 error = 0;
 
 	recv_data >> dstslot >> srcslot;
 
@@ -505,8 +505,9 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 	//Player* plyr = GetPlayer();
 
 	int8 SrcInvSlot, SrcSlot;
+	uint32 data;
 
-	recv_data >> SrcInvSlot >> SrcSlot;
+	recv_data >> SrcInvSlot >> SrcSlot >> data;
 
 	OUT_DEBUG( "ITEM: destroy, SrcInv Slot: %i Src slot: %i", SrcInvSlot, SrcSlot );
 	Item* it = _player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
@@ -747,7 +748,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 4);
  
 	int i;
-	uint32 itemid=0;
+	int32 statcount = 0;
+	uint32 itemid = 0;
 	recv_data >> itemid;
 
 	ItemPrototype *itemProto = ItemPrototypeStorage.LookupEntry(itemid);
@@ -761,8 +763,14 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
 	uint8 databuffer[50000];
 	StackPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, databuffer, 50000);
-	
+
 	LocalizedItem* li = (language>0) ? sLocalizationMgr.GetLocalizedItem(itemid, language) : NULL;
+
+	for(int i = 0; i < 10; ++i)
+	{
+		if(itemProto->Stats[i].Type)
+			statcount = i + 1; // Crow Classic.
+	}
 
 	data << itemProto->ItemId;
 	data << itemProto->Class;
@@ -795,8 +803,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->Unique;
 	data << itemProto->MaxCount;
 	data << itemProto->ContainerSlots;
-	data << uint32(10);								// 3.0.2 count of stats
-	for(i = 0; i < 10; i++)
+	data << uint32(statcount);
+	for(i = 0; i < statcount; i++)
 	{
 		data << itemProto->Stats[i].Type;
 		data << itemProto->Stats[i].Value;
@@ -821,7 +829,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->Delay;
 	data << itemProto->AmmoType;
 	data << itemProto->Range;
-	for(i = 0; i < 5; i++) {
+	for(i = 0; i < 5; i++)
+	{
 		data << itemProto->Spells[i].Id;
 		data << itemProto->Spells[i].Trigger;
 		data << itemProto->Spells[i].Charges;
@@ -841,7 +850,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->QuestId;
 	data << itemProto->LockId;
 	data << itemProto->LockMaterial;
-	data << itemProto->Field108;
+	data << itemProto->SheathId;
 	data << itemProto->RandomPropId;
 	data << itemProto->RandomSuffixId;
 	data << itemProto->Block;
@@ -852,19 +861,22 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->BagFamily;
 	data << itemProto->TotemCategory;
 	// 3 sockets
-	data << itemProto->Sockets[0].SocketColor ;
-	data << itemProto->Sockets[0].Unk;
-	data << itemProto->Sockets[1].SocketColor ;
-	data << itemProto->Sockets[1].Unk ;
-	data << itemProto->Sockets[2].SocketColor ;
-	data << itemProto->Sockets[2].Unk ;
+	for(i = 0; i < 3; i++)
+	{
+		data << itemProto->Sockets[i].SocketColor;
+		data << itemProto->Sockets[i].Unk;
+	}
 	data << itemProto->SocketBonus;
 	data << itemProto->GemProperties;
-	data << itemProto->DisenchantReqSkill;			// should be a float here
+	data << float(itemProto->DisenchantReqSkill);	// should be a float?
 	data << itemProto->ArmorDamageModifier;
 	data << uint32(0);								// 2.4.2 Item duration in seconds
-	data << uint32(0);								// 3.0.2
-	data << uint32(0);								// 3.1.0
+	data << uint32(0);								// ItemLimitCategory
+	data << uint32(0);								// HolidayId.
+	/* Crow: Holiday Id. Been thinking about the use for this. Maybe used with currency items,
+	if the item is from the holiday, then it would look in the DBC for a event, and remove it if
+	its not within that events time? Also removes it from the currency list.
+	*/
 
 	SendPacket( &data );
 }
@@ -966,8 +978,8 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	if(!GetPlayer())
 		return;
 
-	uint64 vendorguid=0, itemguid=0;
-	int8 amount=0;
+	uint64 vendorguid = 0, itemguid = 0;
+	int32 amount = 0;
 	//uint8 slot = INVENTORY_NO_SLOT_AVAILABLE;
 	//uint8 bagslot = INVENTORY_NO_SLOT_AVAILABLE;
 	//int check = 0;
@@ -1015,12 +1027,12 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	}
 
 	// Check if item can be sold
-	if( it->SellPrice == 0 || item->wrapped_item_id != 0 || it->BuyPrice == 0 )
+	if( it->SellPrice == 0 || item->wrapped_item_id != 0 /* || it->BuyPrice == 0 */)
 	{
 		SendSellItem(vendorguid, itemguid, 2);
 		return;
 	}
-	
+
 	uint32 stackcount = item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
 	uint32 quantity = 0;
 
@@ -1034,11 +1046,11 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	}
 
 	if(quantity > stackcount) quantity = stackcount; //make sure we don't over do it
-	
+
 	uint32 price = GetSellPriceForItem(it, quantity);
 
 	_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE,price);
- 
+
 	if(quantity < stackcount)
 	{
 		item->SetCount(stackcount - quantity);
@@ -1077,15 +1089,17 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	uint64 srcguid, bagguid;
 	uint32 itemid;
-	int32 slot;
-	uint8 amount = 0;
+	uint32 amount = 0;
+	int32 vendorslot;
+	int8 slot;
 	uint8 error;
 	int8 bagslot = INVENTORY_SLOT_NOT_SET;
 
 	recv_data >> srcguid >> itemid;
+	recv_data >> vendorslot;
 	recv_data >> bagguid;
-	recv_data >> amount;
 	recv_data >> slot;
+	recv_data >> amount;
 
 	if( _player->isCasting() )
 		_player->InterruptCurrentSpell();
@@ -1278,10 +1292,10 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 		return;
 
 	WorldPacket data(45);
-	uint64 srcguid=0;
-	uint32 itemid=0;
-	int32 slot=0;
-	uint8 amount=0;
+	uint64 srcguid = 0;
+	uint32 itemid = 0;
+	int32 slot = 0;
+	uint32 amount = 0;
 //	int8 playerslot = 0;
 //	int8 bagslot = 0;
 	Item* add = NULLITEM;
@@ -1637,14 +1651,20 @@ INLINE uint32 RepairItemCost(Player* pPlayer, Item* pItem)
 	DurabilityCostsEntry * dcosts = dbcDurabilityCosts.LookupEntry(pItem->GetProto()->ItemLevel);
 	if(!dcosts)
 	{
-		OUT_DEBUG("Repair: Unknown item level (%u)", dcosts);
+		if(sLog.IsOutDevelopement())
+			printf("Repair: Unknown item level (%u)\n", dcosts);
+		else
+			OUT_DEBUG("Repair: Unknown item level (%u)", dcosts);
 		return 0;
 	}
 
 	DurabilityQualityEntry * dquality = dbcDurabilityQuality.LookupEntry((pItem->GetProto()->Quality + 1) * 2);
 	if(!dquality)
 	{
-		OUT_DEBUG("Repair: Unknown item quality (%u)", dquality);
+		if(sLog.IsOutDevelopement())
+			printf("Repair: Unknown item quality (%u)\n", dquality);
+		else
+			OUT_DEBUG("Repair: Unknown item quality (%u)", dquality);
 		return 0;
 	}
 
@@ -1676,13 +1696,13 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 	if(!GetPlayer())
 		return;
 
-	uint64 npcguid;
-	uint64 itemguid;
+	uint64 npcguid, itemguid;
+	uint8 data;
 	Item* pItem;
 	Container* pContainer;
 	uint32 j, i;
 
-	recvPacket >> npcguid >> itemguid;
+	recvPacket >> npcguid >> itemguid >> data;
 
 	Creature* pCreature = _player->GetMapMgr()->GetCreature( GET_LOWGUID_PART(npcguid) );
 	if( pCreature == NULL )
@@ -1896,23 +1916,30 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 
 	CHECK_INWORLD_RETURN;
 
-	GetPlayer()->ObjLock();
-
 	Item* TargetItem =_player->GetItemInterface()->GetItemByGUID(itemguid);
 	if(!TargetItem)
 	{
-		GetPlayer()->ObjUnlock();
 		return;
 	}
-	int slot =_player->GetItemInterface()->GetInventorySlotByGuid(itemguid);
-	bool apply = (slot>=0 && slot <19);
-	uint32 FilledSlots=0;
+	int slot = _player->GetItemInterface()->GetInventorySlotByGuid(itemguid);
+	bool apply = (slot >= 0 && slot < 19);
+	uint32 FilledSlots = 0;
+
+	/* The following is a hack check to make sure player's aren't socketing more than they have,
+		while still allowing socketing of items with prismatic sockets. */
+	bool sockenchgloves = (TargetItem->HasEnchantment(3723) && TargetItem->GetProto()->InventoryType == 10);
+	bool sockenchbracer = (TargetItem->HasEnchantment(3717) && TargetItem->GetProto()->InventoryType == 9);
+	bool sockenchbelt = (TargetItem->HasEnchantment(3729) && TargetItem->GetProto()->InventoryType == 6);
 
 	bool ColorMatch = true;
-	for(uint32 i = 0; i < TargetItem->GetSocketsCount(); i++)
+	for(uint32 i = 0; i < 3; i++)
 	{
 		recvPacket >> gemguid[i];
-		EnchantmentInstance * EI= TargetItem->GetEnchantment(2+i);
+
+		if(i > ((sockenchgloves || sockenchbracer || sockenchbelt) ? TargetItem->GetSocketsCount() + 1 : TargetItem->GetSocketsCount()))
+			continue;
+
+		EnchantmentInstance * EI = TargetItem->GetEnchantment(2+i);
 		if(EI)
 		{
 			FilledSlots++;
@@ -1921,28 +1948,61 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 				gp = 0;
 			else
 				gp = dbcGemProperty.LookupEntry(ip->GemProperties);
-	
-			if(gp && !(gp->SocketMask & TargetItem->GetProto()->Sockets[i].SocketColor))
-				ColorMatch=false;
+
+			if(gp && !(gp->SocketMask & TargetItem->GetProto()->Sockets[i].SocketColor) && TargetItem->GetProto()->Sockets[i].SocketColor != 0)
+				ColorMatch = false;
 		}
 
 		if(gemguid[i])//add or replace gem
 		{
-			Item* it=_player->GetItemInterface()->SafeRemoveAndRetreiveItemByGuid(gemguid[i], true);
+			ItemInterface * itemi = _player->GetItemInterface();
+			ItemPrototype * ip = NULL;
+			Item * it = itemi->GetItemByGUID(gemguid[i]);
+			if (apply) 
+			{
+				if( !it )
+					continue;
+
+				ip = it->GetProto();
+
+				if( !ip )
+					continue;
+
+				if( ip->Flags & ITEM_FLAG_UNIQUE_EQUIP && itemi->IsEquipped( ip->ItemId ) )
+				{
+					itemi->BuildInventoryChangeError( it, TargetItem, INV_ERR_CANT_CARRY_MORE_OF_THIS );
+					continue;
+				}
+				// Skill requirement
+				if( ip->RequiredSkill )
+				{
+					if( ip->RequiredSkillRank > _player->_GetSkillLineCurrent( ip->RequiredSkill, true ) )
+					{
+						itemi->BuildInventoryChangeError( it, TargetItem, INV_ERR_SKILL_ISNT_HIGH_ENOUGH );
+						continue;
+					}
+				}
+			}
+
+			it = _player->GetItemInterface()->SafeRemoveAndRetreiveItemByGuid(gemguid[i],true);
 			if(!it)
 				continue;
 
 			gp = dbcGemProperty.LookupEntry(it->GetProto()->GemProperties);
 			it->Destructor();
-		
+
 			if(!gp)
 				continue;
+
 			if(!(gp->SocketMask & TargetItem->GetProto()->Sockets[i].SocketColor))
-				ColorMatch=false;
+				ColorMatch = false;
+
+			if(gp->SocketMask && TargetItem->GetProto()->Sockets[i].SocketColor == 0)
+				ColorMatch = true;
 
 			if(!gp->EnchantmentID)//this is ok in few cases
 				continue;
-				  
+
 			if(EI)//replace gem
 				TargetItem->RemoveEnchantment(2+i);//remove previous
 			else//add gem
@@ -1957,11 +2017,10 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 	//Add color match bonus
 	if(TargetItem->GetProto()->SocketBonus)
 	{
-		if(ColorMatch && (FilledSlots==TargetItem->GetSocketsCount()))
+		if(ColorMatch && (FilledSlots >= TargetItem->GetSocketsCount()))
 		{
 			if(TargetItem->HasEnchantment(TargetItem->GetProto()->SocketBonus) > 0)
 			{
-				GetPlayer()->ObjUnlock();
 				return;
 			}
 
@@ -1971,15 +2030,14 @@ void WorldSession::HandleInsertGemOpcode(WorldPacket &recvPacket)
 				uint32 Slot = TargetItem->FindFreeEnchantSlot(Enchantment,0);
 				TargetItem->AddEnchantment(Enchantment, 0, true,apply,false, Slot);
 			}
-		}else //remove
+		}
+		else //remove
 		{
 			TargetItem->RemoveSocketBonusEnchant();
 		}
 	}
 
 	TargetItem->m_isDirty = true;
-
-	GetPlayer()->ObjUnlock();
 }
 
 void WorldSession::HandleWrapItemOpcode( WorldPacket& recv_data )

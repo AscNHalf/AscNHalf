@@ -27,14 +27,13 @@
 struct AchievementData
 {
 	uint32 id;
-	uint32 counter[32];
-
-	uint32 date;
+	string criteriaprogress;
 	bool completed;
-
+	uint32 date;
+	uint32 groupid;
 	uint32 num_criterias;
+	uint32 counter[32];
 	uint32 completionTimeLast;
-	
 	bool m_isDirty;
 };
 
@@ -56,6 +55,7 @@ private:
 	void EventAchievementEarned(AchievementData * pData);
 	void SendCriteriaUpdate(AchievementData * ad, uint32 idx);
 	bool CanCompleteAchievement(AchievementData * ad);
+	bool HandleBeforeChecks(AchievementData * ad);
 	AchievementData* CreateAchievementDataEntryForAchievement(AchievementEntry * ae);
 
 	// Gets AchievementData struct. If there is none, one will be created.

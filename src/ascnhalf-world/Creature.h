@@ -154,15 +154,8 @@ struct CreatureProto
 	uint32 extra_a9_flags;
 	uint32	auraimmune_flag;
 	int32 vehicle_entry;
+	uint32 SpellClickid;
 	uint8 CanMove;
-	uint32 spell1;
-	uint32 spell2;
-	uint32 spell3;
-	uint32 spell4;
-	uint32 spell5;
-	uint32 spell6;
-	uint32 spell7;
-	uint32 spell8;
 
 	/* AI Stuff */
 	bool m_canRangedAttack;
@@ -196,9 +189,19 @@ struct CreatureProtoHeroic
 	UNORDERED_SET<uint32> start_auras;
 };
 
+struct CreatureProtoVehicle
+{
+	uint32 vehicle_creature_entry; // Entry.
+	bool healthfromdriver; // Effects only driver.
+	uint32 healthunitfromitemlev;
+	uint32 VehicleSpells[6]; // Vehicle spells.
+	uint32 accessoryentry[8]; // Accessories.
+};
+
 #pragma pack(pop)
 
-struct Formation{
+struct Formation
+{
 	uint32 fol;
 	float ang;
 	float dist;
@@ -315,7 +318,9 @@ public:
 	bool canWalk() const { return ( proto->CanMove & LIMIT_GROUND)!= 0; }
 	bool canSwim() const { return ( proto->CanMove & LIMIT_WATER)!= 0; }
 	bool canFly()  const { return ( proto->CanMove & LIMIT_AIR)!= 0; }
-	
+
+	/// Arena organizers
+	INLINE bool ArenaOrganizersFlags() const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDCHANGER ); }
 
 	/// Updates
 	virtual void Update( uint32 time );
@@ -585,9 +590,7 @@ public:
 	bool m_corpseEvent;
 	MapCell * m_respawnCell;
 	bool m_noRespawn;
-	LocationVector * m_transportPosition;
-	uint32 m_transportGuid;
-	WoWGuid m_transportNewGuid;
+
 protected:
 	CreatureAIScript *_myScriptClass;
 	bool m_limbostate;

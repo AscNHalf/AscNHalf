@@ -21,7 +21,7 @@
 #include "StdAfx.h"
 
 //#pragma comment(lib, "collision.lib")
-#define MAX_MAP 700
+#define MAX_MAP 750
 
 struct CollisionMap
 {

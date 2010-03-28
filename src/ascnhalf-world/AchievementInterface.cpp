@@ -47,7 +47,6 @@ AchievementInterface::~AchievementInterface()
 
 void AchievementInterface::LoadFromDB( QueryResult * pResult )
 {
-
 	// don't allow GMs to complete achievements
 	if( m_player->GetSession()->HasGMPermissions() )
 	{
@@ -62,7 +61,6 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 	{
 		Field * fields = pResult->Fetch();
 		uint32 achievementid = fields[1].GetUInt32();
-		string criteriaprogress = fields[2].GetString();
 		bool completed = (fields[3].GetUInt32() > 0);
 
 		AchievementEntry * ae = dbcAchievement.LookupEntry( achievementid );
@@ -72,12 +70,15 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 		ad->id = achievementid;
 		ad->num_criterias = ae->AssociatedCriteriaCount;
 		ad->completed = completed;
+		ad->criteriaprogress = fields[2].GetString();
 		ad->date = fields[3].GetUInt32();
-		
-		if( ad->completed && string(ae->name).find("Realm First!") != string::npos )
+		ad->groupid = fields[4].GetUInt64();
+
+		if( ad->completed && string(ae->name).find("Realm First!") != string::npos ||
+			(ae->flags & ACHIEVEMENT_FLAG_REALM_FIRST_OBTAIN) || (ae->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
 			m_completedRealmFirstAchievements.insert( ae->ID );
 
-		vector<string> Delim = StrSplit( criteriaprogress, "," );
+		vector<string> Delim = StrSplit( ad->criteriaprogress, "," );
 		for( uint32 i = 0; i < 32; ++i)
 		{
 			if( i >= Delim.size() )
@@ -113,12 +114,12 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 	map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.begin();
 	for(; itr != m_achivementDataMap.end(); ++itr)
 	{
-		AchievementData * ad = itr->second;
+		AchievementData* ad = itr->second;
 		if( !ad->m_isDirty )
 			continue;
 
 		std::stringstream ss;
-		ss << "REPLACE INTO achievements (player,achievementid,progress,completed) VALUES (";
+		ss << "REPLACE INTO achievements (player,achievementid,progress,completed,groupid) VALUES (";
 		ss << m_player->GetLowGUID() << ",";
 		ss << ad->id << ",";
 		ss << "'";
@@ -127,7 +128,8 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 			ss << ad->counter[i] << ",";
 		}
 		ss << "',";
-		ss << ad->date << ")";
+		ss << ad->date << ",";
+		ss << ad->groupid << ")";
 		buffer->AddQueryStr( ss.str().c_str() );
 
 		ad->m_isDirty = false;
@@ -271,8 +273,6 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 	}
 }
 
-
-
 WorldPacket* AchievementInterface::BuildAchievementEarned(AchievementData * pData)
 {
 	pData->m_isDirty = true;
@@ -307,17 +307,33 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 	if( m_player->GetSession()->HasGMPermissions() )
 		return false;
 
+	if(!m_player) // o.O bastard.
+		return false;
+
 	if( ad->completed )
 		return false;
 
 	bool hasCompleted = false;
 	AchievementEntry * ach = dbcAchievement.LookupEntry(ad->id);
-	if( ach->categoryId == 1 ) // We cannot complete statistics
+
+	if( ach->categoryId == 1 || ach->flags & ACHIEVEMENT_FLAG_COUNTER ) // We cannot complete statistics
 		return false;
 
 	// realm first achievements
 	if( m_completedRealmFirstAchievements.find(ad->id) != m_completedRealmFirstAchievements.end() )
 		return false;
+
+	/* Crow: Needs work :|
+	This needs to be in a check that allows updates, but does not allow the
+	player to actually get the achievement, also need to add it so that based on how
+	many we need and how many we have, but that seems to be a small amount of achievements,
+	maybe just do those by hand.
+	*/
+	for(uint32 i = 0; i < ad->num_criterias; ++i)
+	{
+		if(ad->counter[i] == 0)
+			return false;
+	}
 
 	bool failedOne = false;
 	for(uint32 i = 0; i < ad->num_criterias; ++i)
@@ -356,6 +372,27 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 	return true;
 }
 
+bool AchievementInterface::HandleBeforeChecks(AchievementData * ad)
+{
+	AchievementEntry * ach = dbcAchievement.LookupEntry(ad->id);
+
+	// Difficulty checks
+	if(string(ach->description).find("25-player heroic mode") != string::npos)
+		if(m_player->iRaidType < MODE_25PLAYER_HEROIC)
+			return false;
+	if(string(ach->description).find("10-player heroic mode") != string::npos)
+		if(m_player->iRaidType < MODE_10PLAYER_HEROIC)
+			return false;
+	if(string(ach->description).find("25-player mode") != string::npos)
+		if(m_player->iRaidType < MODE_25PLAYER_NORMAL)
+			return false;
+	if((string(ach->description).find("Heroic Difficulty") != string::npos) || ach->ID == 4526)
+		if(m_player->iInstanceType < MODE_5PLAYER_HEROIC)
+			return false;
+
+	return true;
+}
+
 AchievementData* AchievementInterface::GetAchievementDataByAchievementID(uint32 ID)
 {
 	map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.find( ID );
@@ -376,6 +413,7 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 {
 	ad->m_isDirty = true;
 	ad->date = (uint32)time(NULL);
+	ad->groupid = m_player->GetGroupID();
 	WorldPacket data(SMSG_CRITERIA_UPDATE, 50);
 	AchievementEntry * ae = dbcAchievement.LookupEntry(ad->id);
 	data << uint32(ae->AssociatedCriteria[idx]);
@@ -431,10 +469,8 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
-	{
 		return;
-	}
-	
+
 	AchievementCriteriaSet::iterator citr = acs->begin();
 	for(; citr != acs->end(); ++citr)
 	{
@@ -442,18 +478,17 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqKill = ace->kill_creature.creatureID;
 		uint32 ReqCount = ace->kill_creature.creatureCount;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
-
+		if(!pAchievementEntry)
+			continue;
 		// Wrong monster, continue on, kids.
 		if( ReqKill != killedMonster )
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
+			continue;
+		if(!HandleBeforeChecks(ad))
 			continue;
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
@@ -462,10 +497,10 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i); break;
+				SendCriteriaUpdate(ad, i);
+				break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
@@ -490,14 +525,16 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 		uint32 ReqCount = ace->win_bg.winCount;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 		// Wrong BG, continue on, kids.
 		if( ReqBGMap != bgMapId )
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
+			continue;
+		if(!HandleBeforeChecks(ad))
 			continue;
 		ad->completionTimeLast = time;
 		// Figure out our associative ID.
@@ -508,7 +545,6 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 			{
 				if( compareCriteria->raw.additionalRequirement1_type && scoreMargin < compareCriteria->raw.additionalRequirement1_type ) // BG Score Requirement.
 					continue;
-
 				// AV stuff :P
 				if( bg->GetType() == BATTLEGROUND_ALTERAC_VALLEY )
 				{
@@ -517,7 +553,6 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 					{
 						continue; // We do not support mines yet in AV
 					}
-
 					if( pAchievementEntry->ID == 220 ) // AV: Stormpike Perfection
 					{
 						bool failure = false;
@@ -526,13 +561,11 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 						{
 							if( pAV->GetNode(i)->IsGraveyard() )
 								continue;
-
 							if( pAV->GetNode(i)->GetState() != AV_NODE_STATE_ALLIANCE_CONTROLLED )
 								failure = true;
 						}
 						if( failure ) continue;
 					}
-
 					if( pAchievementEntry->ID == 873 ) // AV: Frostwolf Perfection
 					{
 						bool failure = false;
@@ -548,12 +581,10 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 						if( failure ) continue;
 					}
 				}
-
 				ad->counter[i] = ad->counter[i] + 1;
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
@@ -575,18 +606,17 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqAchievement = ace->complete_achievement.linkedAchievement;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
+		if(!pAchievementEntry)
+			continue;
 		if( ReqAchievement != achievementId )
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
-
+		if(!HandleBeforeChecks(ad))
+			continue;
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -597,7 +627,6 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
@@ -619,19 +648,16 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqLevel = ace->reach_level.level;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
+		if(!pAchievementEntry)
+			continue;
 		if( level < ReqLevel )
 			continue;
-
 		// Realm first to 80 stuff has race and class requirements. Let the hacking begin.
 		if( string(pAchievementEntry->name).find("Realm First!") != string::npos )
 		{
 			static const char* classNames[] = { "", "Warrior", "Paladin", "Hunter", "Rogue", "Priest", "Death Knight", "Shaman", "Mage", "Warlock", "", "Druid" };
 			static const char* raceNames[] = { "", "Human", "Orc", "Dwarf", "Night Elf", "Forsaken", "Tauren", "Gnome", "Troll", "", "Blood Elf", "Draenei" };
-
 			uint32 ReqClass = 0;
 			uint32 ReqRace = 0;
 			for(uint32 i = 0; i < 12; ++i)
@@ -652,19 +678,17 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 					break;
 				}
 			}
-
 			if( ReqClass && m_player->getClass() != ReqClass )
 				continue;
-
 			if( ReqRace && m_player->getRace() != ReqRace )
 				continue;
 		}
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
-
+		if(!HandleBeforeChecks(ad))
+			continue;
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -675,7 +699,6 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
@@ -698,18 +721,17 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqItemId = ace->own_item.itemID;
 		uint32 ReqItemCount = ace->own_item.itemCount;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
+		if(!pAchievementEntry)
+			continue;
 		if( itemId != ReqItemId )
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if( ad->completed )
 			continue;
-
+		if(!HandleBeforeChecks(ad))
+			continue;
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -720,11 +742,9 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
-
 	HandleAchievementCriteriaLootItem(itemId, stack);
 }
 
@@ -745,18 +765,17 @@ void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqItemId = ace->loot_item.itemID;
 		uint32 ReqItemCount = ace->loot_item.itemCount;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
+		if(!pAchievementEntry)
+			continue;
 		if( itemId != ReqItemId )
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
-
+		if(!HandleBeforeChecks(ad))
+			continue;
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -767,7 +786,6 @@ void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
-
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
@@ -796,6 +814,8 @@ void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
+			continue;
+		if(!HandleBeforeChecks(ad))
 			continue;
 
 		// Figure out our associative ID.
@@ -842,6 +862,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 cl
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -886,6 +909,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 rac
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -925,6 +951,9 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -964,6 +993,9 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1004,6 +1036,9 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1051,6 +1086,9 @@ void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1108,6 +1146,8 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
 
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
@@ -1152,6 +1192,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1236,6 +1279,9 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1280,6 +1326,8 @@ void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
 
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
@@ -1314,17 +1362,16 @@ void AchievementInterface::HandleAchievementCriteriaReachSkillLevel(uint32 skill
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqSkill = ace->reach_skill_level.skillID;
 		uint32 ReqLevel = ace->reach_skill_level.skillLevel;
-
 		if( ReqSkill != skillId )
 			continue;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry)
 			continue;
-
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
+			continue;
+		if(!HandleBeforeChecks(ad))
 			continue;
 
 		// Figure out our associative ID.
@@ -1362,12 +1409,16 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 		//uint32 ReqDuels = ace->win_duel.duelCount;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1402,12 +1453,16 @@ void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 		//uint32 ReqDuels = ace->win_duel.duelCount;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1443,14 +1498,16 @@ void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 kill
 
 		if( ReqCreature != killedMonster )
 			continue;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
+		if(!pAchievementEntry)
+			continue;
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1484,12 +1541,16 @@ void AchievementInterface::HandleAchievementCriteriaKilledByPlayer()
 		uint32 AchievementID = ace->referredAchievement;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1521,14 +1582,17 @@ void AchievementInterface::HandleAchievementCriteriaDeath()
 	{
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
-
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1568,12 +1632,16 @@ void AchievementInterface::HandleAchievementCriteriaDeathAtMap(uint32 mapId)
 			continue;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
+		if(!pAchievementEntry)
+			continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		if(ad->completed)
 			continue;
+		if(!HandleBeforeChecks(ad))
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{

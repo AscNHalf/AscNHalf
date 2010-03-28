@@ -591,6 +591,9 @@ void CommandTableStorage::Init()
 		{ "multiban", 'b', &ChatHandler::HandleMultiBanCommand, "bans multiple , .multimute <reason> <player1> <player2> ...", NULL, 0, 0, 0 },
 		{ "multiaccountban", 'b', &ChatHandler::HandleMultiAccountBanCommand, "account bans multiple , .multimute <reason> <player1> <player2> ...", NULL, 0, 0, 0 },
 		{ "multikick", 'b', &ChatHandler::HandleMultiKickCommand, "kicks multiple , .multimute <reason> <player1> <player2> ...", NULL, 0, 0, 0 },
+		
+		{ "enableauctionhouse",	'z', &ChatHandler::HandleEnableAH,		"Enables Auctionhouse",		NULL, 0, 0, 0},
+		{ "disableauctionhouse",'z', &ChatHandler::HandleDisableAH,		"Disables Auctionhouse",	NULL, 0, 0, 0},
 	
 		{ NULL,		  0, NULL,										 "",							   NULL, 0, 0  }
 	};

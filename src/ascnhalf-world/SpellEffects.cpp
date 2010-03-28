@@ -22,7 +22,7 @@
 
 #include "StdAfx.h"
 
-#define CREATESPELL(caster,info,triggered,aur) \
+#define CREATESPELL(caster, info, triggered, aur) \
 	new Spell( caster, info, triggered, (aur == NULL ? NULLAURA : aur));
 
 pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
@@ -182,7 +182,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,						// unknown - 153 // SPELL_EFFECT_CREATE_PET  misc value is creature entry
 		&Spell::SpellEffectNULL,						//154 unused
 		&Spell::SpellEffectTitanGrip,					// Titan's Grip - 155
-		&Spell::SpellEffectNULL,						//156 Add Socket
+		&Spell::SpellEffectAddPrismaticSocket,			//156 Add Socket
 		&Spell::SpellEffectCreateRandomItem,			//157 create/learn random item/spell for profession
 		&Spell::SpellEffectMilling,						//158 milling
 		&Spell::SpellEffectNULL,						//159 allow rename pet once again
@@ -193,7 +193,10 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 
 void Spell::SpellEffectNULL(uint32 i)
 {
-	DEBUG_LOG("Spell","Unhandled spell effect %u in spell %u.",m_spellInfo->Effect[i],m_spellInfo->Id);
+	if(sLog.IsOutDevelopement())
+		printf("Unhandled spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
+	else
+		DEBUG_LOG("Spell","Unhandled spell effect %u in spell %u.",m_spellInfo->Effect[i],m_spellInfo->Id);
 }
 
 void Spell::SpellEffectInstantKill(uint32 i)
@@ -823,14 +826,14 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 			uint32 ClearSpellId[8] =
 			{
-			23922,  /* Shield Slam - Rank 1 */
-			23923,  /* Shield Slam - Rank 2 */
-			23924,  /* Shield Slam - Rank 3 */
-			23925,  /* Shield Slam - Rank 4 */
-			25258,  /* Shield Slam - Rank 5 */
-			30356,  /* Shield Slam - Rank 6 */
-			47487,  /* Shield Slam - Rank 7 */
-			47488,  /* Shield Slam - Rank 8 */
+				23922,  /* Shield Slam - Rank 1 */
+				23923,  /* Shield Slam - Rank 2 */
+				23924,  /* Shield Slam - Rank 3 */
+				23925,  /* Shield Slam - Rank 4 */
+				25258,  /* Shield Slam - Rank 5 */
+				30356,  /* Shield Slam - Rank 6 */
+				47487,  /* Shield Slam - Rank 7 */
+				47488,  /* Shield Slam - Rank 8 */
 			};
 
 			for(i = 0; i < 8; i++)
@@ -997,16 +1000,16 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 			uint32 ClearSpellId[10] =
 			{
-			5277,  /* Evasion - Rank 1 */
-			26669, /* Evasion - Rank 2 */
-			2983,  /* Sprint  - Rank 1 */
-			8696,  /* Sprint  - Rank 2 */
-			11305, /* Sprint  - Rank 3 */
-			1856,  /* Vanish  - Rank 1 */
-			1857,  /* Vanish  - Rank 2 */
-			26889, /* Vanish  - Rank 3 */
-			14177, /* Cold Blood       */
-			36554  /* Shadowstep       */
+				5277,  /* Evasion - Rank 1 */
+				26669, /* Evasion - Rank 2 */
+				2983,  /* Sprint  - Rank 1 */
+				8696,  /* Sprint  - Rank 2 */
+				11305, /* Sprint  - Rank 3 */
+				1856,  /* Vanish  - Rank 1 */
+				1857,  /* Vanish  - Rank 2 */
+				26889, /* Vanish  - Rank 3 */
+				14177, /* Cold Blood       */
+				36554  /* Shadowstep       */
 			};
 
 			for(i = 0; i < 10; ++i)
@@ -2867,11 +2870,21 @@ void Spell::SpellEffectWeapon(uint32 i)
 	case 2567:  // thrown
 		{
 			skill = SKILL_THROWN;
+			spell = SPELL_RANGED_THROW;
 		}break;
 	case 5009:  // wands
 		{
 			skill = SKILL_WANDS;
 			spell = SPELL_RANGED_GENERAL;
+		}break;
+	case 2382:  //Generic Weapon Spell
+		{
+			skill = SKILL_DODGE;
+			spell = SPELL_ATTACK;
+		}break;
+	case 9125:  //Generic Block Spell
+		{
+			skill = SKILL_BLOCK;
 		}break;
 	//case 3386:  // spears
 	//	skill = 0;   // ??!!
@@ -4706,6 +4719,46 @@ void Spell::SpellEffectEnchantItemTemporary(uint32 i)  // Enchant Item Temporary
 	itemTarget->m_isDirty = true;
 }
 
+void Spell::SpellEffectAddPrismaticSocket(uint32 i)
+{
+	if( p_caster == NULL)
+		return;
+
+	if(!itemTarget)
+		return;
+
+	EnchantEntry* pEnchant = dbcEnchant.LookupEntry(m_spellInfo->EffectMiscValue[i]);
+	if(!pEnchant)
+		return;
+
+	bool add_socket = false;
+	for(uint8 i = 0; i < 3; ++i)
+	{
+		if(pEnchant->type[i] == 8)
+		{
+			add_socket = true;
+			break;
+		}
+	}
+
+	if(!add_socket) // Wrong spell.
+		return;
+
+	// Item can be in trade slot and have owner diff. from caster
+	Player* item_owner = itemTarget->GetOwner();
+	if(!item_owner)
+		return;
+
+	if(itemTarget->GetSocketsCount() >= 3)
+	{
+		SendCastResult(SPELL_FAILED_MAX_SOCKETS);
+		return;
+	}
+
+	itemTarget->RemoveProfessionEnchant();
+	itemTarget->AddEnchantment(pEnchant, 0, true, true, false, 6); // 6 is profession slot.
+}
+
 void Spell::SpellEffectTameCreature(uint32 i)
 {
 	Creature* tame = NULL;
@@ -6002,7 +6055,7 @@ void Spell::SpellEffectActivateObject(uint32 i) // Activate Object
 void Spell::SpellEffectWMODamage(uint32 i) 
 { 
  	if(gameObjTarget && gameObjTarget->GetInfo()->Type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING) 
-       gameObjTarget->TakeDamage(uint32(damage)); 
+       gameObjTarget->TakeDamage((uint32)damage);
 } 
 void Spell::SpellEffectWMORepair(uint32 i) 
 { 
@@ -6020,7 +6073,10 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	CreatureInfo* ci = CreatureNameStorage.LookupEntry(entry);
 	if(!ci)
 	{
-		OUT_DEBUG("Missing totem creature entry : %u \n",entry);
+		if(sLog.IsOutDevelopement())
+			printf("Totem %u does not have any spells to cast, exiting\n", entry);
+		else
+			OUT_DEBUG("Totem %u does not have any spells to cast, exiting", entry);
 		return;
 	}
 
@@ -6028,7 +6084,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	SpellEntry * TotemSpell = ObjectMgr::getSingleton().GetTotemSpell(m_spellInfo->Id);
 	if(TotemSpell == 0) 
 	{
-		OUT_DEBUG("Totem %u does not have any spells to cast, exiting\n",entry);
+		OUT_DEBUG("Totem %u does not have any spells to cast, exiting\n", entry);
 		return;
 	}
 

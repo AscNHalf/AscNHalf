@@ -1155,7 +1155,7 @@ public:
 
 	void OnActivate(Player * pPlayer)
 	{
-		if ( pPlayer->GetMapMgr()->iInstanceMode == MODE_HEROIC )
+		if ( pPlayer->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC )
 			sEAS.SpawnCreature(pPlayer, 23035, -87.3546, 288.006, 26.4832, 0, 0);
 	}
 };

@@ -1822,7 +1822,7 @@ public:
 		spells[3].attackstoptimer = 1000;
 		spells[3].cooldown = 5;
 
-		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_HEROIC && _unit->GetHealthPct() >= 41)
+		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_5PLAYER_HEROIC && _unit->GetHealthPct() >= 41)
 		{
 			_unit->SetHealthPct(40);
 		}
@@ -1838,7 +1838,7 @@ public:
 
 		SonicBoom = false;
 
-		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_HEROIC && _unit->GetHealthPct() >= 41)
+		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_5PLAYER_HEROIC && _unit->GetHealthPct() >= 41)
 		{
 			_unit->SetHealthPct(40);
 		}
@@ -1853,7 +1853,7 @@ public:
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
 
-		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_HEROIC && _unit->GetHealthPct() >= 41)
+		if(_unit->GetMapMgr() != NULL && _unit->GetMapMgr()->iInstanceMode != MODE_5PLAYER_HEROIC && _unit->GetHealthPct() >= 41)
 		{
 			_unit->SetHealthPct(40);
 		}

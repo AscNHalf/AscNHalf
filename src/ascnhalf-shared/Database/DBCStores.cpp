@@ -102,7 +102,95 @@ const char* EnchantEntrYFormat = "uxuuuuuuuuuuuusxxxxxxxxxxxxxxxxuuuuxxx";
 const char* GemPropertyEntryFormat = "uuuuu";
 const char* GlyphPropertyEntryFormat = "uuuu";
 const char* skilllineentrYFormat = "uuusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char* spellentryFormat = "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuiuuuuuuuufffiiiiiiuuuuuuuuuuuuuuufffuuuuuuuuuuuuuuufffuuuuuuuuuuxuuusxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxuuuuuuuuuuuifffuuuuuiuuxuuuuux";
+const char* spellentryFormat =
+	"u" // Id
+	"u" // Category
+	"u" // DispelType
+	"u" // MechanicsType
+	"uuuuuuuu" // 8x Flags
+	"u" // RequiredShapeShift
+	"x" // unk00
+	"u" // NotAllowedShapeShift
+	"x" // unk01
+	"u" // Targets
+	"u" // TargetCreatureType
+	"u" // RequiresSpellFocus
+	"u" // FacingCasterFlags
+	"uuuuuuuu" // 8x Aura crap
+	"u" // CastingTimeIndex
+	"u" // RecoveryTime
+	"u" // CategoryRecoveryTime
+	"u" // InterruptFlags
+	"u" // AuraInterruptFlags
+	"u" // ChannelInterruptFlags
+	"u" // procFlags
+	"u" // procChance
+	"u" // procCharges
+	"u" // maxLevel
+	"u" // baseLevel
+	"u" // spellLevel
+	"u" // DurationIndex
+	"u" // powerType
+	"u" // manaCost
+	"u" // manaCostPerlevel
+	"u" // manaPerSecond
+	"u" // manaPerSecondPerLevel
+	"u" // rangeIndex
+	"f" // Speed
+	"u" // modalNextSpell
+	"u" // maxstack
+	"uu" // Totem
+	"uuuuuuuu" // 8x Reagent
+	"uuuuuuuu" // 8x ReagentCount
+	"i" // EquippedItemClass
+	"u" // EquippedItemSubClass
+	"u" // RequiredItemFlags
+	"uuu" // 3x Spell Effect
+	"uuu" // 3x Spell Effect Die Sides
+	"fff" // 3x Spell Effect Real Points per Level
+	"iii" // 3x Spell Effect Base Points
+	"iii" // 3x Spell Effect Mechanic
+	"uuu" // 3x Spell Effect Target A
+	"uuu" // 3x Spell Effect Target B
+	"uuu" // 3x Spell Effect Radius index
+	"uuu" // 3x Spell Effect Apply Aura Name
+	"uuu" // 3x Spell Effect Amplitude
+	"fff" // 3x Spell Effect Multiple Value
+	"uuu" // 3x Spell Effect Chain Target
+	"uuu" // 3x Spell Effect Item Type
+	"uuu" // 3x Spell Effect Misc Value
+	"uuu" // 3x Spell Effect Misc Value B
+	"uuu" // 3x Spell Effect Trigger Spell
+	"fff" // 3x Spell Effect Points per Combo Point
+	"uuuuuuuuu" // 3x Spell Effect Class Mask[3]
+	"uu" // 2x SpellVisual
+	"u" // SpellIconID
+	"u" // activeIconID
+	"u" // spellPriority
+	"sxxxxxxxxxxxxxxxx" // Name
+	"sxxxxxxxxxxxxxxxx" // Rank
+	"sxxxxxxxxxxxxxxxx" // Spell Description
+	"sxxxxxxxxxxxxxxxx" // Buff Description
+	"u" // ManaCostPercentage
+	"u" // StartRecoveryCategory
+	"u" // StartRecoveryTime
+	"u" // MaxTargetLevel
+	"u" // SpellFamilyName
+	"uuu" // 3x SpellGroupType
+	"u" // MaxTargets
+	"u" // Spell_Dmg_Type
+	"u" // PreventionType
+	"i" // StanceBarOrder
+	"fff" // 3x dmg_multiplier
+	"u" // MinFactionID
+	"u" // MinReputation
+	"u" // RequiredAuraVision
+	"uu" // 2x TotemCategory
+	"i" // AreaGroupId
+	"u" // School
+	"ux" // runeCostID and spellMissileID
+	"u" // PowerDisplayId
+	"xxxxx"; // Unk
 
 const char* scalingstatdistributionformat = "uiiiiiiiiiiuuuuuuuuuuu";
 const char* scalingstatvaluesformat = "uuuuuuuuuuuuuuuuuuuuuuuu";
@@ -191,7 +279,7 @@ const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 const char* DestructibleModelDataFormat = "uxxuxxxuxxxuxxxuxxx";
 
 const char* PvPDifficultyFormat = "xuuuuu";
-const char* BattlemasterListFormat = "uiiiiiiiiuuxssssssssssssssssxxx";
+const char* BattlemasterListFormat = "uiiiiiiiiuxssssssssssssssssxxxuu";
 
 
 template<class T>

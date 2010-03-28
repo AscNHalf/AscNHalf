@@ -223,10 +223,9 @@ void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)
 	Pet* pPet = _player->GetMapMgr()->GetPet(GET_LOWGUID_PART(petGuid));
 	if(!pPet) return;
 
-	WorldPacket data(8 + pPet->GetName().size());
-	data.SetOpcode(SMSG_PET_NAME_QUERY_RESPONSE);
+	WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, 10 + pPet->GetName().size());
 	data << reqNumber;
-	data << pPet->GetName();
+	data << pPet->GetName().c_str();
 	data << pPet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP);		// stops packet flood
 	data << uint8(0);		// unk
 	SendPacket(&data);

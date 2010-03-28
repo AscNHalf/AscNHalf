@@ -524,6 +524,7 @@ public:
 	bool BreathingEnabled;
 	bool SpeedhackProtection;
 	bool Collision;
+	bool AHEnabled;
 	uint32 mInWorldPlayerCount;
 	uint32 mAcceptedConnections;
 	uint32 SocketSendBufSize;

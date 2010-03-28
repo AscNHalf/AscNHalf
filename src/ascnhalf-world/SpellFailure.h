@@ -210,7 +210,7 @@ enum SpellCastError
 	SPELL_FAILED_MAX_SOCKETS                                     = 184,
 	SPELL_FAILED_PET_CAN_RENAME                                  = 185,
 	SPELL_FAILED_UNKNOWN                                         = 186,
- 	SPELL_CANCAST_OK                                             = 255,
+	SPELL_CANCAST_OK                                             = 255,
 };
 
 #endif

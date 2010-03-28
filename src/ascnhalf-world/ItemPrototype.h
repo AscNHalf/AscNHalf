@@ -698,7 +698,7 @@ struct ItemPrototype
 	uint32 QuestId;
 	uint32 LockId;
 	uint32 LockMaterial;
-	uint32 Field108;
+	uint32 SheathId;
 	uint32 RandomPropId;
 	uint32 RandomSuffixId;
 	uint32 Block;

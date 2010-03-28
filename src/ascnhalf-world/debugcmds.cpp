@@ -168,9 +168,16 @@ bool ChatHandler::HandleDebugSetPhase(const char* args, WorldSession *m_session)
 	}
 
 	int32 phaseId = atoi(args);
-	if(phaseId == 0 || phaseId < -1)
+	if(phaseId < -1)
 	{
 		m_session->GetPlayer()->BroadcastMessage("You must specify a valid phase id.");
+		return true;
+	}
+	if(phaseId == 0)
+	{
+		pUnit->SetPhase(1);
+		m_session->GetPlayer()->BroadcastMessage("Resetting Phase.");
+		return true;
 	}
 
 	pUnit->SetPhase( phaseId );

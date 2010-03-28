@@ -68,7 +68,7 @@ enum MovementFlags
 	MOVEFLAG_TB_PENDING_BACKWARD		= 0x100000,		// (MOVEFLAG_PENDING_BACKWARD)
 	MOVEFLAG_SWIMMING          		    = 0x200000,		//  verified
 	MOVEFLAG_FLYING_PITCH_UP	        = 0x400000,		// (half confirmed)(MOVEFLAG_PENDING_STR_RGHT)
-	MOVEFLAG_TB_MOVED					= 0x800000,		// (half confirmed) gets called when landing (MOVEFLAG_MOVED)
+	MOVEFLAG_TB_MOVED					= 0x800000,		// Send to client on entervehicle
 
 	// Byte 4 (Script Based Flags. Never reset, only turned on or off.)
 	MOVEFLAG_AIR_SUSPENSION	   	 		= 0x1000000,	// confirmed allow body air suspension(good name? lol).
@@ -126,6 +126,7 @@ enum SessionStatus
 
 struct AccountDataEntry
 {
+	time_t Time;
 	char * data;
 	uint32 sz;
 	bool bIsDirty;
@@ -147,35 +148,11 @@ enum AccountDataTypes
 #define GLOBAL_CACHE_MASK           0x15
 #define PER_CHARACTER_CACHE_MASK    0xEA
 
-typedef struct Cords {
-	float x,y,z;
+typedef struct Cords
+{
+	float x, y, z;
 }Cords;
 
-
-class MovementInfo
-{
-public:
-	uint64 guid;
-	uint32 time;
-	float pitch;// -1.55=looking down, 0=looking forward, +1.55=looking up
-	float jump_sinAngle;//on slip 8 is zero, on jump some other number
-	float jump_cosAngle, jump_xySpeed;//9,10 changes if you are not on foot
-	uint32 unk11;
-	uint32 spline_unk;
-	uint8 unk13;
-	uint32 unklast;//something related to collision
-	uint16 flag16;
-
-	float x, y, z, orientation;
-	uint32 flags;
-	uint32 FallTime;
-	WoWGuid transGuid;
-	float transX, transY, transZ, transO, transTime;
-	uint8 transSeat;
-
-	void init(WorldPacket & data);
-	void write(WorldPacket & data);
-};
 
 #define PLAYER_LOGOUT_DELAY (20*1000)		/* 20 seconds should be more than enough to gank ya. */
 
@@ -223,6 +200,9 @@ public:
 
 	void SendChatPacket(WorldPacket * data, uint32 langpos, int32 lang, WorldSession * originator);
 
+	// Process Logs
+	void LogUnprocessedTail(WorldPacket *packet);
+
 	uint32 m_currMsTime;
 	uint32 m_lastPing;
 
@@ -250,13 +230,13 @@ public:
    
 	bool CanUseCommand(char cmdstr);
 
-	
+
 	INLINE void SetSocket(WorldSocket *sock)
 	{
 		_socket = sock;
 	}
 	INLINE void SetPlayer(Player* plr) { _player = plr; }
-	
+
 	INLINE void SetAccountData(uint32 index, char* data, bool initial,uint32 sz)
 	{
 		ASSERT(index < 8);
@@ -264,12 +244,13 @@ public:
 			delete [] sAccountData[index].data;
 		sAccountData[index].data = data;
 		sAccountData[index].sz = sz;
+		sAccountData[index].Time = UNIXTIME;
 		if(!initial && !sAccountData[index].bIsDirty)		// Mark as "changed" or "dirty"
 			sAccountData[index].bIsDirty = true;
 		else if(initial)
 			sAccountData[index].bIsDirty = false;
 	}
-	
+
 	INLINE AccountDataEntry* GetAccountData(uint32 index)
 	{
 		ASSERT(index < 8);
@@ -289,7 +270,7 @@ public:
 		m_lastPing = (uint32)UNIXTIME;
 		_recvQueue.Push(packet);
 	}
-	
+
 	void OutPacket(uint16 opcode, uint16 len, const void* data)
 	{
 		if(_socket && _socket->IsConnected())
@@ -297,7 +278,7 @@ public:
 	}
 
 	INLINE WorldSocket* GetSocket() { return _socket; }
-	
+
 	void Disconnect()
 	{
 		if(_socket && _socket->IsConnected())
@@ -388,13 +369,13 @@ protected:
 	void HandleTogglePVPOpcode(WorldPacket& recvPacket);
 	void HandleAmmoSetOpcode(WorldPacket& recvPacket);
 	void HandleGameObjectUse(WorldPacket& recvPacket);
-	void HandleGameobjReportUseOpCode(WorldPacket& recv_data);
 	//void HandleJoinChannelOpcode(WorldPacket& recvPacket);
 	//void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
 	void HandlePlayedTimeOpcode(WorldPacket & recv_data);
 	void HandleSetSheathedOpcode(WorldPacket & recv_data);
 	void HandleCompleteCinematic(WorldPacket & recv_data);
 	void HandleInspectOpcode( WorldPacket & recv_data );
+	void HandleGameobjReportUseOpCode( WorldPacket& recv_data );
 	void HandleTimeSyncResp(WorldPacket& recv_data);
 
 	/// Gm Ticket System in GMTicket.cpp:
@@ -443,7 +424,7 @@ protected:
 	void HandleRequestRaidInfoOpcode(WorldPacket& recvPacket);
 	void HandleReadyCheckOpcode(WorldPacket& recv_data);
 	void HandleGroupPromote(WorldPacket& recv_data);
-	
+
 	// LFG opcodes
 	void HandleEnableAutoJoin(WorldPacket& recvPacket);
 	void HandleDisableAutoJoin(WorldPacket& recvPacket);
@@ -531,13 +512,14 @@ protected:
 	void HandleCancelAuraOpcode(WorldPacket& recvPacket);
 	void HandleCancelChannellingOpcode(WorldPacket& recvPacket);
 	void HandleCancelAutoRepeatSpellOpcode(WorldPacket& recv_data);
-	void HandleAddDynamicTargetOpcode(WorldPacket & recvPacket);
+	void HandleCharmForceCastSpell(WorldPacket & recvPacket);
 
 	/// Skill opcodes (SkillHandler.spp)
 	//void HandleSkillLevelUpOpcode(WorldPacket& recvPacket);
 	void HandleLearnTalentOpcode(WorldPacket& recvPacket);
 	void HandleLearnPreviewTalents(WorldPacket& recv_data);
 	void HandleUnlearnTalents( WorldPacket & recv_data );
+	void HandleTalentWipeConfirmOpcode(WorldPacket &recv_data);
 
 	/// Quest opcodes (QuestHandler.cpp)
 	void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
@@ -552,7 +534,6 @@ protected:
 	void HandleQuestlogRemoveQuestOpcode(WorldPacket& recvPacket);
 	void HandlePushQuestToPartyOpcode(WorldPacket &recvPacket);
 	void HandleQuestPushResult(WorldPacket &recvPacket);
-
 
 	/// Chat opcodes (Chat.cpp)
 	void HandleMessagechatOpcode(WorldPacket& recvPacket);
@@ -749,6 +730,7 @@ protected:
 	//Vehicles
 	void HandleVehicleDismiss(WorldPacket & recv_data);
 	void HandleSpellClick( WorldPacket & recv_data );
+	void HandleRequestSeatChange( WorldPacket & recv_data );
 	void HandleBoardPlayerVehicleOpcode(WorldPacket & recv_data);
 	void HandleRequestVehicleExitOpcode(WorldPacket & recv_data);
 	void HandleEjectPassengerOpcode(WorldPacket & recv_data);
@@ -756,6 +738,10 @@ protected:
 	//MISC
 	void HandleReadyForAccountDataTimes(WorldPacket &recv_data);
 	void HandleWorldStateUITimerUpdate( WorldPacket & recv_data );
+	void HandleFarsightOpcode(WorldPacket &recv_data);
+
+	/// Empty packets
+	void EmptyPacket(WorldPacket &recv_data);
 
 public:
 	void SendTradeStatus(uint32 TradeStatus);
@@ -777,16 +763,10 @@ public:
 	float m_wLevel; // Level of water the player is currently in
 	bool m_bIsWLevelSet; // Does the m_wLevel variable contain up-to-date information about water level?
 
-	MovementInfo* GetMovementInfo() { return &movement_info; }
-
 private:
 	friend class Player;
 	Player* _player;
 	WorldSocket *_socket;
-		
-	/* Preallocated buffers for movement handlers */
-	MovementInfo movement_info;
-	uint8 movement_packet[90];
 
 	bool m_isFalling;
 
@@ -811,7 +791,7 @@ private:
 	uint32 client_build;
 	uint32 instanceId;
 	uint8 _updatecount;
-	uint8 CheckTeleportPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, Player* pPlayer, MapInfo * pMapInfo);
+	uint8 CheckTeleportPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, Player* pPlayer, uint32 mapid);
 public:
 	static void InitPacketHandlerTable();
 	uint32 floodLines;

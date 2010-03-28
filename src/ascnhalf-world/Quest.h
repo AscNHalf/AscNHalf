@@ -166,7 +166,7 @@ struct Quest
 
 	uint32 reward_repfaction[5];
 	int32 reward_repvalue[5];
-	uint32 reward_replimit;
+	int32 reward_replimit/*[5]*/;
 
 	uint32 reward_title;
 
@@ -178,8 +178,8 @@ struct Quest
 	uint32 effect_on_player;
 	
 	uint32 point_mapid;
-	uint32 point_x;
-	uint32 point_y;
+	float point_x;
+	float point_y;
 	uint32 point_opt;
 
 	uint32 required_money;

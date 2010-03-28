@@ -562,11 +562,12 @@ enum SpellTargetType
 
 
 /***************Ranged spellid*******************/
-/* Note: These spell id's are checked for 2.0.x */
+/* Note: These spell id's are checked for 3.0.x */
 /************************************************/
+#define SPELL_ATTACK	6603
 #define SPELL_RANGED_GENERAL	3018
-#define SPELL_RANGED_THROW	  2764
-#define SPELL_RANGED_WAND	   5019
+#define SPELL_RANGED_THROW	2764
+#define SPELL_RANGED_WAND	5019
 
 #pragma pack(push,1)
 struct TeleportCoords
@@ -1613,7 +1614,7 @@ public:
 	// Has power?
 	bool HasPower();
 	// Checks the caster is ready for cast
-	uint8 CanCast(bool);
+	uint8 CanCast(bool tolerate);
 	// Removes reagents, ammo, and items/charges
 	void RemoveItems();
 	// Calculates the i'th effect value
@@ -1764,6 +1765,7 @@ public:
 	void SpellEffectTriggerSpellWithValue(uint32 i);
 	void SpellEffectMegaJump(uint32 i);
 	void SpellEffectMilling(uint32 i);
+	void SpellEffectAddPrismaticSocket(uint32 i);
 	void SpellEffectTitanGrip(uint32 i);
 	void SummonLightwell(uint32 i);
 	void SpellEffectCreateRandomItem(uint32 i);
@@ -1815,6 +1817,7 @@ public:
 	void SpellTargetPositionOfTarget(uint32 i, uint32 j);
 	void SpellTargetAreaOfEffect87(uint32 i, uint32 j);
 	void SpellTargetAllTargetsInArea(uint32 i, uint32 j);
+	void SpellTargetVehicle(uint32 i, uint32 j);
 
 	uint64 static FindLowestHealthRaidMember(Player* Target, uint32 dist);
 
@@ -1825,6 +1828,7 @@ public:
 	Item*				i_caster;
 	Player* 			p_caster;
 	Object*				m_caster;
+	Vehicle*			v_caster;
 
 	bool SpellEffectUpdateQuest(uint32 questid);
 

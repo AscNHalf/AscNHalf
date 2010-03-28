@@ -81,56 +81,43 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 		data << "WayPoint";
 		data << uint8(0) << uint8(0) << uint8(0);
 		data << "Level is WayPoint ID";
-		for(uint32 i = 0; i < 8;i++)
-		{
+		for(uint32 i = 0; i < 8; ++i)
 			data << uint32(0);
-		}
-		data << uint8(0);  
+		data << uint8(0);
+		SendPacket( &data );
+		return;  
 	}
+	ci = CreatureNameStorage.LookupEntry(entry);
+	if(ci == NULL)
+		return;
+		
+	LocalizedCreatureName * lcn = (language > 0) ? sLocalizationMgr.GetLocalizedCreatureName(entry, language) : NULL;
+ 
+	if(lcn)
+		DEBUG_LOG("WORLD","HandleCreatureQueryOpcode CMSG_CREATURE_QUERY '%s' (localized to %s)", ci->Name, lcn->Name);
 	else
-	{
-		ci = CreatureNameStorage.LookupEntry(entry);
-		if(ci == NULL)
-			return;
-
-		LocalizedCreatureName * lcn = (language>0) ? sLocalizationMgr.GetLocalizedCreatureName(entry, language) : NULL;
-
-		if(lcn == NULL)
-		{
-			DEBUG_LOG("WORLD","HandleCreatureQueryOpcode CMSG_CREATURE_QUERY '%s'", ci->Name);
-			data << (uint32)entry;
-			data << ci->Name;
-			data << uint8(0) << uint8(0) << uint8(0);
-			data << ci->SubName;
-		}
-		else
-		{
-			DEBUG_LOG("WORLD","HandleCreatureQueryOpcode CMSG_CREATURE_QUERY '%s' (localized to %s)", ci->Name, lcn->Name);
-			data << (uint32)entry;
-			data << lcn->Name;
-			data << uint8(0) << uint8(0) << uint8(0);
-			data << lcn->SubName;
-		}
-		data << ci->info_str; //!!! this is a string in 2.3.0 Example: stormwind guard has : "Direction"
-		data << ci->Flags1;  
-		data << ci->Type;
-		data << ci->Family;
-		data << ci->Rank;
-		data << ci->Unknown1;
-		data << ci->SpellDataID;
-		data << ci->Male_DisplayID;
-		data << ci->Female_DisplayID;
-		data << ci->Male_DisplayID2;
-		data << ci->Female_DisplayID2;
-		data << ci->unkfloat1;
-		data << ci->unkfloat2;
-		data << ci->Leader;
-		for(uint32 i = 0; i < 6; ++i)
-		{
-			data << uint32(0);	//QuestItems
-		}
-		data << uint32(0);	// unk
-	}
+		DEBUG_LOG("WORLD","HandleCreatureQueryOpcode CMSG_CREATURE_QUERY '%s'", ci->Name);
+	data << (uint32)entry;
+	data << (lcn ? lcn->Name : ci->Name);
+	data << uint8(0) << uint8(0) << uint8(0);
+	data << (lcn ? lcn->SubName : ci->SubName);
+	data << ci->info_str; //!!! this is a string in 2.3.0 Example: stormwind guard has : "Direction"
+	data << ci->Flags1;  
+	data << ci->Type;
+	data << ci->Family;
+	data << ci->Rank;
+	data << ci->Unknown1;
+	data << ci->SpellDataID;
+	data << ci->Male_DisplayID;
+	data << ci->Female_DisplayID;
+	data << ci->Male_DisplayID2;
+	data << ci->Female_DisplayID2;
+	data << ci->unkfloat1;
+	data << ci->unkfloat2;
+	data << ci->Leader;
+	for(uint32 i = 0; i < 6; ++i)
+		data << uint32(0);	//QuestItems
+	data << uint32(0);	// CreatureMovementInfo.dbc
 
 	SendPacket( &data );
 }

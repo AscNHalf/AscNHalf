@@ -396,6 +396,9 @@ void WorldSession::HandleChannelWatchOpcode(WorldPacket & recv_data)
 void WorldSession::HandleEnableMicrophoneOpcode(WorldPacket & recv_data)
 {
 	OUT_DEBUG("WORLD: Received CMSG_VOICE_SESSION_ENABLE");
+	uint8 voice, mic;
+	recv_data >> voice >> mic;
+	voice, mic = NULL;
 }
 
 void WorldSession::HandleChannelVoiceOnOpcode(WorldPacket & recv_data)

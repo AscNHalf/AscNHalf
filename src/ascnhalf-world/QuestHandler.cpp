@@ -33,7 +33,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
 	recv_data >> guid;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
-    if(guidtype==HIGHGUID_TYPE_UNIT)
+    if(guidtype == HIGHGUID_TYPE_UNIT)
     {
         Creature* quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
         if(quest_giver)
@@ -47,7 +47,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 		    return;
 	    }
     }
-    else if(guidtype==HIGHGUID_TYPE_ITEM)
+    else if(guidtype == HIGHGUID_TYPE_ITEM)
 	{
 		Item* quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
@@ -55,7 +55,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 		else
 			return;
 	}
-    else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
+    else if(guidtype == HIGHGUID_TYPE_GAMEOBJECT)
 	{
 		GameObject* quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)

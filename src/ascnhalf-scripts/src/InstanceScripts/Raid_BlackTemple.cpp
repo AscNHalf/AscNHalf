@@ -561,7 +561,7 @@ class AshtongueSpiritbinderAI : public MoonScriptCreatureAI
 	AshtongueSpiritbinderAI(Creature * pCreature) : MoonScriptCreatureAI(pCreature)
 	{
 		AddSpell(ASHTONGUE_SPIRITBINDER_CHAIN_HEAL, Target_WoundedFriendly, 7, 1, 25);
-		if (_unit->GetMapMgr()->iInstanceMode != MODE_HEROIC)	// Guessed
+		if (_unit->GetMapMgr()->iInstanceMode != MODE_10PLAYER_HEROIC)	// Guessed
 			AddSpell(ASHTONGUE_SPIRITBINDER_SPIRIT_HEAL, Target_Self, 7, 0, 25);				// Weaker version
 		else
 			AddSpell(ASHTONGUE_SPIRITBINDER_SPIRIT_HEAL2, Target_Self, 7, 0, 25);				// Stronger version
@@ -680,7 +680,7 @@ class BonechewerBloodProphetAI : public MoonScriptCreatureAI
 		AddSpell(BONECHEWER_BLOOD_PROPHET_BLOOD_DRAIN, Target_Current, 6, 5, 30, 0, 20);	// Random?
 		AddSpell(BONECHEWER_BLOOD_PROPHET_BLOODBOLT, Target_RandomPlayer, 7, 1.5, 25);
 		AddSpell(BONECHEWER_BLOOD_PROPHET_ENRAGE, Target_Self, 5, 0, 50);
-		if (_unit->GetMapMgr()->iInstanceMode == MODE_HEROIC)						// Guessed
+		if (_unit->GetMapMgr()->iInstanceMode == MODE_10PLAYER_HEROIC)						// Guessed
 			AddSpell(BONECHEWER_BLOOD_PROPHET_PROPHECY_OF_BLOOD, Target_RandomPlayer, 10, 0, 30);
 		else
 			AddSpell(BONECHEWER_BLOOD_PROPHET_PROPHECY_OF_BLOOD2, Target_RandomPlayer, 10, 0, 30);

@@ -459,7 +459,8 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 				TO_CREATURE(pLootTarget)->UpdateLootAnimation(_player);
 
 				// skinning
-				if( lootmgr.IsSkinnable( pLootTarget->GetEntry() ) )
+				if(!TO_CREATURE(pLootTarget)->IsPet() && !TO_CREATURE(pLootTarget)->IsSummon()
+					&& lootmgr.IsSkinnable( pLootTarget->GetEntry()))
 				{
 					pLootTarget->BuildFieldUpdatePacket( _player, UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
 				}
@@ -898,10 +899,10 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 {
-	uint8 animstate;
+	uint32 animstate;
 	recv_data >> animstate;
 
-	_player->SetStandState(animstate);
+	_player->SetStandState(int8(animstate));
 }
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
@@ -1013,9 +1014,12 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
-	//OUT_DEBUG("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
+	DEBUG_LOG("WORLD", "Received CMSG_UPDATE_ACCOUNT_DATA");
 	if(!sWorld.m_useAccountData)
+	{
+		recv_data.rpos(recv_data.wpos()); // Spam cleanup.
 		return;
+	}
 
 	uint32 uiID;
 	recv_data >> uiID;
@@ -1027,6 +1031,9 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 		return;
 	}
 
+	uint32 _time;
+	recv_data >> _time;
+
 	uint32 uiDecompressedSize;
 	recv_data >> uiDecompressedSize;
 	uLongf uid = uiDecompressedSize;
@@ -1034,63 +1041,76 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 	// client wants to 'erase' current entries
 	if(uiDecompressedSize == 0)
 	{
+		recv_data.rpos(recv_data.wpos());
 		SetAccountData(uiID, NULL, false,0);
+		return;
+	}
+
+	if(uiDecompressedSize > 100000)
+	{
+		recv_data.rpos(recv_data.wpos()); // Spam cleanup.
+		Disconnect();
 		return;
 	}
 
 	if(uiDecompressedSize >= 65534)
 	{
+		recv_data.rpos(recv_data.wpos()); // Spam cleanup.
 		// BLOB fields can't handle any more than this.
 		return;
 	}
 
-	size_t ReceivedPackedSize = recv_data.size() - 8;
+	size_t ReceivedPackedSize = recv_data.size() - 12;
 	char* data = new char[uiDecompressedSize+1];
-	memset(data,0,uiDecompressedSize+1);	/* fix umr here */
+	memset(data, 0, uiDecompressedSize+1);	/* fix umr here */
 
 	if(uiDecompressedSize > ReceivedPackedSize) // if packed is compressed
 	{
 		int32 ZlibResult;
 
-		ZlibResult = uncompress((uint8*)data, &uid, recv_data.contents() + 8, (uLong)ReceivedPackedSize);
-		
+		ZlibResult = uncompress((uint8*)data, &uid, recv_data.contents() + 12, (uLong)ReceivedPackedSize);
+
 		switch (ZlibResult)
 		{
 		case Z_OK:				  //0 no error decompression is OK
-			SetAccountData(uiID, data, false,uiDecompressedSize);
-			OUT_DEBUG("WORLD: Successfully decompressed account data %d for %s, and updated storage array.", uiID, GetPlayer()->GetName());
+			SetAccountData(uiID, data, false, uiDecompressedSize);
+			OUT_DEBUG("WORLD: Successfully decompressed account data %d for %s, and updated storage array.", uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName());
 			break;
 		
-		case Z_ERRNO:			   //-1
+		case Z_ERRNO:				//-1
 		case Z_STREAM_ERROR:		//-2
-		case Z_DATA_ERROR:		  //-3
-		case Z_MEM_ERROR:		   //-4
-		case Z_BUF_ERROR:		   //-5
-		case Z_VERSION_ERROR:	   //-6
+		case Z_DATA_ERROR:			//-3
+		case Z_MEM_ERROR:			//-4
+		case Z_BUF_ERROR:			//-5
+		case Z_VERSION_ERROR:		//-6
 		{
 			delete [] data;	 
-			sLog.outString("WORLD WARNING: Decompression of account data %d for %s FAILED.", uiID, GetPlayer()->GetName());
+			sLog.outString("WORLD WARNING: Decompression of account data %d for %s FAILED.", uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName());
 			break;
 		}
 
 		default:
 			delete [] data;	 
-			sLog.outString("WORLD WARNING: Decompression gave a unknown error: %x, of account data %d for %s FAILED.", ZlibResult, uiID, GetPlayer()->GetName());
+			sLog.outString("WORLD WARNING: Decompression gave a unknown error: %x, of account data %d for %s FAILED.", ZlibResult, uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName());
 			break;
 		}
 	}
 	else
 	{
-		memcpy(data,recv_data.contents() + 8,uiDecompressedSize);
-		SetAccountData(uiID, data, false,uiDecompressedSize);
+		memcpy(data, recv_data.contents() + 12, uiDecompressedSize);
+		SetAccountData(uiID, data, false, uiDecompressedSize);
 	}
+	recv_data.rpos(recv_data.wpos()); // Spam cleanup for packet size checker... Because who cares about this dataz
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
-	//OUT_DEBUG("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
+	DEBUG_LOG("WORLD", "Received CMSG_REQUEST_ACCOUNT_DATA");
 	if(!sWorld.m_useAccountData)
+	{
+		recv_data.rpos(recv_data.wpos()); // Spam cleanup for packet size checker.
 		return;
+	}
 
 	uint32 id;
 	recv_data >> id;
@@ -1098,39 +1118,37 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 	if(id > 8)
 	{
 		// Shit..
-		sLog.outString("WARNING: Accountdata > 8 (%d) was requested by %s of account %d!", id, GetPlayer()->GetName(), this->GetAccountId());
+		sLog.outString("WARNING: Accountdata > 8 (%d) was requested by %s of account %d!", id, GetPlayer() ? GetPlayer()->GetName() : "UNKNOWN", this->GetAccountId());
 		return;
 	}
 
 	AccountDataEntry* res = GetAccountData(id);
-		WorldPacket data ;
-		data.SetOpcode(SMSG_UPDATE_ACCOUNT_DATA);
-		data << id;
-	// if red does not exists if ID == 7 and if there is no data send 0
-	if (!res || !res->data) // if error, send a NOTHING packet
+	uLongf destSize = compressBound(res->sz);
+	ByteBuffer bbuff;
+	bbuff.resize(destSize);
+
+	if(res->sz && compress(const_cast<uint8*>(bbuff.contents()), &destSize, (uint8*)res->data, res->sz) != Z_OK)
 	{
+		OUT_DEBUG("Error while compressing ACCOUNT_DATA");
+		return;
+	}
+
+	WorldPacket data;
+	data.SetOpcode(SMSG_UPDATE_ACCOUNT_DATA);
+	data << uint64(_player ? _player->GetGUID() : 0);
+	data << id;
+	// if red does not exists if ID == 7 and if there is no data send 0
+	if(!res || !res->data) // if error, send a NOTHING packet
+	{
+		data << (uint32)0;
 		data << (uint32)0;
 	}
 	else
 	{
+		data << uint32(res->Time);
 		data << res->sz;
-		uLongf destsize;
-		if(res->sz>200)
-		{
-			data.resize( res->sz+800 );  // give us plenty of room to work with..
-			
-			if ( ( compress(const_cast<uint8*>(data.contents()) + (sizeof(uint32)*2), &destsize, (const uint8*)res->data, res->sz)) != Z_OK)
-			{
-				OUT_DEBUG("Error while compressing ACCOUNT_DATA");
-				return;
-			}
-			
-			data.resize(destsize+8);
-		}
-		else 
-			data.append(	res->data,res->sz);	
 	}
-		
+	data.append(bbuff);
 	SendPacket(&data);	
 }
 
@@ -1620,6 +1638,9 @@ void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePlayedTimeOpcode( WorldPacket & recv_data )
 {
+	uint8 send;
+	recv_data >> send;
+
 	uint32 playedt = (uint32)UNIXTIME - _player->m_playedtime[2];
 	if(playedt)
 	{
@@ -1631,7 +1652,7 @@ void WorldSession::HandlePlayedTimeOpcode( WorldPacket & recv_data )
 	WorldPacket data(SMSG_PLAYED_TIME, 9);
 	data << (uint32)_player->m_playedtime[1];
 	data << (uint32)_player->m_playedtime[0];
-	data << uint8(1);
+	data << uint8(send);
 	SendPacket(&data);
 }
 
@@ -2214,39 +2235,79 @@ void WorldSession::HandleToggleHelmOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleDungeonDifficultyOpcode(WorldPacket& recv_data)
 {
-    uint32 data;
-    recv_data >> data;
+	uint32 data;
+	recv_data >> data;
 
-    if(_player->GetGroup() && _player->IsGroupLeader())
-    {
-        WorldPacket pData;
-        pData.Initialize(MSG_SET_DUNGEON_DIFFICULTY);
-        pData << data;
+	if(_player->GetGroup() && _player->IsGroupLeader())
+	{
+		WorldPacket pData;
+		pData.Initialize(MSG_SET_DUNGEON_DIFFICULTY);
+		pData << data;
 
-        _player->iInstanceType = data;
-        sInstanceMgr.ResetSavedInstances(_player);
+		_player->iInstanceType = data;
+		sInstanceMgr.ResetSavedInstances(_player);
 
-        Group * m_Group = _player->GetGroup();
+		Group * m_Group = _player->GetGroup();
 
-        m_Group->Lock();
+		m_Group->SetDifficulty(data);
+		m_Group->Lock();
 		for(uint32 i = 0; i < m_Group->GetSubGroupCount(); ++i)
 		{
 			for(GroupMembersSet::iterator itr = m_Group->GetSubGroup(i)->GetGroupMembersBegin(); itr != m_Group->GetSubGroup(i)->GetGroupMembersEnd(); ++itr)
 			{
 				if((*itr)->m_loggedInPlayer)
 				{
-                    (*itr)->m_loggedInPlayer->iInstanceType = data;
+					(*itr)->m_loggedInPlayer->iInstanceType = data;
 					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&pData);
 				}
 			}
 		}
 		m_Group->Unlock();
-    }
-    else if(!_player->GetGroup())
-    {
-        _player->iInstanceType = data;
-        sInstanceMgr.ResetSavedInstances(_player);
-    }
+	}
+	else if(!_player->GetGroup())
+	{
+		_player->iInstanceType = data;
+		sInstanceMgr.ResetSavedInstances(_player);
+	}
+
+#ifdef OPTIMIZED_PLAYER_SAVING
+	_player->save_InstanceType();
+#endif
+}
+
+void WorldSession::HandleRaidDifficultyOpcode(WorldPacket& recv_data)
+{
+	uint32 data;
+	recv_data >> data;
+
+	if(_player->GetGroup() && _player->IsGroupLeader())
+	{
+		WorldPacket pData;
+		pData.Initialize(MSG_SET_RAID_DIFFICULTY);
+		pData << data;
+
+		_player->iRaidType = data;
+		Group * m_Group = _player->GetGroup();
+
+		m_Group->SetRaidDifficulty(data);
+		m_Group->Lock();
+		for(uint32 i = 0; i < m_Group->GetSubGroupCount(); ++i)
+		{
+			for(GroupMembersSet::iterator itr = m_Group->GetSubGroup(i)->GetGroupMembersBegin(); itr != m_Group->GetSubGroup(i)->GetGroupMembersEnd(); ++itr)
+			{
+				if((*itr)->m_loggedInPlayer)
+				{
+					(*itr)->m_loggedInPlayer->iRaidType = data;
+					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&pData);
+				}
+			}
+		}
+		m_Group->Unlock();
+	}
+	else if(!_player->GetGroup())
+	{
+		_player->iRaidType = data;
+	}
 
 #ifdef OPTIMIZED_PLAYER_SAVING
 	_player->save_InstanceType();
@@ -2287,7 +2348,7 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket & recv_data)
 	if( _player->m_summonInstanceId != _player->GetInstanceID() )
 	{
 		// if not, are we allowed on the summoners map?
-		uint8 pReason = CheckTeleportPrerequsites(NULL, this, _player, inf);
+		uint8 pReason = CheckTeleportPrerequsites(NULL, this, _player, inf->mapid);
 		if( pReason )
 		{
 			SendNotification(NOTIFICATION_MESSAGE_NO_PERMISSION);
@@ -2352,17 +2413,6 @@ void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& recv_data)
 	SendPacket(&data);
 }
 
-void WorldSession::HandleTimeSyncResp( WorldPacket & recv_data )
-{
-	uint32 counter, time;
-	recv_data >> counter >> time;
-
-	// time_ seems always more than getMSTime()
-	uint32 diff = getMSTimeDiff(getMSTime(), time);
-
-	OUT_DEBUG("Recieved opcode response for TimeSyncResp, Counter: %u, Time: %u, MS: %u, Difference: %u.\n", counter, time, getMSTime(), diff);
-}
-
 void WorldSession::HandleHAndROpcode( WorldPacket & recv_data )
 {
 	uint64 guid;
@@ -2385,32 +2435,13 @@ void WorldSession::HandleHAndROpcode( WorldPacket & recv_data )
 	_player->SafeTeleport(_player->GetBindMapId(), 0, vec);
 }
 
-void WorldSession::HandleGameobjReportUseOpCode( WorldPacket& recv_data )   // CMSG_GAMEOBJ_REPORT_USE
-{
-	CHECK_INWORLD_RETURN;
-	uint64 guid;
-	recv_data >> guid;
-	GameObject* gameobj = _player->GetMapMgr()->GetGameObject((uint32)guid);
-
-	if( gameobj== NULL )
-		return;
-
-	if( gameobj->CanActivate() )
-	{
-		sQuestMgr.OnGameObjectActivate(_player, gameobj);
-	}
-	return;
-}
-
 void WorldSession::HandleReadyForAccountDataTimes(WorldPacket &recv_data)
 {
 	DEBUG_LOG( "WORLD","Received CMSG_READY_FOR_ACCOUNT_DATA_TIMES" );
 
 	// account data == UI config
 	WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
-
 	data << uint32(UNIXTIME) << uint8(1) << uint32(0x15);
-
 	for (int i = 0; i < 8; i++)
 	{
 		if(0x15 & (1 << i))
@@ -2419,4 +2450,52 @@ void WorldSession::HandleReadyForAccountDataTimes(WorldPacket &recv_data)
 		}
 	}
 	SendPacket(&data);
+}
+
+void WorldSession::HandleFarsightOpcode(WorldPacket &recv_data)
+{
+	uint8 type;
+	recv_data >> type;
+
+	GetPlayer()->UpdateVisibility();
+}
+
+void WorldSession::HandleGameobjReportUseOpCode( WorldPacket& recv_data )
+{
+	uint64 guid;
+	recv_data >> guid;
+	GameObject* gameobj = _player->GetMapMgr()->GetGameObject(uint32(guid));
+	if(gameobj == NULL)
+		return;
+	if(gameobj->CanActivate())
+		sQuestMgr.OnGameObjectActivate(_player, gameobj);
+	return;
+}
+
+void WorldSession::HandleTalentWipeConfirmOpcode( WorldPacket& recv_data )
+{
+	uint64 guid;
+	recv_data >> guid;
+	CHECK_INWORLD_RETURN;
+
+	uint32 playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
+	uint32 price = _player->CalcTalentResetCost(_player->GetTalentResetTimes());
+
+	if( playerGold < price )
+		return;
+
+	_player->SetTalentResetTimes(GetPlayer()->GetTalentResetTimes() + 1);
+	_player->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - price );
+	_player->Reset_Talents();
+
+	_player->GetAchievementInterface()->HandleAchievementCriteriaTalentResetCostTotal( price );
+	_player->GetAchievementInterface()->HandleAchievementCriteriaTalentResetCount();
+
+	_player->CastSpell(_player, 14867, true);	// Spell: "Untalent Visual Effect"
+
+	WorldPacket data( MSG_TALENT_WIPE_CONFIRM, 12);	// You don't have any talent.
+	data << uint64(0);
+	data << uint32(0);
+	SendPacket( &data );
+	return;
 }

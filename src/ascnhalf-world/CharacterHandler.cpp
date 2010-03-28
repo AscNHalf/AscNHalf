@@ -638,14 +638,20 @@ void WorldSession::FullLogin(Player* plr)
 	m_MoverWoWGuid.Init(plr->GetGUID());
 
 	// copy to movement array
-	movement_packet[0] = m_MoverWoWGuid.GetNewGuidMask();
-	memcpy(&movement_packet[1], m_MoverWoWGuid.GetNewGuid(), m_MoverWoWGuid.GetNewGuidLen());
+	plr->movement_packet[0] = m_MoverWoWGuid.GetNewGuidMask();
+	memcpy(&plr->movement_packet[1], m_MoverWoWGuid.GetNewGuid(), m_MoverWoWGuid.GetNewGuidLen());
 
 	WorldPacket datab(MSG_SET_DUNGEON_DIFFICULTY, 20);
 	datab << plr->iInstanceType;
 	datab << uint32(0x01);
 	datab << uint32(0x00);
 	SendPacket(&datab);
+
+	WorldPacket datac(MSG_SET_RAID_DIFFICULTY, 20);
+	datac << plr->iRaidType;
+	datac << uint32(0x01);
+	datac << uint32(0x00);
+	SendPacket(&datac);
 
 	// Send first line of MOTD
 	WorldPacket datat(SMSG_MOTD, 100);
@@ -688,11 +694,22 @@ void WorldSession::FullLogin(Player* plr)
 #endif
 
 	plr->UpdateAttackSpeed();
-	/*if(plr->getLevel()>70)
-		plr->SetUInt32Value(UNIT_FIELD_LEVEL,70);*/
+	// Anti max level hack.
+	if(plr->getLevel() > 80)
+		plr->SetUInt32Value(UNIT_FIELD_LEVEL, 80);
 
-	// Enable trigger cheat by default
-	//plr->triggerpass_cheat = HasGMPermissions();
+	// Enable certain GM abilities on login.
+	/*if(HasGMPermissions())
+	{
+		plr->bGMTagOn = true;
+		plr->SetFlag(PLAYER_FLAGS, PLAYER_FLAG_GM);
+		plr->m_isGmInvisible = true;
+		plr->m_invisible = true;
+		if(CanUseCommand('z'))
+		{
+			plr->triggerpass_cheat = true; // Enable for admins automatically.
+		}
+	}*/
 
 	// Make sure our name exists (for premade system)
 	PlayerInfo * info = objmgr.GetPlayerInfo(plr->GetLowGUID());
@@ -733,32 +750,43 @@ void WorldSession::FullLogin(Player* plr)
 	info->m_loggedInPlayer = plr;
 
 	// account data == UI config
-	WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
-	//MD5Hash md5hash;
-
-	data << uint32(UNIXTIME) << uint8(1) << uint32(0xEA);
-
-	for (int i = 0; i < 8; i++) // TODO: FIX THIS!
+	if(sWorld.m_useAccountData)
 	{
-//		AccountDataEntry* acct_data = GetAccountData(i); // TODO: Use this correctly.
-
-		if(0xEA & (1 << i))
+		WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
+		MD5Hash md5hash;
+		data << uint32(UNIXTIME) << uint8(1) << uint32(0xEA);
+		for (int i = 0; i < 8; i++)
 		{
-			data << uint32(0);
+			AccountDataEntry* acct_data = GetAccountData(i);
+			if(0xEA & (1 << i))
+				data << uint32(acct_data->Time);
+			md5hash.Initialize();
+			md5hash.UpdateData((const uint8*)acct_data->data, acct_data->sz);
+			md5hash.Finalize();
 		}
-//		md5hash.Initialize();
-//		md5hash.UpdateData((const uint8*)acct_data->data, acct_data->sz);
-//		md5hash.Finalize();
-
-//		data.append(md5hash.GetDigest(), MD5_DIGEST_LENGTH);
+		SendPacket(&data);
 	}
-	SendPacket(&data);
+	else
+	{
+		WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4);
+		MD5Hash md5hash;
+		data << uint32(UNIXTIME) << uint8(1) << uint32(0xEA);
+		for (int i = 0; i < 8; i++)
+		{
+			AccountDataEntry* acct_data = GetAccountData(i);
+			if(0xEA & (1 << i))
+				data << uint32(0);
+			md5hash.Initialize();
+			md5hash.UpdateData((const uint8*)acct_data->data, acct_data->sz);
+			md5hash.Finalize();
+		}
+		SendPacket(&data);
+	}
 
 	_player->ResetTitansGrip();
 
 	// Set TIME OF LOGIN
-	CharacterDatabase.Execute (
-		"UPDATE characters SET online = 1 WHERE guid = %u" , plr->GetLowGUID());
+	CharacterDatabase.Execute ("UPDATE characters SET online = 1 WHERE guid = %u" , plr->GetLowGUID());
 
 	bool enter_world = true;
 #ifndef CLUSTERING
@@ -794,6 +822,9 @@ void WorldSession::FullLogin(Player* plr)
 		}
 	}
 #endif
+	
+	if(plr->m_CurrentVehicle)
+		plr->m_CurrentVehicle->RemovePassenger(plr);
 
 	DEBUG_LOG( "WorldSession","Player %s logged in.", plr->GetName());
 
@@ -853,8 +884,11 @@ void WorldSession::FullLogin(Player* plr)
 	}
 
 	// send to gms
-	if( HasGMPermissions() )
-		sWorld.SendMessageToGMs(this, "GM %s (%s) is now online. (Permissions: [%s])", _player->GetName(), GetAccountNameS(), GetPermissions());
+	if(HasGMPermissions())
+		if(CanUseCommand('z')) // Admins
+			sWorld.SendMessageToGMs(this, "Admin %s (%s) is now online.", _player->GetName(), GetAccountNameS(), GetPermissions());
+		else // Game Masters
+			sWorld.SendMessageToGMs(this, "GameMaster %s (%s) is now online.", _player->GetName(), GetAccountNameS(), GetPermissions());
 
 	//Set current RestState
 	if( plr->m_isResting) 		// We are in a resting zone, turn on Zzz

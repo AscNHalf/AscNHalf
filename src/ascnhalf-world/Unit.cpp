@@ -27,6 +27,8 @@ Unit::Unit()
 	m_attackTimer_1 = 0;
 	m_duelWield = false;
 
+	memset(movement_packet, 0, sizeof(movement_packet));
+	movement_info.FallTime = 0;
 	m_ignoreArmorPct = 0.0f;
 	m_ignoreArmorPctMaceSpec = 0.0f;
 	m_fearmodifiers = 0;
@@ -51,7 +53,17 @@ Unit::Unit()
 	m_teleportAckCounter = 0;
 	m_inVehicleSeatId = 0xFF;
 	m_CurrentVehicle = NULLVEHICLE;
-	
+
+	//transport shit
+	m_transportPosition			= NULL;
+	m_TransporterGUID			= NULL;
+	m_TransporterX				= 0.0f;
+	m_TransporterY				= 0.0f;
+	m_TransporterZ				= 0.0f;
+	m_TransporterO				= 0.0f;
+	m_TransporterUnk			= 0.0f;
+	m_lockTransportVariables	= false;
+
 	//DK:modifiers
 	PctRegenModifier = 0;
 	for( uint32 x = 0; x < 4; x++ )
@@ -62,13 +74,13 @@ Unit::Unit()
 	m_toRegen = 0;
 	m_speedModifier = 0;
 	m_slowdown = 0;
-	m_mountedspeedModifier=0;
+	m_mountedspeedModifier = 0;
 	m_maxSpeed = 0;
-	for(uint32 x=0;x<MECHANIC_COUNT;x++)
+	for(uint32 x = 0; x < MECHANIC_COUNT; x++)
 	{
-		MechanicsDispels[x]=0;
-		MechanicsResistancesPCT[x]=0;
-		ModDamageTakenByMechPCT[x]=0;
+		MechanicsDispels[x] = 0;
+		MechanicsResistancesPCT[x] = 0;
+		ModDamageTakenByMechPCT[x] = 0;
 	}
 
 	//SM
@@ -611,8 +623,9 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 				continue; // This spell should proc only from other hand attacks
 
 			uint32 spellId = itr2->spellId;
+			SpellEntry* sp = dbcSpell.LookupEntry(itr2->spellId);
 
-			if( itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND || itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_ANY_HOSTILE_ACTION ) 
+			if( itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND || itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_ANY_HOSTILE_ACTION || (itr2->procFlags & PROC_ON_PHYSICAL_ATTACK && sp->Spell_Dmg_Type & SPELL_DMG_TYPE_MELEE))
 			{
 				if( CastingSpell == NULL )
 					continue;
@@ -5266,7 +5279,7 @@ void Unit::SetStandState(uint8 standstate)
 void Unit::RemoveAurasByInterruptFlag(uint32 flag)
 {
 	Aura* a = NULL;
-	for(uint32 x=0;x<MAX_AURAS;x++)
+	for(uint32 x = 0; x < MAX_AURAS; x++)
 	{
 		a = m_auras[x];
 		if(a == NULL)
@@ -5280,10 +5293,12 @@ void Unit::RemoveAurasByInterruptFlag(uint32 flag)
 
 bool Unit::HasAuraVisual(uint32 visualid)
 {
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	if(m_auras[x] && m_auras[x]->GetSpellProto()->SpellVisual==visualid)
+	for(uint32 x = 0; x < MAX_AURAS+MAX_PASSIVE_AURAS; ++x)
 	{
-		return true;
+		if(m_auras[x] && ((m_auras[x]->GetSpellProto()->SpellVisual[0] == visualid) || (m_auras[x]->GetSpellProto()->SpellVisual[1] == visualid)))
+		{
+			return true;
+		}
 	}
 
 	return false;
@@ -5291,8 +5306,8 @@ bool Unit::HasAuraVisual(uint32 visualid)
 
 bool Unit::HasAura(uint32 spellid)
 {
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-		if(m_auras[x] != NULL && m_auras[x]->GetSpellId()== spellid)
+	for(uint32 x = 0; x < MAX_AURAS+MAX_PASSIVE_AURAS; x++)
+		if(m_auras[x] != NULL && m_auras[x]->GetSpellId() == spellid)
 			return true;
 
 		return false;
@@ -5330,7 +5345,7 @@ bool Unit::HasNegAuraWithMechanic(uint32 mechanic)
 
 void Unit::EventDeathAuraRemoval()
 {
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
+	for(uint32 x = 0; x < MAX_AURAS+MAX_PASSIVE_AURAS; x++)
 	{
 		if(m_auras[x] != NULL && !m_auras[x]->IsPassive())
 		{

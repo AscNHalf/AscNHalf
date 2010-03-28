@@ -31,7 +31,7 @@ void WorldSession::HandleSetLookingForGroupComment(WorldPacket& recvPacket)
 
 void WorldSession::HandleEnableAutoJoin(WorldPacket& recvPacket)
 {
-	uint32 i;
+/*	uint32 i;
 
 	// make sure they're not queued in any invalid cases
 	for(i = 0; i < MAX_LFG_QUEUE_ID; ++i)
@@ -55,7 +55,7 @@ void WorldSession::HandleEnableAutoJoin(WorldPacket& recvPacket)
 			_player->SendMeetingStoneQueue(_player->LfgDungeonId[i], 1);
 			sLfgMgr.UpdateLfgQueue(_player->LfgDungeonId[i]);
 		}
-	}
+	}*/
 }
 
 void WorldSession::HandleDisableAutoJoin(WorldPacket& recvPacket)

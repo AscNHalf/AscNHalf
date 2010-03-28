@@ -225,15 +225,6 @@ void Player::Init()
 	m_SwimmingTime = 0;
 	m_BreathDamageTimer = 0;
 
-	//transport shit
-	m_TransporterGUID = 0;
-	m_TransporterX = 0.0f;
-	m_TransporterY = 0.0f;
-	m_TransporterZ = 0.0f;
-	m_TransporterO = 0.0f;
-	m_TransporterUnk = 0.0f;
-	m_lockTransportVariables = false;
-
 	// Autoshot variables
 	m_AutoShotTarget = 0;
 	m_onAutoShot = false;
@@ -346,6 +337,7 @@ void Player::Init()
 	rename_pending = false;
 	titanGrip = false;
 	iInstanceType = 0;
+	iRaidType = 0;
 	memset(reputationByListId, 0, sizeof(FactionReputation*) * 128);
 
 	m_comboTarget = 0;
@@ -2463,7 +2455,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << m_killsToday << ", " << m_killsYesterday << ", " << m_killsLifetime << ", ";
 	ss << m_honorToday << ", " << m_honorYesterday << ", ";
 	ss << m_honorPoints << ", ";
-   	ss << iInstanceType << ", ";
+	ss << iInstanceType << ", ";
+	ss << iRaidType << ", ";
 
 	ss << uint32(m_talentActiveSpec) << ", ";
 	ss << uint32(m_talentSpecsCount) << ", ";
@@ -3342,10 +3335,10 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	{
 		end = strchr(start,',');
 		if(!end)break;
-		*end=0;
+		*end = 0;
 		SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + uint32(m_finishedDailyQuests.size()), atol(start));
 		m_finishedDailyQuests.insert(atol(start));
-		start = end +1;
+		start = end+1;
 	}
 	DailyMutex.Release();
 	
@@ -3359,17 +3352,18 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	m_honorPoints = get_next_field.GetUInt32();
 
 	RolloverHonor();
-    iInstanceType = get_next_field.GetUInt32();
+	iInstanceType = get_next_field.GetUInt32();
+	iRaidType = get_next_field.GetUInt32();
 
 	HonorHandler::RecalculateHonorFields(TO_PLAYER(this));
-	
-	for(uint32 x=0;x<5;x++)
-		BaseStats[x]=GetUInt32Value(UNIT_FIELD_STAT0+x);
-  
+
+	for(uint32 x = 0; x < 5; x++)
+		BaseStats[x] = GetUInt32Value(UNIT_FIELD_STAT0+x);
+
 	_setFaction();
 	InitGlyphSlots();
 	InitGlyphsForLevel();
-   
+
 	//class fixes
 	switch(getClass())
 	{
@@ -6625,7 +6619,6 @@ void Player::RemoveQuestsFromLine(int skill_line)
 void Player::SendInitialLogonPackets()
 {
 	// Initial Packets... they seem to be re-sent on port.
-	m_session->OutPacket(SMSG_SET_REST_START_OBSOLETE, 4, &m_timeLogoff);
 
     WorldPacket data(SMSG_BINDPOINTUPDATE, 32);
     data << m_bind_pos_x;
@@ -6879,6 +6872,10 @@ void Player::ApplySpec(uint8 spec, bool init)
 		{	
 			titanGrip = false;
 			ResetTitansGrip();
+		}
+		if( getClass() == DRUID )
+		{
+			SetShapeShift(0);
 		}
 
 		//Dismiss any pets
@@ -9338,6 +9335,7 @@ void Player::OnWorldPortAck()
 	//only rezz if player is porting to a instance portal
 	MapInfo *pPMapinfo = NULL;
 	pPMapinfo = WorldMapInfoStorage.LookupEntry(GetMapId());
+	MapEntry* map = dbcMap.LookupEntry(GetMapId());
 
 	if(pPMapinfo != NULL)
 	{
@@ -9349,13 +9347,50 @@ void Player::OnWorldPortAck()
 			std::string welcome_msg;
 			welcome_msg = "Welcome to ";
 			welcome_msg += pPMapinfo->name;
+			if(map->israid())
+			{
+				switch(iRaidType)
+				{
+				case MODE_10PLAYER_NORMAL:
+					welcome_msg += " (10 Player)";
+					break;
+				case MODE_25PLAYER_NORMAL:
+					welcome_msg += " (25 Player)";
+					break;
+				case MODE_10PLAYER_HEROIC:
+					welcome_msg += " (10 Player Heroic)";
+					break;
+				case MODE_25PLAYER_HEROIC:
+					welcome_msg += " (25 Player Heroic)";
+					break;
+				default:
+					break;
+				}
+			}
+			else
+			{
+				switch(iInstanceType)
+				{
+				case MODE_5PLAYER_NORMAL:
+					welcome_msg += " (5 Player)";
+					break;
+				case MODE_5PLAYER_HEROIC:
+					welcome_msg += " (5 Player Heroic)";
+					break;
+				case MODE_5PLAYER_EPIC:
+					welcome_msg += " (5 Player Epic)";
+					break;
+				default:
+					break;
+				}
+			}
 			welcome_msg += ". ";
 			if(pPMapinfo->type != INSTANCE_NONRAID && m_mapMgr->pInstance)
 			{
 				/*welcome_msg += "This instance is scheduled to reset on ";
 				welcome_msg += asctime(localtime(&m_mapMgr->pInstance->m_expiration));*/
-				welcome_msg += "This instance is scheduled to reset on ";
-				welcome_msg += ConvertTimeStampToDataTime((uint32)m_mapMgr->pInstance->m_expiration);
+				welcome_msg += "Instance Locks are scheduled to expire in ";
+				welcome_msg += ConvertTimeStampToString((uint32)m_mapMgr->pInstance->m_expiration - UNIXTIME);
 			}
 			sChatHandler.SystemMessage(m_session, welcome_msg.c_str());
 		}
@@ -12207,7 +12242,7 @@ bool Player::IsFlyHackEligible()
 
 	if(GetMapId() == 369) return false; // Deeprun Tram
 
-	MovementInfo* moveInfo = GetSession()->GetMovementInfo();
+	MovementInfo* moveInfo = GetMovementInfo();
 	if(!moveInfo) return false;
 
 	uint32 moveFlags = moveInfo->flags;
@@ -12772,4 +12807,23 @@ void Player::PlayerOnUpdate(Player* plr)
 		}
 	}
 	return;
+}
+
+uint32 Player::GetTotalItemLevel()
+{
+	ItemInterface *Ii = GetItemInterface();
+
+	uint32 playertotalitemlevel = 0;
+
+	for(int8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+	{
+		uint32 previoustil = playertotalitemlevel;
+		Item* item = Ii->GetInventoryItem(i);
+
+		if(!item)
+			continue;
+
+		playertotalitemlevel = previoustil + item->GetProto()->ItemLevel;
+	}
+	return playertotalitemlevel;
 }

@@ -52,9 +52,9 @@ enum InstanceType
 
 enum InstanceMode
 {
-	Mode_Normal					= MODE_NORMAL,
-	Mode_Heroic					= MODE_HEROIC,
-	Mode_Epic					= MODE_EPIC
+	Mode_Normal					= MODE_5PLAYER_NORMAL,
+	Mode_Heroic					= MODE_5PLAYER_HEROIC,
+	Mode_Epic					= MODE_5PLAYER_EPIC
 };
 
 enum DataType

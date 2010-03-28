@@ -380,7 +380,7 @@ bool MoonScriptCreatureAI::IsHeroic()
 {
 	if ( _unit->GetMapMgr() == NULLMAPMGR )
 		return false;
-	if ( _unit->GetMapMgr()->iInstanceMode != MODE_HEROIC )
+	if ( _unit->GetMapMgr()->iInstanceMode != MODE_5PLAYER_HEROIC )
 		return false;
 
 	return true;

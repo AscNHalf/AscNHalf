@@ -80,7 +80,7 @@ class SelinFireheartAI : public MoonScriptCreatureAI
 	{
 		AddSpell(SF_DRAINLIFE, Target_RandomPlayer, 8, 0, 35);
 
-		if(_unit->GetMapMgr()->iInstanceMode == MODE_HEROIC)
+		if(_unit->GetMapMgr()->iInstanceMode == MODE_5PLAYER_HEROIC)
 			AddSpell(SF_DRAINMANA, Target_RandomPlayer, 8, 0, 35);
 
 		ManaRage = dbcSpell.LookupEntry(FC_MANARAGE);

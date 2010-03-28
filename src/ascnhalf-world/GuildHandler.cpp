@@ -560,7 +560,7 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 	if( arena_index >= NUM_CHARTER_TYPES )
 		return;
 
-	if(crt->GetEntry()==19861 || crt->GetEntry()==18897 || crt->GetEntry()==19856)		/* i am lazy! */
+	if( !crt->ArenaOrganizersFlags() ) //All arena organizers should be allowed to create arena charter's
 	{
 		uint32 arena_type = arena_index - 1;
 		if(arena_type > 2)

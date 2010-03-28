@@ -94,6 +94,7 @@ void WorldSession::SendTaxiList(Creature* pCreature)
 		WorldPacket update(SMSG_TAXINODE_STATUS, 9);
 		update << guid << uint8( 1 );
 		SendPacket( &update );
+		return;
 	}
 
 	//Set Mask

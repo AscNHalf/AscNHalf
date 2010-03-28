@@ -2023,7 +2023,9 @@ bool ChatHandler::HandlePlayerInfo(const char* args, WorldSession * m_session)
 	else
 		plr = getSelectedChar(m_session, true);
 	
-	if(!plr) return true;
+	if(!plr)
+		return true;
+
 	if(!plr->GetSession())
 	{
 		RedSystemMessage(m_session, "ERROR: this player hasn't got any session !");
@@ -2101,7 +2103,7 @@ bool ChatHandler::HandlePlayerInfo(const char* args, WorldSession * m_session)
 	}
 	snprintf(playedTotal, 64, "[%d days, %d hours, %d minutes, %d seconds]", days, hours, mins, seconds);
 
-	GreenSystemMessage(m_session, "%s is a %s %s %s", plr->GetName(),
+	GreenSystemMessage(m_session, "%s[%u] is a %s %s %s", plr->GetName(), plr->GetLowGUID(),
 		(plr->getGender()?"Female":"Male"), races[plr->getRace()], classes[plr->getClass()]);
 
 	BlueSystemMessage(m_session, "%s has played %s at this level",(plr->getGender()?"She":"He"), playedLevel);
@@ -2231,13 +2233,24 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 	//Are we on a transporter?
 	if(m_session->GetPlayer()->m_TransporterGUID != 0)
 	{
-		Transporter* t = objmgr.GetTransporter(GUID_LOPART(m_session->GetPlayer()->m_TransporterGUID));
-		t->AddNPC(entry,m_session->GetPlayer()->m_TransporterX,m_session->GetPlayer()->m_TransporterY,m_session->GetPlayer()->m_TransporterZ,m_session->GetPlayer()->GetOrientation());
-		WorldDatabase.Execute("INSERT INTO transport_creatures VALUES(%u, %u, '%f', '%f', '%f', '%f')",GUID_LOPART(m_session->GetPlayer()->m_TransporterGUID),entry,m_session->GetPlayer()->m_TransporterX,m_session->GetPlayer()->m_TransporterY,m_session->GetPlayer()->m_TransporterZ,m_session->GetPlayer()->GetOrientation());
-		BlueSystemMessage(m_session, "Spawned crew-member %u on transport %u. You might need to relog.",entry,GUID_LOPART(m_session->GetPlayer()->m_TransporterGUID));
-		sGMLog.writefromsession(m_session, "spawned crew-member %u on transport %u.",entry,GUID_LOPART(m_session->GetPlayer()->m_TransporterGUID));
-		return true;
+		Player* pl = m_session->GetPlayer();
+		Transporter* t = objmgr.GetTransporter(GUID_LOPART(pl->m_TransporterGUID));
+		if(t)
+		{
+			WorldDatabase.Execute("INSERT INTO transport_creatures VALUES(%u, %u, '%f', '%f', '%f', '%f')", GUID_LOPART(pl->m_TransporterGUID), entry, pl->m_TransporterX, pl->m_TransporterY, pl->m_TransporterZ, pl->GetOrientation());
+			t->AddNPC(entry, pl->m_TransporterX, pl->m_TransporterY, pl->m_TransporterZ, pl->GetOrientation());
+			BlueSystemMessage(m_session, "Spawned crew-member %u on transport %u. You might need to relog.", entry, GUID_LOPART(pl->m_TransporterGUID));
+			sGMLog.writefromsession(m_session, "spawned crew-member %u on transport %u.", entry, GUID_LOPART(pl->m_TransporterGUID));
+			return true;
+		}
+		else
+		{
+			BlueSystemMessage(m_session, "Incorrect transportguid %u. Spawn has been denied.", GUID_LOPART(pl->m_TransporterGUID));
+			return true;
+		}
 	}
+//	VehicleEntry * ve = dbcVehicle.LookupEntry( proto->vehicle_entry );
+//	bool spVehicle = (ve && proto->vehicle_entry > 0) ? true : false;
 	bool spVehicle = proto->vehicle_entry > 0 ? true : false;
 
 	Creature* p = NULLCREATURE;
@@ -3263,4 +3276,30 @@ bool ChatHandler::HandleMultiAccountBanCommand(const char *args, WorldSession *m
 	return true;
 }
 
+bool ChatHandler::HandleEnableAH(const char *args, WorldSession *m_session)
+{
+	if(!m_session->CanUseCommand('z'))
+	{
+		SystemMessage(m_session, "Only admins can enable the AH.");
+		return true;
+	}
+ 
+	BlueSystemMessage(m_session, "Auction House Enabled, staff has been alerted.");
+	sWorld.SendMessageToGMs(m_session, "%s has disabled the auction house", (m_session->GetPlayer() ? m_session->GetPlayer()->GetName() : m_session->GetAccountNameS()));
+	sWorld.AHEnabled = true;
+	return true;
+}
 
+bool ChatHandler::HandleDisableAH(const char *args, WorldSession *m_session)
+{
+	if(!m_session->CanUseCommand('z'))
+	{
+		SystemMessage(m_session, "Only admins can disable the AH.");
+		return true;
+	}
+
+	BlueSystemMessage(m_session, "Auction house Disabled, staff has been alerted.");
+	sWorld.SendMessageToGMs(m_session, "%s has enabled the auction house", (m_session->GetPlayer() ? m_session->GetPlayer()->GetName() : m_session->GetAccountNameS()));
+	sWorld.AHEnabled = false;
+	return true;
+}

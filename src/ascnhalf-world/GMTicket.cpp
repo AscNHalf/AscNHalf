@@ -54,6 +54,12 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket & recv_data)
 	recv_data >> message;
 	recv_data >> message2;
 
+	// Crap cleanup.
+	uint64 crap;
+	uint16 crap2;
+	uint8 crap3;
+	recv_data >> crap >> crap2 >> crap3;
+
 	/*if (type == GM_TICKET_TYPE_BEHAVIOR_HARASSMENT)
 	{
 		// more magic
@@ -80,7 +86,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket & recv_data)
 	ticket->posX = x;
 	ticket->posY = y;
 	ticket->posZ = z;
-	ticket->message = message;
+	ticket->message = message, message2;
 	ticket->timestamp = (uint32)UNIXTIME;
 	ticket->name = GetPlayer()->GetName();
 	ticket->level = GetPlayer()->getLevel();
@@ -178,6 +184,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & recv_data)
 
 	// Send current Ticket
 	data << uint32(6); // unk
+	data << uint32(1); // Deletable
 	data << ticket->message.c_str();
 	data << (uint8)ticket->type;
 

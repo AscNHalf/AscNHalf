@@ -546,6 +546,9 @@ protected:
 	bool HandleGetRepCommand(const char *args, WorldSession *m_session);
 
 	bool HandleDebugRetroactiveQuestAchievements(const char *args, WorldSession *m_session);
+	
+	bool HandleEnableAH(const char *args, WorldSession *m_session);
+	bool HandleDisableAH(const char *args, WorldSession *m_session);
 };
 
 

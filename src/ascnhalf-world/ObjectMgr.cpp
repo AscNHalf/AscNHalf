@@ -30,8 +30,8 @@ ObjectMgr::ObjectMgr()
 	m_mailid = 0;
 	m_hiPlayerGuid = 0;
 	m_hiCorpseGuid = 0;
-	m_hiArenaTeamId=0;
-	m_hiGuildId=0;
+	m_hiArenaTeamId = 0;
+	m_hiGuildId = 0;
 }
 
 
@@ -2541,6 +2541,7 @@ void ObjectMgr::LoadInstanceReputationModifiers()
 bool ObjectMgr::HandleInstanceReputationModifiers(Player* pPlayer, Unit* pVictim)
 {
 	uint32 team = pPlayer->GetTeam();
+	MapEntry* map = dbcMap.LookupEntry(pPlayer->GetMapId());
 	bool is_boss, is_heroic;
 	if(pVictim->GetTypeId() != TYPEID_UNIT)
 		return false;
@@ -2550,7 +2551,11 @@ bool ObjectMgr::HandleInstanceReputationModifiers(Player* pPlayer, Unit* pVictim
 		return false;
 
 	is_boss = (TO_CREATURE( pVictim )->proto && TO_CREATURE( pVictim )->proto->boss) ? true : false;
-	is_heroic = (pPlayer->IsInWorld() && pPlayer->iInstanceType == MODE_HEROIC && pPlayer->GetMapMgr()->GetMapInfo()->type != INSTANCE_NULL) ? true : false;
+
+	if(map->israid()) // We are good here I guess.
+		is_heroic = (pPlayer->IsInWorld() && pPlayer->iRaidType >= MODE_10PLAYER_HEROIC && pPlayer->GetMapMgr()->GetMapInfo()->type != INSTANCE_NULL) ? true : false;
+	else
+		is_heroic = (pPlayer->IsInWorld() && pPlayer->iInstanceType == MODE_5PLAYER_HEROIC && pPlayer->GetMapMgr()->GetMapInfo()->type != INSTANCE_NULL) ? true : false;
 
 	// Apply the bonuses as normal.
 	int32 replimit;

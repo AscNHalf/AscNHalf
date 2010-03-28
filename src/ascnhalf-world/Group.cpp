@@ -57,7 +57,7 @@ Group::Group(bool Assign)
 	m_GroupType = GROUP_TYPE_PARTY;	 // Always init as party
 
 	// Create initial subgroup
-    memset(m_SubGroups,0, sizeof(SubGroup*)*8);
+	memset(m_SubGroups,0, sizeof(SubGroup*)*8);
 	m_SubGroups[0] = new SubGroup(this, 0);
 
 	m_Leader = NULL;
@@ -66,6 +66,8 @@ Group::Group(bool Assign)
 	m_LootThreshold = 2;
 	m_SubGroupCount = 1;
 	m_MemberCount = 0;
+	m_difficulty = MODE_5PLAYER_NORMAL;
+	m_raiddifficulty = MODE_10PLAYER_NORMAL;
 
 	if( Assign )
 	{
@@ -78,7 +80,6 @@ Group::Group(bool Assign)
 	m_groupFlags = 0;
 	memset(m_targetIcons, 0, sizeof(uint64) * 8);
 	m_isqueued = false;
-	m_difficulty = MODE_NORMAL;
 	m_assistantLeader = m_mainAssist = m_mainTank = NULL;
 #ifdef VOICE_CHAT
 	m_voiceChannelRequested = false;
@@ -375,7 +376,7 @@ void Group::Update()
 
 				data << uint8( m_LootThreshold );
 				data << uint8( m_difficulty ); // 5 Normal/Heroic.
-				data << uint8(0); // 10/25 man.
+				data << uint8( m_raiddifficulty ); // 10/25 man.
 
 				if( !(*itr1)->m_loggedInPlayer->IsInWorld() )
 					(*itr1)->m_loggedInPlayer->CopyAndSendDelayedPacket( &data );
@@ -822,10 +823,11 @@ void Group::LoadFromDB(Field *fields)
 	m_LootMethod = fields[3].GetUInt8();
 	m_LootThreshold = fields[4].GetUInt8();
 	m_difficulty = fields[5].GetUInt8();
+	m_raiddifficulty = fields[6].GetUInt8();
 
-	LOAD_ASSISTANT(6, m_assistantLeader);
-	LOAD_ASSISTANT(7, m_mainTank);
-	LOAD_ASSISTANT(8, m_mainAssist);
+	LOAD_ASSISTANT(7, m_assistantLeader);
+	LOAD_ASSISTANT(8, m_mainTank);
+	LOAD_ASSISTANT(9, m_mainAssist);
 
 	// create groups
 	for(int i = 1; i < m_SubGroupCount; ++i)
@@ -836,7 +838,7 @@ void Group::LoadFromDB(Field *fields)
 	{
 		for(int j = 0; j < 5; ++j)
 		{
-			uint32 guid = fields[8 + (i*5) + j].GetUInt32();
+			uint32 guid = fields[9 + (i*5) + j].GetUInt32();
 			if( guid == 0 )
 				continue;
 
@@ -866,7 +868,8 @@ void Group::SaveToDB()
 		<< uint32(m_SubGroupCount) << ","
 		<< uint32(m_LootMethod) << ","
 		<< uint32(m_LootThreshold) << ","
-		<< uint32(m_difficulty) << ",";
+		<< uint32(m_difficulty) << ","
+		<< uint32(m_raiddifficulty) << ",";
 
 	if(m_assistantLeader)
 		ss << m_assistantLeader->guid << ",";
@@ -1105,27 +1108,11 @@ void Group::HandlePartialChange(uint32 Type, Player* pPlayer)
 
 void WorldSession::HandlePartyMemberStatsOpcode(WorldPacket & recv_data)
 {
-	return;
-	CHECK_INWORLD_RETURN;
-
 	uint64 guid;
 	recv_data >> guid;
-
-	Player* plr = _player->GetMapMgr()->GetPlayer((uint32)guid);
-
-	if(!_player->GetGroup() || !plr)
-		return;
-
-	WorldPacket data(200);
-	if(!_player->GetGroup()->HasMember(plr))
-		return;			// invalid player
-
-	if(_player->IsVisible(plr))
-		return;
-
-	_player->GetGroup()->UpdateOutOfRangePlayer(plr, GROUP_UPDATE_TYPE_FULL_CREATE | GROUP_UPDATE_TYPE_FULL_REQUEST_REPLY, false, &data);
-	data.SetOpcode(SMSG_PARTY_MEMBER_STATS_FULL);
-	SendPacket(&data);
+	guid = NULL;
+	return;
+	// This is handled in the core already :D
 }
 
 Group* Group::Create()

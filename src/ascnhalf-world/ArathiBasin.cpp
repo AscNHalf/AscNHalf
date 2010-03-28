@@ -413,11 +413,7 @@ ArathiBasin::ArathiBasin( MapMgr* mgr, uint32 id, uint32 lgroup, uint32 t) : CBa
 	m_pvpData.clear();
 	m_resurrectMap.clear();
 
-	BattlemasterListEntry* bl = dbcBattlemasterList.LookupEntry(529);
-	if(bl)
-		m_playerCountPerTeam = bl->maxplayersperteam;
-	else	// shouldn't happen
-		m_playerCountPerTeam = 15;
+	m_playerCountPerTeam = 15;
 	
 	m_lgroup = lgroup;
 

@@ -28,7 +28,8 @@
 #define BitCount4(x) ( BitCount2(x) + BitCount2((x)>>2) )
 #define BitCount8(x) ( BitCount4(x) + BitCount4((x)>>4) )
 
-class SERVER_DECL WoWGuid {
+class SERVER_DECL WoWGuid
+{
 public:
 	
 	WoWGuid() 

@@ -37,9 +37,11 @@
 #define SKILL_2H_SWORDS                 55
 #define SKILL_HOLY                      56
 #define SKILL_SHADOW                    78
+#define SKILL_DODGE						81
 #define SKILL_DEFENSE                   95
 #define SKILL_LANG_COMMON               98
 #define SKILL_RACIAL_DWARVEN            101
+#define SKILL_BLOCK						107
 #define SKILL_LANG_ORCISH               109
 #define SKILL_LANG_DWARVEN              111
 #define SKILL_LANG_DARNASSIAN           113

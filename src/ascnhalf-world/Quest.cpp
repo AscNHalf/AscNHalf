@@ -28,12 +28,14 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 	// 2048 bytes should be more than enough. The fields cost ~200 bytes.
 	// better to allocate more at startup than have to realloc the buffer later on.
 
-	WorldPacket *data = new WorldPacket(SMSG_QUEST_QUERY_RESPONSE, 2048);
-	LocalizedQuest * lci = (language > 0) ? sLocalizationMgr.GetLocalizedQuest(qst->id, language) : NULL;
+	uint32 i = 0;
+
+	WorldPacket* data = new WorldPacket(SMSG_QUEST_QUERY_RESPONSE, 248);
+	LocalizedQuest* lci = (language > 0) ? sLocalizationMgr.GetLocalizedQuest(qst->id, language) : NULL;
 
 	*data << uint32(qst->id);						// Quest ID
 	*data << uint32(2);								// Unknown, always seems to be 2
-	*data << uint32(qst->max_level);				// Quest level
+	*data << int32(qst->max_level);					// Quest level
 	*data << uint32(qst->min_level);				// minlevel !!!
 
 	if(qst->quest_sort > 0)
@@ -42,26 +44,27 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 		*data << uint32(qst->zone_id);				// Positive if pointing to a zone.
 
 	*data << uint32(qst->type);						// Info ID / Type
-	*data << uint32(qst->suggested_players);		// suggested players
+	*data << uint32(qst->suggested_players);			// suggested players
 	*data << uint32(qst->required_rep_faction);		// Faction ID
 	*data << uint32(qst->required_rep_value);		// Faction Amount
+	*data << uint32(0);								// 3.3.3 // Opposite Faction ID
+	*data << uint32(0);								// 3.3.3 // Opposite Faction Amount
 	*data << uint32(qst->next_quest_id);			// Next Quest ID
 	*data << uint32(0);								// 3.3.0
 
 	*data << uint32(sQuestMgr.GenerateRewardMoney(_player, qst));	// Copper reward
 	*data << uint32(qst->required_money);			// Required Money
-	*data << uint32(qst->effect_on_player);			// Spell casted on player upon completion
 	*data << uint32(qst->reward_spell);				// Spell added to spellbook upon completion
+	*data << uint32(qst->effect_on_player);			// Spell casted on player upon completion
 	*data << uint32(qst->reward_honor);				// 2.3.0 - bonus honor
-	*data << float(0);								// unknown
+	*data << float(0);								// Reward Honor Multiplier
 	*data << uint32(qst->srcitem);					// Item given at the start of a quest (srcitem)
 	*data << uint32(qst->quest_flags);				// Quest Flags
 	*data << uint32(qst->reward_title);				// Reward Title Id - Player is givn this title upon completion
-	*data << uint64(qst->required_kill_player);		// 3.0.2
-	*data << uint32(qst->reward_talents);			// 3.0.2
-	*data << uint32(0);								// bonus arena points
+	*data << uint32(qst->required_kill_player);		// Required Kill Player
+	*data << uint32(qst->reward_talents);			// Reward Talents
 	*data << uint32(0);								// Arena Points
-	*data << uint32(0);								// Arena Points Multiplicator.
+	*data << uint32(0);								// unk
 
 	// (loop 4 times)
 	for(uint32 i = 0; i < 4; ++i)
@@ -78,38 +81,27 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 	}
 
 	// 3.3 Faction Reward Stuff.
-	for(uint32 i = 0; i < 5; ++i)
-		*data << uint32(0);
+	for(i = 0; i < 5; ++i)
+		*data << uint32(qst->reward_repfaction[i]);
 
-	for(uint32 i = 0; i < 5; ++i)
-		*data << uint32(0);
+	for(i = 0; i < 5; ++i)
+		*data << int32(qst->reward_repvalue[i]);
 
-	for(uint32 i = 0; i < 5; ++i)
-		*data << uint32(0);
-
+	for(i = 0; i < 5; ++i)
+		*data << int32(qst->reward_replimit);
 	//end
 
 	*data << qst->point_mapid;						// Unknown
 	*data << qst->point_x;							// Unknown
 	*data << qst->point_y;							// Unknown
 	*data << qst->point_opt;						// Unknown
-	
-	if(lci)
-	{
-		*data << lci->Title;
-		*data << lci->Objectives;
-		*data << lci->Details;
-		*data << lci->EndText;
-	}
-	else
-	{
-		*data << qst->title;						// Title / name of quest
-		*data << qst->objectives;					// Objectives / description
-		*data << qst->details;						// Details
-		*data << qst->endtext;						// Subdescription
-	}
 
-	*data << uint8(0); //unk string
+	*data << (lci ? lci->Title : qst->title);				// Title / name of quest
+	*data << (lci ? lci->Objectives : qst->objectives);		// Objectives / description
+	*data << (lci ? lci->Details : qst->details);			// Details
+	*data << (lci ? lci->EndText : qst->endtext);			// Subdescription
+
+	*data << uint8(0); // Displayed after finishing quest.
 
 	// (loop 4 times)
 	for(uint32 i = 0; i < 4; ++i)
@@ -142,7 +134,6 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 
 	return data;
 }
-
 
 /*****************
 * QuestLogEntry *

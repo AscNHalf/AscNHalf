@@ -42,7 +42,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 {
 	CHECK_INWORLD_RETURN;
 	CHECK_PACKET_SIZE(recv_data, 4);
-	uint32 id ;
+	uint32 id;
 	recv_data >> id;
 	_HandleAreaTriggerOpcode(id);
 }
@@ -54,7 +54,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 	// Are we REALLY here?
 	CHECK_INWORLD_RETURN;
 
-    // Search quest log, find any exploration quests
+	// Search quest log, find any exploration quests
 	sQuestMgr.OnPlayerExploreArea(GetPlayer(),id);
 
 	AreaTrigger* pAreaTrigger = AreaTriggerStorage.LookupEntry( id );
@@ -94,11 +94,12 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 			if(_player->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
 				MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+				MapEntry* map = dbcMap.LookupEntry(pAreaTrigger->Mapid);
 				if(!pMi)
 					return;
 
 				//do we meet the map requirements?
-				uint8 reason = CheckTeleportPrerequsites(pAreaTrigger, this, _player, WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid));
+				uint8 reason = CheckTeleportPrerequsites(pAreaTrigger, this, _player, pAreaTrigger->Mapid);
 				if(reason != AREA_TRIGGER_FAILURE_OK)
 				{
 					const char * pReason = AreaTriggerFailureMessages[reason];
@@ -172,11 +173,11 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 				// Try to find a saved instance and
 				// do not handle Hyjal Inn (trigger 4319), since we need a unique mapid when generating our instance_id.
 
-				if( id != 4319 && pMi && ( pMi->type == INSTANCE_RAID || _player->iInstanceType >= MODE_HEROIC && pMi->type == INSTANCE_MULTIMODE ) )
+				if( id != 4319 && pMi && ( map->israid() || _player->iRaidType >= MODE_25PLAYER_NORMAL && pMi->type == INSTANCE_MULTIMODE ) )
 				{
 					//Do we have a saved instance we should use?
 					Instance * in = NULL;
-					in = sInstanceMgr.GetSavedInstance( pMi->mapid,_player->GetLowGUID() );
+					in = sInstanceMgr.GetSavedInstance( pMi->mapid,_player->GetLowGUID(), _player->iRaidType );
 					if( in != NULL  && in->m_instanceId )
 					{
 						//If we are the first to enter this instance, also set our current group id.
