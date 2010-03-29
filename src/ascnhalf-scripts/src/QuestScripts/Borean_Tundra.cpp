@@ -133,3 +133,8 @@ bool BuryThoseCockroaches(uint32 i, Spell* pSpell)
 	qle->UpdatePlayerFields();
 	return true;
 }
+
+void SetupBoreanTundra(ScriptMgr* mgr)
+{
+	mgr->register_dummy_spell(45503, &BuryThoseCockroaches);
+}

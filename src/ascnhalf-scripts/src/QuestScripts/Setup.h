@@ -49,6 +49,7 @@ void SetupGhostlands(ScriptMgr * mgr);
 void SetupHellfirePeninsula(ScriptMgr * mgr);
 void SetupHillsbradFoothills(ScriptMgr * mgr);
 void SetupHowlingFjord(ScriptMgr * mgr);
+void SetupBoreanTundra(ScriptMgr * mgr);
 void SetupIsleOfQuelDanas(ScriptMgr * mgr);
 void SetupLochModan(ScriptMgr * mgr);
 void SetupMulgore(ScriptMgr * mgr);

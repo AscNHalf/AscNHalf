@@ -57,6 +57,7 @@ extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)
 	SetupHellfirePeninsula(mgr);
 	SetupHillsbradFoothills(mgr);
 	SetupHowlingFjord(mgr);
+	SetupBoreanTundra(mgr);
 	SetupIsleOfQuelDanas(mgr);
 	SetupLochModan(mgr);
 	SetupMulgore(mgr);

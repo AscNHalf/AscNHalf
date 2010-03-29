@@ -101,6 +101,7 @@ SET(quest_SRCS
    QuestScripts/Hellfire_Peninsula.cpp
    QuestScripts/HillsbradFoothills.cpp
    QuestScripts/Howling_Fjord.cpp
+   QuestScripts/Borean_Tundra.cpp
    QuestScripts/Isle_of_QuelDanas.cpp
    QuestScripts/LochModan.cpp
    QuestScripts/Mage.cpp
