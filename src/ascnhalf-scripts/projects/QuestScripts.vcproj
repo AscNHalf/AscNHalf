@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="QuestScripts"
 	ProjectGUID="{1A080CA7-D19A-4129-972C-89E816E6DEC0}"
+	RootNamespace="QuestScripts"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -450,6 +451,10 @@
 				</File>
 				<File
 					RelativePath="..\src\QuestScripts\BloodmystIsle.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\QuestScripts\Borean_Tundra.cpp"
 					>
 				</File>
 				<File

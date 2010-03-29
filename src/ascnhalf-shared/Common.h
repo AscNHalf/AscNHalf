@@ -303,14 +303,15 @@ enum MsTimeVariables
 #include <unordered_set>
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && !_HAS_TR1
 // this is not needed, imho
+// we solved this using boost. but anyways, you should install SP1.
 // - Twl
 //#pragma message ("FATAL ERROR: Please install Service Pack 1 for Visual Studio 2008")
-#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER < 1500
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER < 1500 // it's not even 9.0 (shouldn't support that), try boost.
 #include <boost/tr1/memory.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/tr1/unordered_set.hpp>
-#else
-#include <memory>
+#else // it's builtin
+#include <memory> 
 #include <hash_map>
 #include <hash_set>
 #endif
@@ -329,16 +330,6 @@ using std::tr1::shared_ptr;
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER < 1500 || !_HAS_TR1)
 using namespace std::tr1;
 
-// May not work on *nix, but fixes build on windows.
-// - Twl
-
-/*#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
-
-using namespace boost;
-
-using std::tr1::shared_ptr;
-*/
 
 #undef HM_NAMESPACE
 #define HM_NAMESPACE boost

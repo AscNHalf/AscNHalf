@@ -155,6 +155,7 @@ public:
      				if ( pGameobject != NULL )
 					{
 						sEAS.GameobjectDelete( pGameobject, 1 * 60 * 1000 );
+						
 					}
 
 					return;

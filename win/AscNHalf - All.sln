@@ -77,6 +77,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorldPvPScripts", "..\src\a
 		{1DC6C4DA-A028-41F3-877D-D5400C594F88} = {1DC6C4DA-A028-41F3-877D-D5400C594F88}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ascnhalf-netwrapper", "VC90\ascnhalf-netwrapper.vcproj", "{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{90297C34-F231-4DF4-848E-A74BCC0E40ED} = {90297C34-F231-4DF4-848E-A74BCC0E40ED}
+		{1DC6C4DA-A028-41F3-877D-D5400C594F88} = {1DC6C4DA-A028-41F3-877D-D5400C594F88}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -197,6 +203,13 @@ Global
 		{FF39B41C-C998-4AAF-9EF0-199402233EE5}.Release|Win32.Build.0 = Release|Win32
 		{FF39B41C-C998-4AAF-9EF0-199402233EE5}.Release|x64.ActiveCfg = Release|x64
 		{FF39B41C-C998-4AAF-9EF0-199402233EE5}.Release|x64.Build.0 = Release|x64
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Debug|Win32.Build.0 = Debug|Win32
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Debug|x64.ActiveCfg = Debug|Win32
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Release|Win32.ActiveCfg = Release|Win32
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Release|Win32.Build.0 = Release|Win32
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Release|x64.ActiveCfg = Release|x64
+		{1F2A0E88-3CA9-4917-A447-3EDD1D8CED0D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
