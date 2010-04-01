@@ -603,38 +603,29 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 					_player->m_CurrentTransporter->AddPlayer(_player);
 
 				// Create a location vector with position variables.
-				LocationVector v;
-				v.x = _player->movement_info.transX;
-				v.y = _player->movement_info.transY;
-				v.z = _player->movement_info.transZ;
-				v.o = _player->movement_info.transO;
+				LocationVector *v = new LocationVector( _player->movement_info.transX, _player->movement_info.transY, _player->movement_info.transZ, _player->movement_info.transO);
 
 				/* set variables */
-				_player->m_TransporterGUID = _player->movement_info.transGuid.GetOldGuid();
-				_player->m_TransporterUnk = _player->movement_info.transTime;
-				_player->m_TransporterX = v.x;
-				_player->m_TransporterY = v.y;
-				_player->m_TransporterZ = v.z;
-				_player->m_TransporterO = v.o;
-				_player->m_transportPosition =& v;
+				_player->m_TransporterX = v->x;
+				_player->m_TransporterY = v->y;
+				_player->m_TransporterZ = v->z;
+				_player->m_TransporterO = v->o;
+				_player->m_transportPosition = v;
 				_player->DelaySpeedHack(5000);
+				delete v;
 			}
 			else
 			{
 				// Create a location vector with position variables.
-				LocationVector v;
-				v.x = _player->movement_info.transX;
-				v.y = _player->movement_info.transY;
-				v.z = _player->movement_info.transZ;
-				v.o = _player->movement_info.transO;
+				LocationVector *v = new LocationVector( _player->movement_info.transX, _player->movement_info.transY, _player->movement_info.transZ, _player->movement_info.transO);
 
 				/* no changes */
-				_player->m_TransporterUnk = _player->movement_info.transTime;
-				_player->m_TransporterX = v.x;
-				_player->m_TransporterY = v.y;
-				_player->m_TransporterZ = v.z;
-				_player->m_TransporterO = v.o;
-				_player->m_transportPosition =& v;
+				_player->m_TransporterX = v->x;
+				_player->m_TransporterY = v->y;
+				_player->m_TransporterZ = v->z;
+				_player->m_TransporterO = v->o;
+				_player->m_transportPosition = v;
+				delete v;
 			}
 		}
 		/*float x = _player->movement_info.x - _player->movement_info.transX;
