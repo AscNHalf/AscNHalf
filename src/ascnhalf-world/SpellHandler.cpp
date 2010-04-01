@@ -175,7 +175,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 		return;
 	}
 
-	Spell* spell = new Spell(_player, spellInfo, false, NULLAURA);
+	Spell* spell(new Spell(_player, spellInfo, false, NULLAURA));
 	spell->extra_cast_number=cn;
 	spell->m_glyphIndex = glyphIndex;
 	spell->i_caster = tmpItem;
@@ -190,9 +190,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 		return;
 
 	uint32 spellId;
-	uint8 cn, unk; // cn: Cast count. 3.0.2 unk
+	uint8 cn, flags; // 3.0.2 unk
 
-	recvPacket >> cn >> spellId  >> unk;
+	recvPacket >> cn >> spellId  >> flags;
+
+	SpellCastTargets targets(recvPacket, GetPlayer()->GetGUID());
+	
 	if(!spellId)
 	{
 		OUT_DEBUG("WORLD: unknown spell id %i\n", spellId);
@@ -266,7 +269,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			{
 				_player->m_AutoShotTarget = _player->GetSelection();
 				uint32 duration = _player->GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME);
-				SpellCastTargets targets(recvPacket,GetPlayer()->GetGUID());
 				if(!targets.m_unitTarget)
 				{
 					sLog.outString( "Cancelling auto-shot cast because targets.m_unitTarget is null!" );
@@ -284,8 +286,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 			return;
 		}
-
-        SpellCastTargets targets(recvPacket, GetPlayer()->GetGUID());
 
 		if(_player->m_currentSpell)
 		{
@@ -327,15 +327,40 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			}
 		}
 
-		Spell* spell = new Spell(GetPlayer(), spellInfo, false, NULLAURA);
+		Spell* spell(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
 		spell->extra_cast_number = cn;
 		spell->prepare(&targets);
+	}
+		
+	if(flags & 0x02)
+	{
+		recvPacket.hexlike();
+		/*
+		recvPacket.read_skip<float>();						// x coords?
+		recvPacket.read_skip<float>();						// y coords?
+
+		uint8 unk1;
+		recvPacket >> unk1;									// >> 1 or 0
+
+		if(unk1)
+		{
+			recvPacket.read_skip<uint32>();					// >> MSG_MOVE_STOP
+			uint64 guid;									// guid - unused
+
+			if(!recvPacket.readPackGUID(guid))
+				return;
+
+			MovementInfo movementInfo;
+			ReadMovementInfo(recvPacket, &movementInfo);
+		}*/
 	}
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
 	uint32 spellId;
+	
+//	recvPacket.read_skip<uint8>(); // This is a counter, raises every spell failure
 	recvPacket >> spellId;
 
 	if(GetPlayer()->m_currentSpell)
@@ -377,18 +402,21 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode(WorldPacket& recv_data)
 	_player->m_onAutoShot = false;
 }
 
-void WorldSession::HandleCharmForceCastSpell(WorldPacket & recvPacket)
+void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 {
 	DEBUG_LOG( "WORLD"," got CMSG_PET_CAST_SPELL." );
 	uint64 guid;
+	uint8 counter;
 	uint32 spellid;
-	uint8 counter, flags;
+	uint8 flags;
 	Unit* caster;
 	SpellCastTargets targets;
+	SpellEntry *sp;
+	Spell* pSpell;
 	list<AI_Spell*>::iterator itr;
 
 	recvPacket >> guid >> counter >> spellid >> flags;
-	SpellEntry *sp = dbcSpell.LookupEntry(spellid);
+	sp = dbcSpell.LookupEntry(spellid);
 
 	// Summoned Elemental's Freeze
 	if(spellid == 33395)
@@ -465,6 +493,7 @@ void WorldSession::HandleCharmForceCastSpell(WorldPacket & recvPacket)
 
 	targets.read(recvPacket, _player->GetGUID());
 
-	Spell* pSpell = new Spell(caster, sp, false, NULLAURA);
+	pSpell = new Spell(caster, sp, false, NULLAURA);
+	pSpell->extra_cast_number = counter;
 	pSpell->prepare(&targets);
 }

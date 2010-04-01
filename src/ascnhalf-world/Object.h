@@ -28,6 +28,9 @@ class Unit;
 class Spell;
 class Aura;
 class DynamicObject;
+class Map;
+
+#define DEFAULT_WORLD_OBJECT_SIZE	0.388999998569489f	// player size, also currently used (correctly?) for any non Unit world objects
 
 typedef struct
 { 
@@ -82,6 +85,7 @@ public:
 	INLINE const uint32 GetTypeFromGUID() const { return (m_uint32Values[1] & HIGHGUID_TYPE_MASK); }
 	INLINE const uint32 GetUIdFromGUID() const { return (m_uint32Values[0] & LOWGUID_ENTRY_MASK); }
 	INLINE const uint32 GetLowGUID() const { return (m_uint32Values[0]); }
+	INLINE const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
 
 	// type
 	bool m_isVehicle;
@@ -432,6 +436,8 @@ public:
 
 protected:
 	Object (  );
+	
+	ByteBuffer m_PackGUID;
 
 	//void _Create (uint32 guidlow, uint32 guidhigh);
 	void _Create( uint32 mapid, float x, float y, float z, float ang);
@@ -558,6 +564,34 @@ public:
 
 	// empties loot vector
 	void ClearLoot();
+	
+public:
+	uint32 GetPhaseMask() const { return m_phaseMask; }
+	bool isType(uint16 mask) const { return (mask == m_objectType); }
+	void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
+	void GetNearPoint( Object const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d,float absAngle) const;
+	void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const
+	{
+		// angle calculated from current orientation
+		GetNearPoint(NULL,x,y,z,size,distance2d,GetOrientation() + angle);
+	}
+	
+	float GetObjectSize() const
+	{
+		return ( m_valuesCount > UNIT_FIELD_COMBATREACH ) ? m_floatValues[UNIT_FIELD_COMBATREACH] : DEFAULT_WORLD_OBJECT_SIZE;
+	}
+	
+	void UpdateGroundPositionZ(float x, float y, float &z) const;
+	
+	Map* GetMap() const { ASSERT(m_currMap); return m_currMap; }
+	Map* FindMap() const { return m_currMap; }
+	Map const* GetBaseMap() const;
+	
+private:
+	Map* m_currMap;
+	uint32 m_phaseMask; // in area phase state
+	uint16 m_objectType;
+	
 };
 
 #endif

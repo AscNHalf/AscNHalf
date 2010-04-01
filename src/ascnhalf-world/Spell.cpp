@@ -2449,14 +2449,17 @@ void Spell::SendChannelUpdate(uint32 time)
 		u_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,0);
 		u_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
 	}
+	
+	if (!p_caster)
+		return;
 
 	/*WorldPacket data(MSG_CHANNEL_UPDATE, 18);*/
 	uint8 buf[20];
 	StackPacket data(MSG_CHANNEL_UPDATE, buf, 20);
 
-	data << m_caster->GetNewGUID();
-	data << time;
-	m_caster->SendMessageToSet(&data, true);	
+	data << p_caster->GetNewGUID();
+	data << time;	
+	p_caster->SendMessageToSet(&data, true);	
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -2799,10 +2802,7 @@ void Spell::HandleEffects(uint32 i)
 	if( m_spellInfo->Effect[i] < TOTAL_SPELL_EFFECTS)
 		(*this.*SpellEffectsHandler[m_spellInfo->Effect[i]])(i);
 	else
-		if(sLog.IsOutDevelopement())
-			printf("Unknown spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
-		else
-			DEBUG_LOG("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
+		DEBUG_LOG("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
 }
 
 void Spell::HandleAddAura(uint64 guid)
@@ -2846,6 +2846,12 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 6788;
 	else if( m_spellInfo->Id == 45438) // Cast spell Hypothermia
 		spellid = 41425;
+	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47549))	//Improved Holy Concentration
+		spellid = 47894;
+	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47551))	//Improved Holy Concentration
+		spellid = 47895;
+	else if (p_caster && m_spellInfo->Id == 34754 && p_caster->HasSpell(47552))	//Improved Holy Concentration
+		spellid = 47896;
 	else if( m_spellInfo->AdditionalAura )
 		spellid = m_spellInfo->AdditionalAura;
 	else if( m_spellInfo->NameHash == SPELL_HASH_HEROISM )
@@ -2994,9 +3000,9 @@ uint8 Spell::CanCast(bool tolerate)
 		
 		if( target )
 		{
-			//gm flags can't be targetted by ANY spell, not even their own self casts
-			if (target->IsPlayer() && (Player*)target->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_GM))
-				return SPELL_FAILED_BM_OR_INVISGOD;
+			//gm flags can't be targetted by ANY spell
+			if(target->IsPlayer() && (m_caster->GetTypeId() == TYPEID_ITEM ? TO_ITEM(m_caster)->GetOwner() != target : m_caster != target) && TO_PLAYER(target->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_GM)))
+				return SPELL_FAILED_GM_OR_INVISGOD;
 
 			//you can't mind control someone already mind controlled
 			if (m_spellInfo->NameHash == SPELL_HASH_MIND_CONTROL && target->GetAuraSpellIDWithNameHash(SPELL_HASH_MIND_CONTROL))
@@ -3153,7 +3159,7 @@ uint8 Spell::CanCast(bool tolerate)
 		}
 		
 		// Requires ShapeShift (stealth only atm, need more work)
-		if( m_spellInfo->RequiredShapeShift )
+		if( m_spellInfo->RequiredShapeShift && !p_caster->ignoreShapeShiftChecks )
 		{
 			if( m_spellInfo->RequiredShapeShift == (uint32)1 << (FORM_STEALTH-1) )
 			{
@@ -3184,6 +3190,9 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 			if( u_caster->disarmedShield && m_spellInfo->RequiredItemFlags && (m_spellInfo->RequiredItemFlags & (1 << INVTYPE_SHIELD)) )
 					return SPELL_FAILED_EQUIPPED_ITEM_CLASS ;
+					
+			if( u_caster->disarmedRanged && m_spellInfo->RequiredItemFlags && (m_spellInfo->RequiredItemFlags & (1 << INVTYPE_RANGED)) )
+					return SPELL_FAILED_EQUIPPED_ITEM_CLASS;
 		}
 
 		// check for cooldowns
@@ -4254,8 +4263,8 @@ int32 Spell::CalculateEffect(uint32 i,Unit* target)
 
 	int32 value = 0;
 
-	float basePointsPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
-	float randomPointsPerLevel = 1;
+	float basePointsPerLevel    = m_spellInfo->EffectRealPointsPerLevel[i];
+	float randomPointsPerLevel  = /*m_spellInfo->EffectDicePerLevel[i]*/1;
 
 	int32 basePoints = m_spellInfo->EffectBasePoints[i] + 1;
 	int32 randomPoints = m_spellInfo->EffectDieSides[i];
@@ -4303,8 +4312,8 @@ exit:*/
 			diff +=m_spellInfo->maxLevel;
 		else
 			diff +=u_caster->getLevel();
-		basePoints += float2int32(diff * basePointsPerLevel );
 		randomPoints += float2int32(diff * randomPointsPerLevel);
+		basePoints += float2int32(diff * basePointsPerLevel );
 	}
 
 	if(randomPoints <= 1)

@@ -3076,3 +3076,23 @@ void Object::CastSpell( uint64 targetGuid, uint32 SpellID, bool triggered )
 
 	CastSpell(targetGuid, ent, triggered);
 }
+
+void Object::GetNearPoint2D(float &x, float &y, float distance2d, float absAngle ) const
+{
+	x = GetPositionX() + (GetObjectSize() + distance2d) * cos(absAngle);
+	y = GetPositionY() + (GetObjectSize() + distance2d) * sin(absAngle);
+}
+
+void Object::GetNearPoint(Object const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle ) const
+{
+	GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
+	z = GetPositionZ();
+	UpdateGroundPositionZ(x, y, z);
+}
+
+void Object::UpdateGroundPositionZ(float x, float y, float &z) const
+{
+	float new_z = CollideInterface.GetHeight(x, y, z, true);
+	if(new_z > -100000.0f)
+		z = new_z+ 0.05f; // just to be sure that we are not a few pixel under the surface
+}

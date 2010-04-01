@@ -29,6 +29,7 @@ Unit::Unit()
 
 	memset(movement_packet, 0, sizeof(movement_packet));
 	movement_info.FallTime = 0;
+	m_RemoveEnvenom = 100;
 	m_ignoreArmorPct = 0.0f;
 	m_ignoreArmorPctMaceSpec = 0.0f;
 	m_fearmodifiers = 0;
@@ -39,10 +40,15 @@ Unit::Unit()
 	m_meleespell = 0;
 	m_meleespell_cn = 0;
 	m_addDmgOnce = 0;
+	m_BlockModPct = 0;
 	
 	m_silenced = 0;
 	disarmed = false;
 	disarmedShield = false;
+	disarmedRanged = false;
+	
+	m_CombatResult_Dodge = 0;
+	m_CombatResult_Parry = 0;
 
 	// Pet
 	m_isPet = false;
@@ -3129,10 +3135,20 @@ else
 			expertise_bonus += TO_PLAYER(this)->GetUInt32Value(PLAYER_OFFHAND_EXPERTISE);
 		expertise_bonus *= 0.25f;
 		dodge -= expertise_bonus;
-		if(dodge<0) dodge=0.0f;
+		if(dodge < 5) dodge = 5.0f;
 		parry -= expertise_bonus;
-		if(parry<0) parry=0.0f;
+		if(parry < 5) parry = 5.0f;
 	}
+	
+//--------------------------------by aura mods-------------------------
+	//Aura 248 SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+	dodge += m_CombatResult_Dodge;
+	if( dodge < 0 ) 
+		dodge = 5.0f;
+
+	//parry += m_CombatResult_Parry;
+	//if( parry < 0 ) 
+		//parry = 0.0f;
 	
 
 //--------------------------------by damage type and by weapon type-------------------------
@@ -5583,6 +5599,26 @@ void Unit::RemoveAurasByBuffType(uint32 buff_type, const uint64 &guid, uint32 sk
 	}
 }
 
+uint32 Unit::RemoveAuraCountByNameHash(uint32 namehash, uint32 count)
+{
+	uint32 res = 0;
+	for(uint32 x = 0; x < MAX_AURAS; x++)
+	{
+		if(m_auras[x])
+		{
+			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
+			{
+				m_auras[x]->Remove();
+				res++;
+
+				if( res == count )
+					break;
+			}
+		}
+	}
+	return res;
+}
+
 void Unit::RemoveAurasByBuffIndexType(uint32 buff_index_type, const uint64 &guid)
 {
 	for(uint32 x=0;x<MAX_AURAS;x++)
@@ -7260,4 +7296,42 @@ void Unit::RemoveBeacons()
 	//reset this fucker
 	BeaconCaster = NULLUNIT;
 	BeaconTarget = NULLUNIT;
+}
+
+void Unit::JumpTo(float speedXY, float speedZ, bool forward)
+{
+	float angle = forward ? 0 : M_PI;
+
+	if(GetTypeId() != TYPEID_UNIT)
+	{
+		float vcos = cos(angle+GetOrientation());
+		float vsin = sin(angle+GetOrientation());
+
+		WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
+		data.append(GetPackGUID());
+		data << uint32(0);										// Sequence
+		data << float(vcos);									// x direction
+		data << float(vsin);									// y direction
+		data << float(speedXY);									// Horizontal speed
+		data << float(-speedZ);									// Z Movement speed (vertical)
+
+		TO_PLAYER(this)->GetSession()->SendPacket(&data);
+	}
+}
+
+uint32 Unit::FindAuraCountByHash(uint32 HashName, uint32 maxcount)
+{
+	uint32 count = 0;
+
+	for( uint32 x = 0; x < MAX_AURAS; ++x )
+	{
+		if( m_auras[x] && ( m_auras[x]->GetSpellProto()->NameHash == HashName ) )
+		{
+			count++;
+			if( count == maxcount )
+				break;
+		}
+	}
+
+	return count;
 }

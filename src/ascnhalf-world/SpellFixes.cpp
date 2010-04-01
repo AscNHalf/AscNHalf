@@ -106,11 +106,12 @@ void DumpSpellsSQL()
 	{
 		sp = dbcSpell.LookupRow(x);
 		char query[4096];
-		std::string name = sp->Name;
-		std::string desc = sp->Description;
-		
-		replace(name.begin(), name.end(), '\'', ' ');
-		replace(desc.begin(), desc.end(), '\'', ' ');
+		char name[4096];
+		char desc[4096];
+		strcpy(name,sp->Name);
+		strcpy(desc,sp->Description);
+		for (int z=0;z<(int)strlen(name);z++) if (name[z] == '\'') name[z]=' ';
+		for (int z=0;z<(int)strlen(desc);z++) if (desc[z] == '\'') desc[z]=' ';
 		sprintf(query, "insert into spell(entry, name, description, attr, attrex, attrexb, "
 				"attrexc, attrexd, attrexe, procchance, procflags, "
 				"intr, auintr, grouptype0, "
@@ -121,7 +122,7 @@ void DumpSpellsSQL()
 				"%u, %u, 0x%x, "
 				"0x%x, 0x%x, %u, "
 				"%u, %u, %u);",
-				sp->Id, name.c_str(), desc.c_str(), sp->Attributes, sp->AttributesEx, sp->Flags3, 
+				sp->Id, name, desc, sp->Attributes, sp->AttributesEx, sp->Flags3,  
 				sp->Flags4, sp->Flags5, sp->Flags6, sp->procChance, sp->procFlags, 
 				sp->InterruptFlags, sp->AuraInterruptFlags, sp->SpellGroupType[0], 
 				sp->SpellGroupType[1], sp->SpellGroupType[2], sp->EffectBasePoints[0], 
@@ -385,6 +386,23 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 	{
 		switch(sp->Id)
 		{
+			case 71903: // Shadowmourne
+				{
+					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+					sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_PHYSICAL_ATTACK | PROC_ON_CRIT_ATTACK;
+					sp->procChance = 20;
+					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+					sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[1] = 71905;
+				}break;
+
+			case 71905:
+				{
+					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+					sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+				}break;
+
 			// Spell 1455 Proc Chance (Life Tap Rank 2:
 			case  1455:
 				sp->procChance = 100;
@@ -939,6 +957,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->EffectImplicitTargetA[0] = EFF_TARGET_SINGLE_FRIEND;
 				}break;
+				
+			// Penance triggered damage spells can hit player after target dies. Either change flags or interupt on death.
+			case 47666:
+			case 52998:
+			case 52999:
+			case 53000:
+				{
+						sp->EffectImplicitTargetA[0] = EFF_TARGET_SINGLE_ENEMY;
+				}break;
 
 			// Hymn of Hope
 			case 60931:
@@ -1081,16 +1108,22 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//Paladin - Art of War
 			case 53486:
 				{
-						sp->procFlags	=	PROC_ON_CRIT_ATTACK | PROC_ON_SPELL_CRIT_HIT;
-						sp->EffectApplyAuraName[2]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+						sp->procChance	=	100;
+						sp->Effect[2]	=	SPELL_EFFECT_APPLY_AURA;
+						sp->EffectApplyAuraName[2] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[2]	=	53489;
 				}break;
+				
 			case 53488:
 				{
-						sp->procFlags	=	PROC_ON_CRIT_ATTACK | PROC_ON_SPELL_CRIT_HIT;
-						sp->EffectApplyAuraName[2]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+						sp->procChance	=	100;
+						sp->Effect[2]	=	SPELL_EFFECT_APPLY_AURA;
+						sp->EffectApplyAuraName[2] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[2]	=	59578;
 				}break;
+				
 			case 53489:
 			case 59578:
 				{
@@ -1463,19 +1496,26 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//muhaha,	rewriting	Retaliation	spell	as old one :D
 			case  20230:
 					{
-						sp->Effect[0]	=	6; //aura
+						sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA; //aura
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[0]	=	22858; //evil	,	but	this is	good for us	:D
 						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM; //add procflag	here since this	was	not	processed	with the others	!
 					}break;
 		
 		
-			//"bloodthirst"	new	version	is ok	but	old	version	is wrong from	now	on :(
+			// Bloodthirst
 			case  23881:
 					{
-						sp->Effect[1]	=	64;	//cast on	us,	it is	good
-						sp->EffectTriggerSpell[1]	=	23885; //evil	,	but	this is	good for us	:D
+						sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[1] = 23880;
 					}break;
+				
+			// Other Bloodthirst
+//			case 23885:
+//				{
+//					sp->Effect[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+//					sp->EffectTriggerSpell[0]	=	23880;
+//				}break;
 		
 			case  23892:
 				{
@@ -1523,7 +1563,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 56336:
 			case 56337:
 				{
-						sp->procFlags = PROC_ON_TRAP_TRIGGER | PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CRIT_ATTACK | PROC_ON_PHYSICAL_ATTACK | PROC_ON_RANGED_ATTACK;
+						sp->procFlags = PROC_ON_TRAP_TRIGGER | PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CRIT_ATTACK | PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
 						sp->EffectSpellClassMask[0][0] = 0x00000004;
 						sp->EffectSpellClassMask[0][1] = sp->EffectSpellClassMask[1][1];						
 						sp->EffectSpellClassMask[1][0] = 0x0;
@@ -2572,6 +2612,29 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags	=	PROC_ON_ANY_DAMAGE_VICTIM	|	PROC_TARGET_SELF;
 				}break;
 		
+			// Warrior Charge
+			case 100:
+			case 6178:
+			case 11578:
+				{
+					sp->Effect[1]	=	SPELL_EFFECT_DUMMY;
+					sp->EffectMiscValue[1] = 1;
+				}break;
+
+			// Warrior Execute
+			case 5308:
+			case 20658:
+			case 20660:
+			case 20661:
+			case 20662:
+			case 25234:
+			case 25236:
+			case 47470:
+			case 47471:
+				{
+					sp->Effect[1]	=	SPELL_EFFECT_DUMMY;
+				}break;
+
 			//warrior	-	improved berserker rage
 			case  20500:
 			case  20501:
@@ -2602,15 +2665,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 							sp->EffectDieSides[1]= sp2->EffectDieSides[0];
 							//sp->EffectBaseDice[1]= sp2->EffectBaseDice[0] ;
 						}
-				}break;
-		
-			// Charge	-	Changing from	dummy	for	the	power	regen
-			case 100:
-			case 6178:
-			case 11578:
-				{
-					sp->Effect[1]	=	SPELL_EFFECT_ENERGIZE;
-					sp->EffectMiscValue[1] = 1;
 				}break;
 		
 			//warrior	-	Rampage
@@ -3650,7 +3704,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			// Shockwave
 			case 46968:
 				{
-						sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MELEE;
+					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MELEE;
+					sp->Effect[1] = SPELL_EFFECT_SCHOOL_DAMAGE;
+					sp->Effect[2] = SPELL_EFFECT_DUMMY;
 				}break;
 
 			// Blood Craze
@@ -3679,7 +3735,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->AuraInterruptFlags = AURA_INTERRUPT_ON_CAST_SPELL;
 				}break;
 
-			// blessing of sanctuary / greater blessing of sanctuary
+			// blessing of sanctuary / greater blessing of sanctuary, tooltip is wrong, they both give strength.
 			case 20911:
 			case 25899:
 				{
@@ -3689,8 +3745,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[1] = 57319;
 						sp->EffectImplicitTargetA[1] = 6;
-						sp->Effect[2] = SPELL_EFFECT_APPLY_AURA;
-						sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
+						sp->Effect[2] = SPELL_EFFECT_DUMMY;
 				}break;
 
 			// Seal	of Command - Holy	damage,	but	melee	mechanics	(crit	damage,	chance,	etc)
@@ -3890,6 +3945,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->AllowBackAttack = true;
 				}break;
+				
+			// Seal of Righteousness
+			case 21084:
+				{
+					sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	25742;
+					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
+					sp->procChance = 1000;
+				}break;
 
 			//////////////////////////////////////////
 			// HUNTER								//
@@ -3920,26 +3984,49 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//Two Handed Weapon Specialization and One Handed Weapon Specializacion
 			//Warrior and Paladin and Death Knight - this will change on 3.1.0
 			case 20111:
-			case 20112:
-			case 20113:
 			case 12163:
-			case 12711:
-			case 12712:
 			case 16538:
-			case 16539:
-			case 16540:
-			case 16541:
-			case 16542:
-			case 20196:
-			case 20197:
-			case 20198:
-			case 20199:
-			case 20200:
 			case 55107:
-			case 55108:
 				{
 					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
 					sp->EffectMiscValue[0] = 2;
+				}break;
+				
+			case 20112:
+			case 12711:
+			case 16539:
+			case 20196:
+			case 55108:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 4;
+				}break;
+				
+			case 20113:
+			case 12712:
+			case 16540:
+			{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 6;
+				}break;
+
+			case 20197:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 7;
+				}break;
+				
+			case 16541:
+			{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 8;
+				}break;
+				
+			case 16542:
+			case 20198:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 10;
 				}break;
 			//Frost Trap
 			case 13809:
@@ -4977,6 +5064,26 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 		
 			// Insert	boss spell fixes here
 			
+			// Prismatic Shield
+			case 40879:
+				{
+					switch(rand()%6)
+					{
+					case 0: sp->EffectTriggerSpell[0] = 40880; break;
+					case 1: sp->EffectTriggerSpell[0] = 40882; break;
+					case 2: sp->EffectTriggerSpell[0] = 40883; break;
+					case 3: sp->EffectTriggerSpell[0] = 40891; break;
+					case 4: sp->EffectTriggerSpell[0] = 40896; break;
+					case 5: sp->EffectTriggerSpell[0] = 40897; break;
+					}
+				}break;
+
+			// Dementia
+			case 41404:
+				{
+
+				}break;
+
 			// War Stomp
 			case 20549:
 				{
@@ -5419,21 +5526,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags = PROC_ON_SPELL_HIT_VICTIM;
 				}break;
 
-			case 71903: // Shadowmourne
+				//////////////////////////////////////////////////////////////////
+				//RACIALS
+				//////////////////////////////////////////////////////////////////
+
+			// Every Man For Himself
+			case 59752:
 				{
 					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
-					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
-					sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_PHYSICAL_ATTACK | PROC_ON_CRIT_ATTACK;
-					sp->procChance = 20;
-					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
-					sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
-					sp->EffectTriggerSpell[1] = 71905;
-				}break;
-
-			case 71905:
-				{
-					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
-					sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MECHANIC_IMMUNITY;
 				}break;
 		
 				//////////////////////////////////////////
@@ -5774,6 +5875,8 @@ void ApplyNormalFixes()
 					temp = sp->Effect[col1_swap];			sp->Effect[col1_swap] = sp->Effect[col2_swap] ;						sp->Effect[col2_swap] = temp;
 					temp = sp->EffectDieSides[col1_swap];	sp->EffectDieSides[col1_swap] = sp->EffectDieSides[col2_swap] ;		sp->EffectDieSides[col2_swap] = temp;
 					//temp = sp->EffectBaseDice[col1_swap];	sp->EffectBaseDice[col1_swap] = sp->EffectBaseDice[col2_swap] ;		sp->EffectBaseDice[col2_swap] = temp;
+					//ftemp = sp->EffectDicePerLevel[col1_swap];			sp->EffectDicePerLevel[col1_swap] = sp->EffectDicePerLevel[col2_swap] ;				sp->EffectDicePerLevel[col2_swap] = ftemp;
+					ftemp = sp->EffectRealPointsPerLevel[col1_swap];	sp->EffectRealPointsPerLevel[col1_swap] = sp->EffectRealPointsPerLevel[col2_swap] ;	sp->EffectRealPointsPerLevel[col2_swap] = ftemp;
 					temp = sp->EffectBasePoints[col1_swap];	sp->EffectBasePoints[col1_swap] = sp->EffectBasePoints[col2_swap] ;	sp->EffectBasePoints[col2_swap] = temp;
 					temp = sp->EffectMechanic[col1_swap];	sp->EffectMechanic[col1_swap] = sp->EffectMechanic[col2_swap] ;	sp->EffectMechanic[col2_swap] = temp;
 					temp = sp->EffectImplicitTargetA[col1_swap];	sp->EffectImplicitTargetA[col1_swap] = sp->EffectImplicitTargetA[col2_swap] ;	sp->EffectImplicitTargetA[col2_swap] = temp;
@@ -5816,7 +5919,7 @@ void ApplyNormalFixes()
 		/*if(sp->self_cast_only && !(sp->Attributes&64))
 			printf("SPELL SELF CAST ONLY: %s %u\n", sp->Name, sp->Id);*/
 
-		if(!strcmp(sp->Name, "AscNHalf") || !strcmp(sp->Name, "Stuck") || !strcmp(sp->Name, "Astral Recall"))
+		if(!strcmp(sp->Name, "Hearthstone") || !strcmp(sp->Name, "Stuck") || !strcmp(sp->Name, "Astral Recall"))
 			sp->self_cast_only = true;
 
 		sp->proc_interval = 0;//trigger at each event
@@ -5846,10 +5949,18 @@ void ApplyNormalFixes()
 
 		//Rogue: Posion time fix for 2.3
 		if( strstr( sp->Name, "Crippling Poison") && sp->Effect[0] == 54 ) //I, II
+		{
 			sp->EffectBasePoints[0] = 3599;
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 20;
+		}
 		if( strstr( sp->Name, "Mind-numbing Poison") && sp->Effect[0] == 54 ) //I,II,III
+		{
 			sp->EffectBasePoints[0] = 3599;
-		if( strstr( sp->Name, "Instant Poison") && sp->Effect[0] == 54 ) //I,II,III,IV,V,VI,VII    
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 20;
+		}
+		if( strstr( sp->Name, "Instant Poison") && sp->Effect[0] == 54 ) //I,II,III,IV,V,VI,VII
 			sp->EffectBasePoints[0] = 3599;
 		if( strstr( sp->Name, "Deadly Poison") && sp->Effect[0] == 54 ) //I,II,III,IV,V,VI,VII
 			sp->EffectBasePoints[0] = 3599;
@@ -5860,6 +5971,43 @@ void ApplyNormalFixes()
 
 		if( strstr( sp->Name, "Sharpen Blade") && sp->Effect[0] == 54 ) //All BS stones
 		    sp->EffectBasePoints[0] = 3599;
+			
+		//Rogue: Poison proc fix
+		if( strstr( sp->Name, "Crippling Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
+
+		if(strstr( sp->Name, "Mind-numbing Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
+
+		if(strstr( sp->Name, "Instant Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
+
+		if(strstr( sp->Name, "Deadly Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
+
+		if(strstr( sp->Name, "Wound Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
+
+		if(strstr( sp->Name, "Anesthetic Poison"))
+		{
+			sp->ProcsPerMinute = 5;
+			sp->procChance = 25;
+		}
 
 		//these mostly do not mix so we can use else 
 		// look for seal, etc in name

@@ -72,6 +72,7 @@ struct ProcTriggerSpell
 	uint64 caster;
 	uint32 procChance;
 	uint32 procFlags;
+	uint32 procFlagsExtra;
 	uint32 procCharges;
 	uint32 LastTrigger;
 	uint32 ProcType; //0=triggerspell/1=triggerclassspell
@@ -126,10 +127,13 @@ public:
 	INLINE Object* GetTarget() {return ((m_target != NULL && m_target->IsInWorld()) ? TO_OBJECT(m_target): NULLOBJ);}
 	INLINE Unit* GetUnitTarget() {return TO_UNIT(GetTarget());}
 	INLINE uint64 GetTargetGUID(){return m_target->GetGUID();}
-
+	
+	Aura * GetParentAura() const { return m_parentAura; }
+	uint64 const& GetSourceGUID() const { return m_sourceGuid; }
 
 
 	void RemoveIfNecessary();
+	bool DOTCanCrit;
 
 	Aura*  StrongerThat(Aura* aur);
 	void ApplyModifiers(bool apply);
@@ -143,7 +147,8 @@ public:
 	void AttemptDispel(Unit* pCaster, bool canResist = true);
 	bool m_dispelled;
 	uint32 m_resistPctChance;
-		
+	uint64 m_sourceGuid;
+	
 	INLINE uint32 GetTimeLeft()//in sec
 	{
 		if(m_duration==-1)return (uint32)-1;
@@ -206,6 +211,7 @@ public:
 	void SpellAuraModSkill(bool apply);
 	void SpellAuraModIncreaseSpeed(bool apply);
 	void SpellAuraModDecreaseSpeed(bool apply);
+	void SpellAuraModCombatResultChance(bool apply);
 	void SpellAuraModIncreaseHealth(bool apply);
 	void SpellAuraModIncreaseEnergy(bool apply);
 	void SpellAuraModShapeshift(bool apply);
@@ -218,7 +224,10 @@ public:
 	void SpellAuraProcTriggerDamage(bool apply);
 	void SpellAuraTrackCreatures(bool apply);
 	void SpellAuraTrackResources(bool apply);	
-	void SpellAuraModParryPerc(bool apply);	
+	void SpellAuraModParrySkill(bool apply);	
+	void SpellAuraModParryPerc(bool apply);		
+	void SpellAuraModDodgeSkill(bool apply);
+	void SpellAuraModBlockSkill(bool apply);	
 	void SpellAuraModDodgePerc(bool apply);	
 	void SpellAuraModBlockPerc(bool apply);
 	void SpellAuraModCritPerc(bool apply);
@@ -231,7 +240,7 @@ public:
 	void SpellAuraModCratureDmgDone(bool apply);
 	void SpellAuraPacifySilence(bool apply);
 	void SpellAuraModScale(bool apply);
-	void SpellAuraPeriodicHealthFunnel(bool apply);	
+	void SpellAuraPeriodicHealthFunnel(bool apply);
 	void SpellAuraPeriodicManaLeech(bool apply);
 	void SpellAuraModCastingSpeed(bool apply);
 	void SpellAuraFeignDeath(bool apply);
@@ -319,6 +328,7 @@ public:
 	void SpellAuraModStealthLevel(bool apply);
 	void SpellAuraModUnderwaterBreathing(bool apply);
 	void SpellAuraModReputationAdjust(bool apply);
+	void SpellAuraInitializeImages(bool apply);
 	void SpellAuraModIgnoreArmorPct(bool apply);
 	void SpellAuraNoPVPCredit(bool apply);
 	void SpellAuraModHealthRegInCombat(bool apply);
@@ -340,6 +350,7 @@ public:
 	void SpellAuraReduceEnemyRCritChance(bool apply);
 	void SpellAuraUseNormalMovementSpeed(bool apply);
 	void SpellAuraIncreaseTimeBetweenAttacksPCT(bool apply);
+	void SpellAuraMeleeHaste(bool apply);
 //	void SpellAuraIncreaseSpellDamageByInt(bool apply);
 //	void SpellAuraIncreaseHealingByInt(bool apply);
 	void SpellAuraIncreaseAllWeaponSkill(bool apply);
@@ -350,15 +361,18 @@ public:
 	void SpellAuraEnableFlight(bool apply);
 	void SpellAuraEnableFlightWithUnmountedSpeed(bool apply);
 	void SpellAuraIncreaseRageFromDamageDealtPCT(bool apply);
+	void SpellAuraModIncreaseFlightSpeed(bool apply);
 	void SpellAuraIncreaseFlightSpeed(bool apply);
 	void SpellAuraIncreaseMovementAndMountedSpeed(bool apply);
 	void SpellAuraIncreaseRating(bool apply);
 	void SpellAuraIncreaseCastTimePCT(bool apply);
 	void SpellAuraRegenManaStatPCT(bool apply);
 	void SpellAuraSpellHealingStatPCT(bool apply);
+	void SpellAuraPeriodicTriggerSpellWithValue(bool apply);
 	void SpellAuraAuraModInvisibilityDetection(bool apply);
 	void SpellAuraIncreaseMaxHealth(bool apply);
 	void SpellAuraSpiritOfRedemption(bool apply);
+	void SpellAuraIncreaseDebuffResistance(bool apply);
 	void SpellAuraIncreaseAttackerSpellCrit(bool apply);
 	void SpellAuraIncreaseRepGainPct(bool apply);
 	void SpellAuraIncreaseRangedAPStatPCT(bool apply);
@@ -367,6 +381,7 @@ public:
 	void SpellAuraFinishingMovesCannotBeDodged(bool apply);
 	void SpellAuraExpertise(bool apply);
 	void SpellAuraDrinkNew(bool apply);
+	void SpellAuraControlVehicle(bool apply);
 	void SpellAuraModSpellDamageFromAP(bool apply);
 	void SpellAuraModSpellHealingFromAP(bool apply);
 	void SpellAuraSkipCanCastCheck(bool apply);
@@ -374,6 +389,8 @@ public:
 	void SpellAuraModDamageTakenPctPerCaster(bool apply);
 	void SpellAuraSetPhase(bool apply);
 	void SpellAuraIncreaseAPByAttribute(bool apply);
+	void SpellAuraProcTriggerSpellWithValue(bool apply);
+	void SpellAuraConvertRune(bool apply);
 	void SpellAuraVehiclePassenger(bool apply);
 	void SpellAuraReduceEffectDuration(bool apply);
 	void SpellAuraNoReagent(bool apply);
@@ -384,8 +401,14 @@ public:
 	void SpellAuraRedirectThreat(bool apply);
 	void SpellAuraReduceAOEDamageTaken(bool apply);
 	void SpellAuraHasteRanged(bool apply);
+	void SpellAuraAllowDotHotCrit(bool apply);
 	void SpellAuraReflectInfront(bool apply);
 	void SpellAuraModPetTalentPoints(bool apply);
+	void SpellAuraNoAmmoRequiredForShot(bool apply);
+	void SpellAuraIgnoreShapeshift(bool apply);
+	void SpellAuraBlockMultipleDamage(bool apply);
+	void SpellAuraModAttackPowerOfArmor(bool apply);
+	void SpellAuraModCritChanceAll(bool apply);
 	
 	void UpdateAuraModDecreaseSpeed();
 
@@ -480,7 +503,9 @@ private:
 		return ( r<=square_r);
 	}
 	
+	Aura* m_parentAura;
 	Unit* m_target;
+	Player* p_target;
 	uint64 m_casterGuid;
 
 	uint32 timeleft;
@@ -494,6 +519,7 @@ private:
 	uint32 m_dynamicValue;
 
 protected:
+	Aura *parentAura;
 	uint32 m_casterfaction;
 
 	void SendInterrupted(uint8 result, Object* m_caster);
@@ -507,6 +533,9 @@ public:
 	int16 m_interrupted;
 
 	INLINE bool IsInterrupted() { return ( m_interrupted >= 0 ); }
+	
+public:
+	int32 m_amount;
 };
 
 typedef void(Aura::*pSpellAura)(bool apply);

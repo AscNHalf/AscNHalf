@@ -895,6 +895,8 @@ public:
 	bool HasAuraWithMechanic(uint32 mechanic);
 	bool HasPosAuraWithMechanic(uint32 mechanic);
 	bool HasNegAuraWithMechanic(uint32 mechanic);
+	uint32 RemoveAuraCountByNameHash(uint32 namehash, uint32 count);
+	uint32 FindAuraCountByHash(uint32 HashName, uint32 maxcount = 0);
 	
 	void GiveGroupXP(Unit* pVictim, Player* PlayerInGroup);
 
@@ -1069,7 +1071,13 @@ public:
 	uint32 MechanicsDispels[NUM_MECHANIC];
 	float MechanicsResistancesPCT[NUM_MECHANIC]; 
 	float ModDamageTakenByMechPCT[NUM_MECHANIC];
-	//int32 RangedDamageTakenPct; 
+	//int32 RangedDamageTakenPct;
+
+	//Combat Mod Results:
+	int32 m_CombatResult_Dodge;
+	int32 m_CombatResult_Parry; //is not implented yet
+	
+	int8 m_RemoveEnvenom;
 
 	//SM
 	int32 * SM[SPELL_MODIFIERS][2]; // 0 = flat, 1 = percent
@@ -1182,6 +1190,7 @@ public:
 	int32 m_rooted;
 	bool disarmed;
 	bool disarmedShield;
+	bool disarmedRanged;
 	uint64 m_detectRangeGUID[5];
 	int32  m_detectRangeMOD[5];
 	// Affect Speed
@@ -1418,6 +1427,13 @@ protected:
 	uint32 m_charmtemp;
 
 	std::map<uint32, SpellEntry*> m_DummyAuras;
+	
+public:
+	void JumpTo(float speedXY, float speedZ, bool forward = true);
+	
+protected:
+	uint32 m_BlockModPct;
+	
 };
 
 #endif

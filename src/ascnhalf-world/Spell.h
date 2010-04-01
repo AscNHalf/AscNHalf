@@ -96,6 +96,9 @@ Range ID|Range|Description
 
 enum SUMMON_TYPE
 {
+	SUMMON_TYPE_NONE		= 0,
+    SUMMON_TYPE_PET			= 1,
+    SUMMON_TYPE_MINION      = 3,
 	SUMMON_TYPE_POSSESSED = 65,
 	SUMMON_TYPE_GUARDIAN = 61,
 	SUMMON_TYPE_WILD = 64,
@@ -106,8 +109,12 @@ enum SUMMON_TYPE
 	SUMMON_TYPE_TOTEM_4 = 83,
 	SUMMON_TYPE_SUMMON = 67,
 	SUMMON_TYPE_CRITTER = 41,
+	SUMMON_TYPE_CREATE_TOTEM = 121,
 	SUMMON_TYPE_GHOUL = 829,
+	SUMMON_TYPE_PHANTASM = 1021,
 	SUMMON_TYPE_LIGHTWELL = 1141,
+	SUMMON_TYPE_VEHICLE     = 1142,
+    SUMMON_TYPE_VEHICLE2    = 1143,
 };
 
 //wooohooo, there are 19 spells that actually require to add a proccounter for these 
@@ -760,7 +767,7 @@ enum SpellEffects
     SPELL_EFFECT_UNKNOWN23,                 //    143
 	SPELL_EFFECT_UNKNOWN24,                 //    144
 	SPELL_EFFECT_UNKNOWN25,                 //    145
-	SPELL_EFFECT_UNKNOWN26,                 //    146
+	SPELL_EFFECT_ACTIVATE_RUNE,             //    146
 	SPELL_EFFECT_UNKNOWN27,                 //    147
 	SPELL_EFFECT_UNKNOWN28,                 //    148
 	SPELL_EFFECT_UNKNOWN29,                 //    149
@@ -1475,7 +1482,7 @@ typedef enum SpellEffectTarget
 	EFF_TARGET_SMALL_AOE								= 88, //even smaller aoe circle
 	EFF_TARGET_NONCOMBAT_PET							= 90, //target non-combat pet :P
 	EFF_TARGET_IN_FRONT_OF_CASTER2						= 104, // Used in 3.2/3.3
-	TOTAL_SPELL_TARGET									= 105 // note: all spells with target type's > 101 are test spells
+	TOTAL_SPELL_TARGET									= 111 // note: all spells with target type's > 111 are test spells
 } SpellEffectTarget;
 
 INLINE bool IsFlyingSpell(SpellEntry *sp)
@@ -1658,6 +1665,18 @@ public:
 
 	void CreateItem(uint32 itemId);
 
+	struct TargetInfo
+	{
+		uint64 targetGUID;
+		uint64 timeDelay;
+		SPELL_LOG missCondition:8;
+		SPELL_LOG reflectResult:8;
+		uint8  effectMask:8;
+		bool   processed:1;
+	};
+	std::list<TargetInfo> m_UniqueTargetInfo;
+	uint8 m_needAliveTargetMask;	// Mask req. alive targets
+
 	// Effect Handlers
 	void SpellEffectNULL(uint32 i);
 	void SpellEffectInstantKill(uint32 i);
@@ -1744,6 +1763,7 @@ public:
 	void SpellEffectApplyPetAura(uint32 i);
 	void SpellEffectDummyMelee(uint32 i);
 	void SpellEffectPlayerPull( uint32 i );
+	void SpellEffectReduceThreatPercent( uint32 i );
 	void SpellEffectSpellSteal(uint32 i);
 	void SpellEffectProspecting(uint32 i);
 	void SpellEffectOpenLockItem(uint32 i);
@@ -1759,11 +1779,14 @@ public:
 	void SpellEffectEnvironmentalDamage(uint32);
 	void SpellEffectLearnPetSpell(uint32 i);
 	void SpellEffectEnchantHeldItem(uint32 i);
+	void SpellEffectSummonPhantasm(uint32 i);
 	void SpellEffectAddHonor(uint32 i);
 	void SpellEffectSpawn(uint32 i);
 	void SpellEffectApplyAura128(uint32 i);
 	void SpellEffectTriggerSpellWithValue(uint32 i);
+	void SpellEffectActivateRune(uint32 i);
 	void SpellEffectMegaJump(uint32 i);
+	void SpellEffectJump2(uint32 i);
 	void SpellEffectMilling(uint32 i);
 	void SpellEffectAddPrismaticSocket(uint32 i);
 	void SpellEffectTitanGrip(uint32 i);
@@ -1949,6 +1972,16 @@ public:
 		}
 
 		return Rad[i];
+	}
+	
+	INLINE bool IsPassiveSpell(uint32 spellId)
+ 	{
+		SpellEntry const *spellInfo = dbcSpell.LookupEntry(spellId);
+		if (!spellInfo)
+			return false;
+		if(spellInfo->Attributes & ATTRIBUTES_PASSIVE)
+			return true;
+		return false;
 	}
 
 	INLINE static uint32 GetBaseThreat(uint32 dmg)

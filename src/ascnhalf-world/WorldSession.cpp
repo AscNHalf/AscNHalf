@@ -921,6 +921,8 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_SET_TITLE].handler								= &WorldSession::HandleSetVisibleRankOpcode;
 	WorldPacketHandlers[CMSG_COMPLAIN].handler								= &WorldSession::HandleReportSpamOpcode;
 	WorldPacketHandlers[CMSG_WORLD_STATE_UI_TIMER_UPDATE].handler			= &WorldSession::HandleWorldStateUITimerUpdate;
+	
+	WorldPacketHandlers[CMSG_PET_CAST_SPELL].handler						= &WorldSession::HandleAddDynamicTargetOpcode;
 
 	// Arenas
 	WorldPacketHandlers[CMSG_ARENA_TEAM_QUERY].handler						= &WorldSession::HandleArenaTeamQueryOpcode;
@@ -975,7 +977,6 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_EJECT_PASSENGER].handler 						= &WorldSession::HandleEjectPassengerOpcode;
 
 	// Minion Cast Spell
-	WorldPacketHandlers[CMSG_PET_CAST_SPELL].handler						= &WorldSession::HandleCharmForceCastSpell;
 	/*WorldPacketHandlers[CMSG_REQUEST_VEHICLE_SWITCH_SEAT].handler			= &WorldSession::HandleRequestSeatChange;
 	WorldPacketHandlers[CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE].handler	= &WorldSession::HandleRequestSeatChange;*/
 }

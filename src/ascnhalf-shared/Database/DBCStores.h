@@ -681,7 +681,7 @@ struct SummonPropertiesEntry
 	uint32 factionId;
 	uint32 type;
 	uint32 slot;
-	uint32 unk2;
+	uint32 flags;
 };
 
 // Struct for the entry in Spell.dbc

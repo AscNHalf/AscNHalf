@@ -351,6 +351,13 @@ struct RandHeroicAndDungeon
 	// In 3.3.0, first random heroics give 2 Emblem of Frost(49426).
 };
 
+enum ModType
+{
+	MOD_MELEE	= 0,
+	MOD_RANGED	= 1,
+	MOD_SPELL	= 2
+};
+
 struct spells
 {
 	uint16  spellId;
@@ -566,14 +573,39 @@ enum FactionRating
 	REVERED,
 	EXALTED
 };
+
 enum RuneTypes
 {
 	RUNE_TYPE_BLOOD			= 0,
 	RUNE_TYPE_FROST			= 1,
 	RUNE_TYPE_UNHOLY		= 2,
 	RUNE_TYPE_DEATH			= 3,
-	RUNE_TYPE_RECHARGING	= 4
+	RUNE_TYPE_RECHARGING	= 4,
+    NUM_RUNE_TYPES  = 5
 };
+
+struct RuneInfo
+{
+	uint8 BaseRune;
+	uint8 CurrentRune;
+	uint8 Cooldown;
+};
+
+struct Runes
+{
+	RuneInfo runes[6];
+	uint8 runeState;					// mask of available runes
+	RuneTypes lastUsedRune;
+
+	void SetRuneState(uint8 index, bool set = true)
+	{
+		if(set)
+			runeState |= (1 << index);			// usable
+		else
+			runeState &= ~(1 << index);			// on cooldown
+	}
+};
+
 struct FactionReputation
 {
 	int32 standing;
@@ -892,6 +924,7 @@ public:
 
 	bool ok_to_remove;
 	uint64 m_spellIndexTypeTargets[NUM_SPELL_TYPE_INDEX];
+	uint32 flying_aura;
 	void OnLogin();//custom stuff on player login.
 	void EquipInit(PlayerCreateInfo *EquipInfo);
 	void RemoveSpellTargets(uint32 Type);
@@ -1302,6 +1335,7 @@ public:
 	void DestroyForPlayer( Player* target ) const;
 	void SetTalentHearthOfWildPCT(int value){hearth_of_wild_pct=value;}
 	void EventTalentHeartOfWildChange(bool apply);
+	void EventTalentHearthOfWildChange(bool apply);
 
 	std::list<LoginAura> loginauras;
 
@@ -1364,6 +1398,7 @@ public:
 	float SpellCrtiticalStrikeRatingBonus;
 	float SpellHasteRatingBonus;
 	void UpdateAttackSpeed();
+	void ModAttackSpeed( int32 mod, ModType type );
 	void UpdateChances();
 	void UpdateStats();
 	void UpdateHit(int32 hit);
@@ -1543,6 +1578,7 @@ public:
 	uint32 ResistanceModPctNeg[7];
 	float m_resist_critical[2];//when we are a victim we can have talents to decrease chance for critical hit. This is a negative value and it's added to critchances
 	float m_resist_hit[3]; // 0 = melee; 1= ranged; 2=spells
+	float m_attack_speed[3];
 	float SpellDmgDoneByAttribute[5][7];
 	float SpellHealDoneByAttribute[5][7];
 	uint32 m_modphyscritdmgPCT;
@@ -2159,6 +2195,7 @@ public:
 
 	bool m_passOnLoot;
 	bool m_changingMaps;
+	bool ignoreShapeShiftChecks;
 
 	/************************************************************************/
 	/* SOCIAL                                                               */
@@ -2256,7 +2293,19 @@ public:
 
 	// Runes
 	uint8 m_runes[6];
+	Runes *m_rune;
 	uint8 m_runemask;
+	
+	uint8 GetRunesState() const { return m_rune->runeState; }
+	RuneTypes GetBaseRune(uint8 index) const { return RuneTypes(m_rune->runes[index].BaseRune); }
+	RuneTypes GetCurrentRune(uint8 index) const { return RuneTypes(m_rune->runes[index].CurrentRune); }
+	uint8 GetRuneCooldown(uint8 index) const { return m_rune->runes[index].Cooldown; }
+	RuneTypes GetLastUsedRune() { return m_rune->lastUsedRune; }
+	void SetLastUsedRune(RuneTypes type) { m_rune->lastUsedRune = type; }
+	void SetBaseRune(uint8 index, uint8 baseRune) { m_rune->runes[index].BaseRune = baseRune; }
+	void SetCurrentRune(uint8 index, uint8 currentRune) { m_rune->runes[index].CurrentRune = currentRune; }
+	void SetRuneCooldown(uint8 index, uint8 cooldown) { m_rune->runes[index].Cooldown = cooldown; m_rune->SetRuneState(index, (cooldown == 0) ? true : false); }
+	void InitRunes();
 
 	void ConvertRune(uint8 index, uint8 value);
 	void ScheduleRuneRefresh(uint8 index, bool forceDeathRune = false);

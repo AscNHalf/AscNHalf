@@ -182,7 +182,7 @@ enum SpellCastError
 	SPELL_FAILED_TOO_SHALLOW                                     = 156,
 	SPELL_FAILED_TARGET_NOT_IN_SANCTUARY                         = 157,
 	SPELL_FAILED_TARGET_IS_TRIVIAL                               = 158,
-	SPELL_FAILED_BM_OR_INVISGOD                                  = 159,
+	SPELL_FAILED_GM_OR_INVISGOD                                  = 159,
 	SPELL_FAILED_EXPERT_RIDING_REQUIREMENT                       = 160,
 	SPELL_FAILED_ARTISAN_RIDING_REQUIREMENT                      = 161,
 	SPELL_FAILED_NOT_IDLE                                        = 162,

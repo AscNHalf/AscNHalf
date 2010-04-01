@@ -38,6 +38,7 @@ Player::Player( uint32 guid )
 	SetUInt32Value( OBJECT_FIELD_GUID, guid);
 	m_wowGuid.Init(GetGUID());
 	m_deathRuneMasteryChance = 0;
+	ignoreShapeShiftChecks = false;
 }
 
 void Player::Init()
@@ -99,6 +100,11 @@ void Player::Init()
 	m_hitfrommeleespell = 0;
 	m_meleeattackspeedmod = 1.0f;
 	m_rangedattackspeedmod = 1.0f;
+	
+	for(int8 i = 0; i < 3; i++ )
+	{
+		m_attack_speed[i]	= 1.0f;
+	}
 
 	m_cheatDeathRank = 0;
 
@@ -479,6 +485,28 @@ void Player::Init()
 	m_randhad = NULL;
 
 	Unit::Init();
+}
+
+void Player::InitRunes()
+{
+	if(getClass() != 6)
+		return;
+
+	m_rune = new Runes;
+
+	m_rune->runeState = 0;
+	m_rune->lastUsedRune = RUNE_TYPE_BLOOD;
+
+	for(uint32 i = 0; i < 6; ++i)
+	{
+		SetBaseRune(i, baseRunes[i]);			// init base types
+		SetCurrentRune(i, baseRunes[i]);		// init current types
+		SetRuneCooldown(i, 0);					// reset cooldowns
+		m_rune->SetRuneState(i);
+	}
+
+	for(uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+		SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
 }
 
 void Player::OnLogin()
@@ -5259,6 +5287,20 @@ void Player::UpdateChanceFields()
 	{
 		SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + i, SpellCritChanceSchool[i]+spellcritperc);
 	}
+}
+
+void Player::ModAttackSpeed( int32 mod, ModType type )
+{
+	if( mod == 0 )
+		return;
+
+	if( mod > 0 )
+		m_attack_speed[ type ] *= 1.0f + ( ( float )mod / 100.0f );
+	else
+		m_attack_speed[ type ] /= 1.0f + ( ( float )( - mod ) / 100.0f );
+
+	if( type == MOD_SPELL )
+		SetFloatValue( UNIT_MOD_CAST_SPEED, 1.0f / ( m_attack_speed[ MOD_SPELL ] * SpellHasteRatingBonus ) );
 }
 
 void Player::UpdateAttackSpeed()
@@ -10805,7 +10847,7 @@ void Player::RecalculateHonor()
 }
 
 //wooot, crapy code rulez.....NOT
-void Player::EventTalentHeartOfWildChange(bool apply)
+void Player::EventTalentHearthOfWildChange(bool apply)
 {
 	if(!hearth_of_wild_pct)
 		return;
@@ -10819,7 +10861,7 @@ void Player::EventTalentHeartOfWildChange(bool apply)
 	uint32 SS=GetShapeShift();
 
 	//increase stamina if :
-	if(SS == FORM_BEAR || SS == FORM_DIREBEAR)
+	if(SS==FORM_BEAR || SS==FORM_DIREBEAR)
 	{
 		TotalStatModPctPos[STAT_STAMINA] += tval; 
 		CalcStat(STAT_STAMINA);	

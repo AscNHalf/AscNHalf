@@ -512,7 +512,7 @@ protected:
 	void HandleCancelAuraOpcode(WorldPacket& recvPacket);
 	void HandleCancelChannellingOpcode(WorldPacket& recvPacket);
 	void HandleCancelAutoRepeatSpellOpcode(WorldPacket& recv_data);
-	void HandleCharmForceCastSpell(WorldPacket & recvPacket);
+	void HandleAddDynamicTargetOpcode(WorldPacket & recvPacket);
 
 	/// Skill opcodes (SkillHandler.spp)
 	//void HandleSkillLevelUpOpcode(WorldPacket& recvPacket);
