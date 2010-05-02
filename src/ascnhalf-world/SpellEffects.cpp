@@ -6820,8 +6820,21 @@ void Spell::SpellEffectActivateObject(uint32 i) // Activate Object
 
 void Spell::SpellEffectWMODamage(uint32 i) 
 { 
- 	if(gameObjTarget && gameObjTarget->GetInfo()->Type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING) 
-       gameObjTarget->TakeDamage((uint32)damage);
+ 	if(gameObjTarget && gameObjTarget->GetInfo()->Type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+	{
+		gameObjTarget->TakeDamage((uint32)damage);
+		
+		WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8+8+8+4+4);
+		data.append(gameObjTarget->GetPackGUID());
+        data.append(u_caster->GetPackGUID());
+        if (u_caster->IsPlayer() && TO_PLAYER(u_caster)->m_CurrentCharm)
+            data.append(u_caster->GetPackGUID());
+        else
+            data << uint8(0);
+        data << uint32(damage);
+        data << uint32(m_spellInfo->Id);
+        gameObjTarget->SendMessageToSet(&data, false);
+	}		
 } 
 void Spell::SpellEffectWMORepair(uint32 i) 
 { 
