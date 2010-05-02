@@ -533,7 +533,7 @@ void GameObject::UseFishingNode(Player* player)
 	if( Rand(((player->_GetSkillLineCurrent( SKILL_FISHING, true ) - minskill) * 100) / maxskill) )
 	{
 		lootmgr.FillFishingLoot( &m_loot, zone );
-		player->SendLoot( GetGUID(), LOOT_FISHING );
+		player->SendLoot( GetGUID(), GetMapId(), LOOT_FISHING );
 		EndFishing( player, false );
 	}
 	else // Failed
@@ -849,7 +849,8 @@ void GameObject::TakeDamage(uint32 ammount)
 		{
 			RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
+			if(disp)
+				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
 
 
 			sHookInterface.OnDestroyBuilding(TO_GAMEOBJECT(this));
@@ -858,15 +859,11 @@ void GameObject::TakeDamage(uint32 ammount)
 		{
 			/*if(GetUInt32Value(GAMEOBJECT_DISPLAYID) != disp->GetDisplayId(0))
 			{*/
+			if(disp)
 				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
 			/*}*/
 			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
 		}
-		/*else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.3) && Health > 0)
-		{
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(4));	// smoke
-			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
-		}*/
 	}
 	else if(!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED) && !HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
 	{
@@ -878,13 +875,15 @@ void GameObject::TakeDamage(uint32 ammount)
 		else if(Health <= ((pInfo->SpellFocus + pInfo->sound5)*0.6) && Health > 0 /*&& Health >= (pInfo->sound5)*0.3*/)
 		{
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
+			if(disp)
+				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(0));				// damaged
 			sHookInterface.OnDamageBuilding(TO_GAMEOBJECT(this));
 		}
 		else if(Health <= 0)
 		{
 			SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-			SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
+			if(disp)
+				SetUInt32Value(GAMEOBJECT_DISPLAYID, disp->GetDisplayId(1));	// destroyed
 
 			sHookInterface.OnDestroyBuilding(TO_GAMEOBJECT(this));
 		}

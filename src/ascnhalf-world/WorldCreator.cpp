@@ -36,12 +36,13 @@ void InstanceMgr::Load(TaskList * l)
 {
 	new FormationMgr;
 	new WorldStateTemplateManager;
+	QueryResult *result;
 
 	sWorldStateTemplateManager.LoadFromDB();
 
 	// Create all non-instance type maps.
-	QueryResult *result = CharacterDatabase.Query( "SELECT MAX(id) FROM instances" );
-	if( result )
+	result = CharacterDatabase.Query( "SELECT MAX(id) FROM instances" );
+	if(result)
 	{
 		m_InstanceHigh = result->Fetch()[0].GetUInt32()+1;
 		delete result;
@@ -759,9 +760,9 @@ void InstanceMgr::BuildXMLStats(char * m_file)
 
 void InstanceMgr::_LoadInstances()
 {
-	MapInfo * inf;
-	Instance * in;
-	QueryResult * result;
+	MapInfo* inf;
+	Instance* in;
+	QueryResult* result;
 
 	// clear any instances that have expired.
 	Log.Notice("InstanceMgr", "Deleting Expired Instances...");

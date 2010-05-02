@@ -822,6 +822,9 @@ void Pet::GiveXP( uint32 xp )
 
 	if( getLevel() >= m_Owner->getLevel() )		//pet do not get xp if its level >= owners level
 		return;
+		
+	if(m_Owner->m_XPoff)
+		return;
 
 	xp += m_uint32Values[UNIT_FIELD_PETEXPERIENCE];
 	uint32 nxp = m_uint32Values[UNIT_FIELD_PETNEXTLEVELEXP];

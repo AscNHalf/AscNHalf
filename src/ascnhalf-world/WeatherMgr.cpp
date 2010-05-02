@@ -121,10 +121,12 @@ void WeatherMgr::LoadFromDB()
 	if( !result )
 		return;
 
+	Field *fields = result->Fetch();
+	WeatherInfo* wi = NULL;
 	do
 	{
-		Field *fields = result->Fetch();
-		WeatherInfo* wi(new WeatherInfo);
+		fields = result->Fetch();
+		wi = new WeatherInfo();
 		wi->m_zoneId = fields[0].GetUInt32();
 		wi->m_effectValues[0] = fields[1].GetUInt32();  // high_chance
 		wi->m_effectValues[1] = fields[2].GetUInt32();  // high_type

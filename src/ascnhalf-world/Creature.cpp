@@ -281,7 +281,9 @@ void Creature::GenerateLoot()
 		return;
 	}
 
-	lootmgr.FillCreatureLoot(&m_loot,GetEntry(), m_mapMgr ? (m_mapMgr->iInstanceMode > 0 ? true : false) : false);
+	MapEntry* map = dbcMap.LookupEntry(GetMapId());
+	uint8 difficulty = (m_mapMgr ? (m_mapMgr->iInstanceMode) : 0);
+	lootmgr.FillCreatureLoot(&m_loot, GetEntry(), difficulty);
 
 	// -1 , no gold; 0 calculated according level; >0 coppercoins
 	if((proto->minmoney < 1 || proto->maxmoney < 1) && (proto->minmoney != 0 || proto->maxmoney !=0))

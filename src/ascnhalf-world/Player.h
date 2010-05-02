@@ -269,6 +269,14 @@ enum PlayerSpeedType
     FLY	            = 6,
 };
 
+enum LFGroleflags
+{
+	LEADER		= 1,
+	TANK		= 2,
+	HEALER		= 4,
+	DAMAGE		= 8
+};
+
 enum Standing
 {
     STANDING_HATED,
@@ -934,7 +942,7 @@ public:
  	void SendDungeonDifficulty();
 	void SendRaidDifficulty();
 
-	void AddToWorld();
+	void AddToWorld(bool loggingin = false);
 	void AddToWorld(MapMgr* pMapMgr);
 	void RemoveFromWorld();
 	bool Create ( WorldPacket &data );
@@ -1030,9 +1038,7 @@ public:
 	uint16				FindQuestSlot(uint32 questid);
 
 	//Quest related variables
-	uint32 m_questbarrier1[25];
 	QuestLogEntry*		m_questlog[25];
-	uint32 m_questbarrier2[25];
 	std::set<uint32>	m_QuestGOInProgress;
 	std::set<uint32>	m_removequests;
 	std::set<uint32>	m_finishedQuests;
@@ -1305,7 +1311,7 @@ public:
 
 	INLINE const uint64& GetLootGUID() const { return m_lootGuid; }
 	INLINE void         SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
-	void                SendLoot(uint64 guid,uint8 loot_type);
+	void                SendLoot(uint64 guid, uint32 mapid, uint8 loot_type);
 	// loot variables
 	uint64              m_lootGuid;
 	uint64              m_currentLoot;
@@ -1424,6 +1430,7 @@ public:
 	void SendTalentResetConfirm();
 	void SendPetUntrainConfirm();
 	void SendDualTalentConfirm();
+	void SendXPToggleConfirm();
 	uint32 GetTalentResetTimes() { return m_talentresettimes; }
 	INLINE void SetTalentResetTimes(uint32 value) { m_talentresettimes = value; }
 	void SetPlayerStatus(uint8 pStatus) { m_status = pStatus; }
@@ -1718,6 +1725,7 @@ public:
 	uint8 LfgType[3];
 	uint16 LfmDungeonId;
 	uint8 LfmType;
+	uint32 roleflags;
 	bool m_Autojoin;
 	bool m_AutoAddMem;
 	void StopMirrorTimer(uint32 Type);
@@ -1855,6 +1863,8 @@ public:
 	stringstream LoadAuras;
 	bool resend_speed;
 	bool rename_pending;
+	bool m_XPoff;
+	bool customizable;
 	uint32 iInstanceType;
 	uint32 iRaidType;
 	INLINE void SetName(string& name) { m_name = name; }

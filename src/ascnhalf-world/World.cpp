@@ -470,15 +470,7 @@ bool World::SetInitialWorldSettings()
 	ApplyNormalFixes();
 
 	MAKE_TASK(ObjectMgr, LoadAchievements);
-	if(Config.MainConfig.GetBoolDefault("Startup", "BackgroundWaypointLoading", false))
-	{
-		ThreadPool.ExecuteTask(new BasicTaskExecutor(new CallbackP0<ObjectMgr>(ObjectMgr::getSingletonPtr(), &ObjectMgr::LoadCreatureWaypoints), 
-			BTE_PRIORITY_MED));
-	}
-	else
-	{
-		MAKE_TASK(ObjectMgr, LoadCreatureWaypoints);
-	}
+	MAKE_TASK(ObjectMgr, LoadCreatureWaypoints);
 	MAKE_TASK(ObjectMgr, LoadTrainers);
 	MAKE_TASK(ObjectMgr, LoadTotemSpells);
 	MAKE_TASK(ObjectMgr, LoadSpellOverride);
@@ -490,6 +482,7 @@ bool World::SetInitialWorldSettings()
 	MAKE_TASK(ObjectMgr, LoadPetLevelupSpellMap);
 	MAKE_TASK(AddonMgr,  LoadFromDB);
 	MAKE_TASK(ObjectMgr, SetHighestGuids);
+	MAKE_TASK(ObjectMgr, ListGuidAmounts);
 	MAKE_TASK(ObjectMgr, LoadReputationModifiers);
 	MAKE_TASK(ObjectMgr, LoadMonsterSay);
 	MAKE_TASK(WeatherMgr,LoadFromDB);
@@ -558,13 +551,13 @@ bool World::SetInitialWorldSettings()
 		Log.Notice("World", "Backgrounding loot loading...");
 
 		// loot background loading in a lower priority thread.
-		ThreadPool.ExecuteTask(new BasicTaskExecutor(new CallbackP0<LootMgr>(LootMgr::getSingletonPtr(), &LootMgr::LoadCreatureLoot), 
+		ThreadPool.ExecuteTask(new BasicTaskExecutor(new CallbackP0<LootMgr>(LootMgr::getSingletonPtr(), &LootMgr::LoadDelayedLoot), 
 			BTE_PRIORITY_LOW));
 	}
 	else
 	{
 		Log.Notice("World", "Loading loot in foreground...");
-		lootmgr.LoadCreatureLoot();
+		lootmgr.LoadDelayedLoot();
 	}
 
 #ifndef CLUSTERING
@@ -593,24 +586,27 @@ bool World::SetInitialWorldSettings()
 	uint32 talent_pos;
 	uint32 talent_class;
 
-    for( uint32 i = 0; i < dbcTalent.GetNumRows(); ++i )
-    {
-        TalentEntry const* talent_info = dbcTalent.LookupRow( i );
-		if( talent_info == NULL )
+   TalentEntry const* talent_info = NULL;
+	TalentTabEntry const* tab_info = NULL;
+	for( uint32 i = 0; i < dbcTalent.GetNumRows(); ++i )
+	{
+		talent_info = dbcTalent.LookupRow( i );
+		if(!talent_info)
 			continue;
 
-		TalentTabEntry const* tab_info = dbcTalentTab.LookupEntry( talent_info->TalentTree );
-		if( tab_info == NULL )
+		tab_info = dbcTalentTab.LookupEntry( talent_info->TalentTree );
+
+		if(!tab_info)
 			continue;
 
         talent_max_rank = 0;
-        for( uint32 j = 5; j > 0; --j )
-        {
-            if( talent_info->RankID[j - 1] )
-            {
-                talent_max_rank = j;
-                break;
-            }
+		for( uint32 j = 5; j > 0; --j )
+		{
+			if( talent_info->RankID[j - 1] )
+			{
+				talent_max_rank = j;
+				break;
+			}
 		}
 
 		InspectTalentTabBit[( talent_info->Row << 24 ) + ( talent_info->Col << 16 ) + talent_info->TalentID] = talent_max_rank;
@@ -619,7 +615,7 @@ bool World::SetInitialWorldSettings()
 
 	for( uint32 i = 0; i < dbcTalentTab.GetNumRows(); ++i )
 	{
-		TalentTabEntry const* tab_info = dbcTalentTab.LookupRow( i );
+		tab_info = dbcTalentTab.LookupRow(i);
 		if( tab_info == NULL )
 			continue;
 
@@ -636,7 +632,7 @@ bool World::SetInitialWorldSettings()
 		for( std::map< uint32, uint32 >::iterator itr = InspectTalentTabBit.begin(); itr != InspectTalentTabBit.end(); ++itr )
 		{
 			uint32 talent_id = itr->first & 0xFFFF;
-			TalentEntry const* talent_info = dbcTalent.LookupEntry( talent_id );
+			talent_info = dbcTalent.LookupEntry( talent_id );
 			if( talent_info == NULL )
 				continue;
 

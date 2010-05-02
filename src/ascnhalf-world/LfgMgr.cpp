@@ -262,7 +262,7 @@ void LfgMgr::UpdateLfgQueue(uint32 LfgDungeonId)
 
 void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
 {
-	if( plr == NULL )
+	/*if( plr == NULL )
 		return;
 
 	if( Dungeon >= MAX_DUNGEONS )
@@ -351,7 +351,7 @@ void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
 	data.put(8, count);
 	data.put(12, count);
 
-    plr->GetSession()->SendPacket(&data);
+    plr->GetSession()->SendPacket(&data);*/
 }
 
 void LfgMgr::SetPlayerInLfmList(Player* pl, uint32 LfgDungeonId)

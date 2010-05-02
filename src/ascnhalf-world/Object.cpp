@@ -221,6 +221,11 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, Player* target)
 		updatetype = UPDATETYPE_CREATE_YOURSELF;
 	}
 
+/*	if( IsUnit() && TO_VEHICLE(this)->GetVehicleEntry() )	{
+		flags |= UPDATEFLAG_VEHICLE;
+		Log.Notice("VehicleMgr", "updated flag to vehicle ");
+	}*/
+
 	// build our actual update
 	*data << updatetype;
 
@@ -692,7 +697,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 		switch(GetTypeId())
 		{
 		case TYPEID_UNIT:
-			m_uint32Values[UNIT_NPC_FLAGS] &= ~UNIT_NPC_FLAG_PLAYERVEHICLE;
+		//	m_uint32Values[UNIT_NPC_FLAGS] &= ~UNIT_NPC_FLAG_PLAYERVEHICLE;
 			m_uint32Values[UNIT_DYNAMIC_FLAGS] &= ~(U_DYN_FLAG_TAGGED_BY_OTHER | U_DYN_FLAG_LOOTABLE | U_DYN_FLAG_TAPPED_BY_PLAYER);
 			break;
 		case TYPEID_GAMEOBJECT:

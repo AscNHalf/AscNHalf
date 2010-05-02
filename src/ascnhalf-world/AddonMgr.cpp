@@ -231,10 +231,12 @@ void AddonMgr::LoadFromDB()
 		return;
 	}
 
+	Field *field = NULL;
+	AddonEntry *ent = NULL;
 	do 
 	{
-		Field *field = result->Fetch();
-		AddonEntry *ent = new AddonEntry;
+		field = result->Fetch();
+		ent = new AddonEntry;
 
 		ent->name = field[1].GetString();
 		ent->crc = field[2].GetUInt64();

@@ -637,6 +637,12 @@ void GossipScript::GossipHello(Object* pObject, Player* Plr, bool AutoSend)
 			Plr->GetSummon() != NULL )						// have pet
 		Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "I would like to untrain my pet.", 13);
 
+	if( pCreature->GetEntry() == 35364 || pCreature->GetEntry() == 35365 )
+		if(Plr->m_XPoff)
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "I wish to start gaining experience again.", 18, false, 100000, "Are you certain you wish to start gaining experience?" );
+		else
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "I no longer wish to gain experience.", 18, false, 100000, "Are you certain you wish to stop gaining experience?" );
+	
 	if(AutoSend)
 		Menu->SendTo(Plr);
 }
@@ -732,14 +738,19 @@ void GossipScript::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, u
 	case 16:
 		{
 			GossipMenu *Menu;
-			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 30000, Plr);
-			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Purchase a Dual Talent Specialization.", 17);
+			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 14391, Plr);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Purchase a Dual Talent Specialization.", 17, false, sWorld.dualTalentTrainCost, "Are you sure you wish to buy Dual Talent Specialization?" );
 			Menu->SendTo(Plr);
 		}break;
 	case 17:
 		{
 			Plr->Gossip_Complete();
 			Plr->SendDualTalentConfirm();
+		}break;
+	case 18: // Enable and disable XP.
+		{
+			Plr->Gossip_Complete();
+			Plr->SendXPToggleConfirm();
 		}break;
 	case 99:		// Aborting current action
 		{

@@ -348,16 +348,17 @@ void ObjectMgr::LoadExtraItemStuff()
 {
 	map<uint32,uint32> foodItems;
 	QueryResult * result = WorldDatabase.Query("SELECT * FROM itempetfood ORDER BY entry");
+	Field *f = NULL;
 	if(result)
 	{
-		Field *f = result->Fetch();
 		do
-		{		
+		{	
+			f = result->Fetch();
 			foodItems.insert( make_pair( f[0].GetUInt32(), f[1].GetUInt32() ) );
 		}
 		while(result->NextRow());
+		delete result;
 	}
-	delete result;
 
 	StorageContainerIterator<GameObjectInfo> *gtr = GameObjectNameStorage.MakeIterator();
 	while(!gtr->AtEnd())

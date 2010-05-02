@@ -224,7 +224,6 @@ bool Mailbox::AddMessageToListingPacket(WorldPacket& data,MailMessage *msg)
 		data << msg->sender_guid;
 
 	data << msg->cod;			// cod
-	data << msg->message_id;		// itempageid
 	data << uint32(0);
 	data << msg->stationary;
 	data << msg->money;		// money
@@ -232,6 +231,7 @@ bool Mailbox::AddMessageToListingPacket(WorldPacket& data,MailMessage *msg)
 	data << float(float(msg->expire_time - (uint32)UNIXTIME) / 86400.0f);
 	data << uint32(0);
 	data << msg->subject;
+	data << msg->body;
 	pos = data.wpos();
 	data << uint8(0);		// item count
 
@@ -250,8 +250,8 @@ bool Mailbox::AddMessageToListingPacket(WorldPacket& data,MailMessage *msg)
 			for( j = 0; j < 6; ++j )
 			{
 				data << pItem->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + ( j * 3 ) );
-				data << pItem->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_2_1 + ( j * 3 ) );
-				data << pItem->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_3_1 + ( j * 3 ) );
+				data << pItem->GetUInt32Value( (ITEM_FIELD_ENCHANTMENT_1_1 + 1) + ( j * 3 ) );
+				data << pItem->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_3 + ( j * 3 ) );
 			}
 
 			data << pItem->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID );
@@ -681,7 +681,8 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 {
 	uint64 mailbox;
 	uint32 message_id;
-	recv_data >> mailbox >> message_id;
+	uint32 mailtemplet;
+	recv_data >> mailbox >> message_id >> mailtemplet;
 
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_DELETED);
@@ -868,7 +869,8 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 {
 	uint64 mailbox;
 	uint32 message_id;
-	recv_data >> mailbox >> message_id;
+	uint64 returntoguid;
+	recv_data >> mailbox >> message_id >> returntoguid;
 
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_RETURNED_TO_SENDER);
@@ -944,17 +946,20 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data)
 {
-	uint32 message_id;
-	recv_data >> message_id;
+	uint64 itemGuid;
+	recv_data >> itemGuid;
 
 	string body = "Internal Error";
 
-	MailMessage * msg = _player->m_mailBox->GetMessage(message_id);
-	if(msg)
-		body = msg->body;
-
-	WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, body.length() + 5);
-	data << message_id << body;
+	Item* item = _player->GetItemInterface()->GetItemByGUID(itemGuid);
+	WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, body.length() + 9);
+	if(!item)
+		data << uint8(1);
+	else
+	{
+//		item->gett
+		data << uint8(0) << itemGuid << body;
+	}
 	SendPacket(&data);
 }
 

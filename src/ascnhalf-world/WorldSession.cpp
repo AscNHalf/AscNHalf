@@ -530,6 +530,9 @@ void WorldSession::InitPacketHandlerTable()
 
 	WorldPacketHandlers[CMSG_CHAR_RENAME].handler							= &WorldSession::HandleCharRenameOpcode;
 	WorldPacketHandlers[CMSG_CHAR_RENAME].status							= STATUS_AUTHED;
+	
+	WorldPacketHandlers[CMSG_CHAR_CUSTOMIZE].handler						= &WorldSession::HandleCharCustomizeOpcode;
+	WorldPacketHandlers[CMSG_CHAR_CUSTOMIZE].status							= STATUS_AUTHED;
 
 	WorldPacketHandlers[CMSG_PLAYER_LOGIN].handler							= &WorldSession::HandlePlayerLoginOpcode; 
 	WorldPacketHandlers[CMSG_PLAYER_LOGIN].status							= STATUS_AUTHED;
@@ -693,7 +696,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[MSG_PARTY_ASSIGNMENT].handler						= &WorldSession::HandleGroupPromote;
 
 	// LFG System
-	WorldPacketHandlers[CMSG_SET_LFG_COMMENT].handler						= &WorldSession::HandleSetLookingForGroupComment;
+	/*WorldPacketHandlers[CMSG_SET_LFG_COMMENT].handler						= &WorldSession::HandleSetLookingForGroupComment;
 	WorldPacketHandlers[MSG_LOOKING_FOR_GROUP].handler						= &WorldSession::HandleMsgLookingForGroup;
 	WorldPacketHandlers[CMSG_SET_LOOKING_FOR_GROUP].handler					= &WorldSession::HandleSetLookingForGroup;
 	WorldPacketHandlers[CMSG_SET_LOOKING_FOR_MORE].handler					= &WorldSession::HandleSetLookingForMore;
@@ -701,7 +704,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_LFG_CLEAR_AUTOJOIN].handler					= &WorldSession::HandleDisableAutoJoin;
 	WorldPacketHandlers[CMSG_LFM_SET_AUTOFILL].handler						= &WorldSession::HandleEnableAutoAddMembers;
 	WorldPacketHandlers[CMSG_LFM_CLEAR_AUTOFILL].handler					= &WorldSession::HandleDisableAutoAddMembers;
-	WorldPacketHandlers[CMSG_CLEAR_LOOKING_FOR_GROUP].handler				= &WorldSession::HandleLfgClear;
+	WorldPacketHandlers[CMSG_CLEAR_LOOKING_FOR_GROUP].handler				= &WorldSession::HandleLfgClear;*/
 
 	// Taxi / NPC Interaction
 	WorldPacketHandlers[CMSG_ENABLETAXI].handler							= &WorldSession::HandleTaxiQueryAvaibleNodesOpcode;
@@ -977,8 +980,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_EJECT_PASSENGER].handler 						= &WorldSession::HandleEjectPassengerOpcode;
 
 	// Minion Cast Spell
-	/*WorldPacketHandlers[CMSG_REQUEST_VEHICLE_SWITCH_SEAT].handler			= &WorldSession::HandleRequestSeatChange;
-	WorldPacketHandlers[CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE].handler	= &WorldSession::HandleRequestSeatChange;*/
+	/*WorldPacketHandlers[CMSG_REQUEST_VEHICLE_SWITCH_SEAT].handler			= &WorldSession::HandleRequestSeatChange;*/
 }
 
 /// Empty packets

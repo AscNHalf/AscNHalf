@@ -468,16 +468,14 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 						break;
 					}
 
-					LocalizedQuest * lq = (language>0) ? sLocalizationMgr.GetLocalizedQuest((*it)->qst->id,language):NULL;
-					if(lq)
-						data << lq->Title;
-					else
-						data << (*it)->qst->title;
+					data << uint32(0);	// 3.3.3
+					data << (*it)->qst->is_repeatable;
+					LocalizedQuest * lq = (language > 0) ? sLocalizationMgr.GetLocalizedQuest((*it)->qst->id, language) : NULL;
+					data << (lq ? lq->Title : (*it)->qst->title);
 				}
 			}
 		}
-		data.wpos(pos);
-		data << count;
+		data.put(pos, count);
 		SendPacket(&data);
 		DEBUG_LOG( "WORLD"," Sent SMSG_GOSSIP_MESSAGE" );
 	}
@@ -504,8 +502,8 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	recv_data >> guid >> unk24 >> option;
 
 	DEBUG_LOG("WORLD","CMSG_GOSSIP_SELECT_OPTION Option %i Guid %.8X", option, guid );
-	GossipScript * Script=NULL;
-	Object* qst_giver=NULLOBJ;
+	GossipScript* Script = NULL;
+	Object* qst_giver = NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
@@ -545,6 +543,16 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 		GossipMenuItem item = _player->CurrentGossipMenu->GetItem(option);
 		IntId = item.IntId;
 		Coded = item.Coded;
+		if(item.BoxMoney)
+		{
+			if(_player->GetUInt32Value(PLAYER_FIELD_COINAGE) < item.BoxMoney)
+			{
+				sChatHandler.SystemMessage(this, "You must have at least %u copper to use this function.", item.BoxMoney);
+				return;
+			}
+			else
+				_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -(int32(item.BoxMoney)));
+		}
 	}
 
 	if(Coded)
@@ -691,7 +699,7 @@ void WorldSession::SendInnkeeperBind(Creature* pCreature)
         OutPacket(SMSG_GOSSIP_COMPLETE, 0, NULL);
 
 		data.Initialize(SMSG_BINDER_CONFIRM);
-		data << pCreature->GetGUID() << _player->GetZoneId();
+		data << pCreature->GetGUID() << pCreature->GetZoneId();
 		SendPacket(&data);
 
 		_player->bHasBindDialogOpen = true;

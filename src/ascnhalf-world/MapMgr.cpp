@@ -1962,30 +1962,9 @@ Vehicle* MapMgr::CreateVehicle(uint32 entry)
 	It works, and it creates the vehicle as a creature before initializing it as a vehicle.
 	If for some reason vehicles stop working, or cause crashes, revert to this for testing.*/
 	uint64 newguid = ( (uint64)HIGHGUID_TYPE_VEHICLE << 32 ) | ( (uint64)entry << 24 );
-	Creature* cr = NULLCREATURE;
-	if(_reusable_guids_vehicle.size())
-	{
-		uint32 guid = _reusable_guids_vehicle.front();
-		_reusable_guids_vehicle.pop_front();
-
-		newguid |= guid;
-	}
-	else
-		newguid |= ++m_VehicleHighGuid;
-
-	cr = new Creature(newguid);
 
 	Vehicle* v = NULLVEHICLE;
 
-	v = new Vehicle(cr->GetGUID());
-	v->Init();
-
-	ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
-	m_VehicleStorage.insert( make_pair< const uint32, Vehicle* >(v->GetUIdFromGUID(), v));
-	return v;
-	/* Below is the original code for creating a vehicle.*/
-/*	uint64 newguid = ( (uint64)HIGHGUID_TYPE_VEHICLE << 32 ) | ( (uint64)entry << 24 );
-	Vehicle* v = NULLVEHICLE;
 	if(_reusable_guids_vehicle.size())
 	{
 		uint32 guid = _reusable_guids_vehicle.front();
@@ -2001,7 +1980,7 @@ Vehicle* MapMgr::CreateVehicle(uint32 entry)
 
 	ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
 	m_VehicleStorage.insert( make_pair< const uint32, Vehicle* >(v->GetUIdFromGUID(), v));
-	return v;*/
+	return v;
 }
 
 Creature* MapMgr::CreateCreature(uint32 entry)

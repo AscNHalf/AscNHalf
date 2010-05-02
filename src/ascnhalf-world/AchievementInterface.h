@@ -32,7 +32,7 @@ struct AchievementData
 	uint32 date;
 	uint32 groupid;
 	uint32 num_criterias;
-	uint32 counter[32];
+	uint32* counter;
 	uint32 completionTimeLast;
 	bool m_isDirty;
 };

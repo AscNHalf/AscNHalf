@@ -236,19 +236,35 @@ void CBattlegroundManager::AddAverageQueueTime(uint32 BgType, uint32 queueTime)
 	m_averageQueueTimes[BgType][0] = queueTime;
 }
 
-void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType, bool battlemaster)
+void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType, bool battlemaster, bool random)
 {
 	if( BattlegroundType >= BATTLEGROUND_NUM_TYPES )
 		return;
 
+	WorldPacket data;
 	uint32 LevelGroup = GetLevelGrouping(m_session->GetPlayer()->getLevel());
 	uint32 Count = 0;
-	WorldPacket data(SMSG_BATTLEFIELD_LIST, 200);
-	data << m_session->GetPlayer()->GetGUID();
-	data << uint8(!battlemaster);	// from where are we joining
-	data << BattlegroundType;		//BG ID
-	data << uint8(0);				//unk 3.3
-	data << uint8(0);				//unk 3.3
+	
+	data.Initialize(SMSG_BATTLEFIELD_LIST);
+	data << m_session->GetPlayer()->GetGUID();		// Player Guid
+	data << uint8(!battlemaster);					// Joining from Player Screen?
+	data << BattlegroundType;						// BG ID
+	data << uint8(IS_ARENA(BattlegroundType));		// unk 3.3
+	data << uint8(0);								// unk 3.3
+	data << uint8(0);								// Has Reward?
+	data << uint32(0);								// Arena points
+	data << uint32(0);								// Honor points
+	data << uint32(0);								// Lose honor
+
+	data << uint8(random);
+	if(random)
+	{
+		data << uint8(0);							// Has Reward?
+		data << uint32(0);							// Arena points
+		data << uint32(0);							// Honor points
+		data << uint32(0);							// Lose honor
+	}
+
 	size_t CountPos = data.wpos();
 	data << uint32(0);				//count
 

@@ -344,6 +344,8 @@ void Player::Init()
 	titanGrip = false;
 	iInstanceType = 0;
 	iRaidType = 0;
+	m_XPoff = false;
+	customizable = false;
 	memset(reputationByListId, 0, sizeof(FactionReputation*) * 128);
 
 	m_comboTarget = 0;
@@ -1554,6 +1556,9 @@ void Player::GiveXP(uint32 xp, const uint64 &guid, bool allowbonus)
 	if(getLevel() >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
 		return;
 
+	if(m_XPoff)
+		return;
+
 	uint32 restxp = xp;
 
 	//add reststate bonus
@@ -1735,6 +1740,9 @@ void Player::smsg_InitialSpells()
 }
 void Player::BuildPlayerTalentsInfo(WorldPacket *data, bool self)
 {
+	if(m_talentSpecsCount > 2)
+		m_talentSpecsCount = 2; // Hack fix
+
 	*data << uint32(GetUInt32Value(PLAYER_CHARACTER_POINTS1)); // Unspent talents
 	// TODO: probably shouldn't send both specs if target is not self
 	*data << uint8(m_talentSpecsCount);
@@ -2236,6 +2244,8 @@ void Player::InitVisibleUpdateBits()
         Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_ENTRYID + offset);
         // enchant
         Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + offset);
+		
+		offset = NULL; // Nullify
     }
 
 	Player::m_visibleUpdateMask.SetBit(PLAYER_CHOSEN_TITLE);
@@ -2287,9 +2297,10 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 
 	// stat saving
 	<< "'" << m_name << "', "
-	<< uint32(getRace()) << ","
-	<< uint32(getClass()) << ","
-	<< uint32(getGender()) << ",";
+	<< uint32(getRace()) << ", "
+	<< uint32(getClass()) << ", "
+	<< uint32(getGender()) << ", "
+	<< uint32(customizable ? 1 : 0) << ",";
 
 	if(m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] != info->factiontemplate)
 		ss << m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] << ",";
@@ -2297,6 +2308,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 		ss << "0,";
 
 	ss << uint32(getLevel()) << ","
+	<< uint32(m_XPoff ? 1 : 0) << ","
 	<< m_uint32Values[PLAYER_XP] << ","
 	
 	// dump exploration data
@@ -2923,6 +2935,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	setRace(get_next_field.GetUInt8());
 	setClass(get_next_field.GetUInt8());
 	setGender(get_next_field.GetUInt8());
+	customizable = get_next_field.GetBool();
 	uint32 cfaction = get_next_field.GetUInt32();
 	
 	// set race dbc
@@ -2972,7 +2985,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 
 	CalculateBaseStats();
 
-
+	m_XPoff = get_next_field.GetBool();
 	// set xp
 	m_uint32Values[PLAYER_XP] = get_next_field.GetUInt32();
 	
@@ -3563,6 +3576,9 @@ void Player::_LoadQuestLogEntry(QueryResult * result)
 			}
 			if(m_questlog[slot] != 0)
 				continue;
+				
+			if(slot >= 25)
+				break;
 			
 			entry = NULL;
 			entry = new QuestLogEntry;
@@ -3600,10 +3616,11 @@ QuestLogEntry* Player::GetQuestLogForEntry(uint32 quest)
 
 void Player::SetQuestLogSlot(QuestLogEntry *entry, uint32 slot)
 {
+	ASSERT(slot < 25);
 	m_questlog[slot] = entry;
 }
 
-void Player::AddToWorld()
+void Player::AddToWorld(bool loggingin /* = false */)
 {
 	FlyCheat = false;
 	m_setflycheat=false;
@@ -6077,7 +6094,7 @@ bool Player::HasQuestForItem(uint32 itemid)
 2-skinning/herbalism/minning
 3-Fishing
 */
-void Player::SendLoot(uint64 guid,uint8 loot_type)
+void Player::SendLoot(uint64 guid, uint32 mapid, uint8 loot_type)
 {	
 	Group * m_Group = m_playerInfo->m_Group;
 	if(!IsInWorld()) return;
@@ -6269,6 +6286,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 					
 					data2.Initialize(SMSG_LOOT_START_ROLL);
 					data2 << guid;
+					data2 << mapid;
 					data2 << x;
 					data2 << uint32(iter->item.itemproto->ItemId);
 					data2 << uint32(factor);
@@ -6337,6 +6355,21 @@ void Player::SendDualTalentConfirm()
 	data << GetGUID();
 	data << sWorld.dualTalentTrainCost;
 	GetSession()->SendPacket( &data );*/
+}
+
+void Player::SendXPToggleConfirm()
+{
+//	sChatHandler.SystemMessageToPlr(this, "XP %s.", m_XPoff ? "Disabled" : "Enabled");
+	if(m_XPoff)
+		m_XPoff = false;
+	else
+		m_XPoff = true;
+/*	std::string message = "Xp Disabled or Enabled message.";
+	WorldPacket data(SMSG_TOGGLE_XP_GAIN, 20);
+	data << GetGUID();
+	data << uint32(message.size());
+	data << message;
+	GetSession()->SendPacket(&data);*/
 }
 
 void Player::EventAllowTiggerPort(bool enable)
@@ -11164,11 +11197,19 @@ void Player::EventGroupFullUpdate()
 
 void Player::EjectFromInstance()
 {
+	uint32 mapid = GetMapId();
 	if(m_bgEntryPointX && m_bgEntryPointY && m_bgEntryPointZ && !IS_INSTANCE(m_bgEntryPointMap))
 	{
 		if(SafeTeleport(m_bgEntryPointMap, m_bgEntryPointInstance, m_bgEntryPointX, m_bgEntryPointY, m_bgEntryPointZ, m_bgEntryPointO))
 			return;
 	}
+	
+	MapInfo* map = WorldMapInfoStorage.LookupEntry(mapid);
+	if(map)
+		if(map->repopmapid && !IS_INSTANCE(map->repopmapid))
+			if(map->repopx && map->repopy && map->repopz)
+				if(SafeTeleport(map->repopmapid, 0, map->repopx, map->repopy, map->repopz, 0)) // Should be nearest graveyard.
+					return;
 
 	SafeTeleport(m_bind_mapid, 0, m_bind_pos_x, m_bind_pos_y, m_bind_pos_z, 0);
 }

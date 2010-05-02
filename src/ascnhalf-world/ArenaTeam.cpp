@@ -340,8 +340,11 @@ ArenaTeamMember * ArenaTeam::GetMember(PlayerInfo * info)
 	return NULL;
 }
 
-ArenaTeamMember * ArenaTeam::GetMemberByGuid(uint32 guid)
+ArenaTeamMember* ArenaTeam::GetMemberByGuid(uint32 guid)
 {
+	if(!m_memberCount) // If we don't have members, whats the point?
+		return NULL;
+		
 	for(uint32 i = 0; i < m_memberCount; ++i)
 	{
 		if(m_members[i].Info && m_members[i].Info->guid == guid)

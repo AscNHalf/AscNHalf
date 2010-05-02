@@ -464,7 +464,6 @@ public:
 	Guild* GetGuildByLeaderGuid(uint64 leaderGuid);  
 	Guild* GetGuildByGuildName(std::string guildName);
 
-	map<uint32,set<Quest*>*> ZoneToQuestMap;
 	void LoadAchievements();
 
 	//Corpse Stuff
@@ -543,6 +542,7 @@ public:
 	ReputationModifier * GetReputationModifier(uint32 entry_id, uint32 faction_id);
 
 	void SetHighestGuids();
+	void ListGuidAmounts();
 	uint32 GenerateLowGuid(uint32 guidhigh);
 	uint32 GenerateMailID();
 	

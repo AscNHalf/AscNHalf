@@ -210,6 +210,9 @@ bool ChatHandler::HandleAddInvItemCommand(const char *args, WorldSession *m_sess
 
 	if(sscanf(args, "%u %u %d", &itemid, &count, &randomprop) < 1)
 		return false;
+		
+	if(count < 1)
+		count = 1;
 
 	Player* chr = getSelectedChar(m_session);
 	if (chr == NULL) return true;

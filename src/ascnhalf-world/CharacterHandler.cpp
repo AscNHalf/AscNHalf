@@ -154,9 +154,8 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 					data << uint32(1);		// alive
 			}
 
-			data << uint32(0);					//Added in 3.0.2
-			//data << fields[14].GetUInt8();		// Rest State
-			data << uint8(0);
+			data << uint32(fields[19].GetUInt8());		//Added in 3.0.2
+			data << fields[14].GetUInt8();				// Rest State
 
 			if( Class == WARLOCK || Class == HUNTER )
 			{
@@ -245,7 +244,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 	}
 
 	AsyncQuery * q = new AsyncQuery( new SQLClassCallbackP1<World, uint32>(World::getSingletonPtr(), &World::CharacterEnumProc, GetAccountId()) );
-	q->AddQuery("SELECT guid, level, race, class, gender, bytes, bytes2, name, positionX, positionY, positionZ, mapId, zoneId, banned, restState, deathstate, forced_rename_pending, player_flags, guild_data.guildid FROM characters LEFT JOIN guild_data ON characters.guid = guild_data.playerid WHERE acct=%u ORDER BY guid ASC LIMIT 10", GetAccountId());
+	q->AddQuery("SELECT guid, level, race, class, gender, bytes, bytes2, name, positionX, positionY, positionZ, mapId, zoneId, banned, restState, deathstate, forced_rename_pending, player_flags, guild_data.guildid, customizable FROM characters LEFT JOIN guild_data ON characters.guid = guild_data.playerid WHERE acct=%u ORDER BY guid ASC LIMIT 10", GetAccountId());
 	m_asyncQuery = true;
 	CharacterDatabase.QueueAsyncQuery(q);
 	m_lastEnumTime = (uint32)UNIXTIME;
@@ -910,21 +909,22 @@ void WorldSession::FullLogin(Player* plr)
 	if(info->m_Group)
 		info->m_Group->Update();
 
-	// Retroactive: Level achievement
-	_player->GetAchievementInterface()->HandleAchievementCriteriaLevelUp( _player->getLevel() );
-	// Retroactive: Bank slots: broken atm :(
-	//_player->GetAchievementInterface()->HandleAchievementCriteriaBuyBankSlot(true);
-
-	// Send achievement data!
-	if( _player->GetAchievementInterface()->HasAchievements() )
+	if(plr->getLevel() > 10 && !GetPermissions())
 	{
-		WorldPacket * data = _player->GetAchievementInterface()->BuildAchievementData();
-		_player->CopyAndSendDelayedPacket(data);
-		delete data;
+		// Retroactive: Level achievement
+		_player->GetAchievementInterface()->HandleAchievementCriteriaLevelUp( _player->getLevel() );
+
+		// Send achievement data!
+		if( _player->GetAchievementInterface()->HasAchievements() )
+		{
+			WorldPacket * data = _player->GetAchievementInterface()->BuildAchievementData();
+			_player->CopyAndSendDelayedPacket(data);
+			delete data;
+		}
 	}
 
 	if(enter_world && !_player->GetMapMgr())
-		plr->AddToWorld();
+		plr->AddToWorld(true);
 
 	objmgr.AddPlayer(_player);
 }
@@ -1056,4 +1056,90 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	_player->SetByte(PLAYER_BYTES, 3, (uint8)colour);
 	_player->SetByte(PLAYER_BYTES_2, 0, newFacialHair);
 	_player->SetStandState(0);
+}
+
+void WorldSession::HandleCharCustomizeOpcode(WorldPacket & recv_data)
+{
+	WorldPacket data(SMSG_CHAR_CUSTOMIZE, recv_data.size() + 1);
+	uint64 guid;
+	string name;
+	recv_data >> guid >> name;
+
+	uint8 gender, skin, hairColor, hairStyle, facialHair, face;
+	recv_data >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
+
+	uint32 playerGuid = uint32(guid);
+	PlayerInfo* pi = objmgr.GetPlayerInfo(playerGuid);
+	if( pi == NULL )
+		return;
+
+	QueryResult* result = CharacterDatabase.Query("SELECT bytes2 FROM characters WHERE guid = '%u'", playerGuid);
+	if(!result)
+		return;
+
+	if(name != pi->name)
+	{
+		// Check name for rule violation.
+		const char * szName = name.c_str();
+		for(uint32 x = 0; x < strlen(szName); ++x)
+		{
+			if(int(szName[x]) || (int(szName[x]) > 90 && int(szName[x]) < 97) || int(szName[x]) > 122)
+			{
+				data << uint8(0x32);
+				data << guid << name;
+				SendPacket(&data);
+				return;
+			}
+		}
+
+		QueryResult * result2 = CharacterDatabase.Query("SELECT COUNT(*) FROM banned_names WHERE name = '%s'", CharacterDatabase.EscapeString(name).c_str());
+		if(result2)
+		{
+			if(result2->Fetch()[0].GetUInt32() > 0)
+			{
+				// That name is banned!
+				data << uint8(0x31);
+				data << guid << name;
+				SendPacket(&data);
+				return;
+			}
+			delete result2;
+		}
+
+		// Check if name is in use.
+		if(objmgr.GetPlayerInfoByName(name.c_str()) != 0)
+		{
+			data << uint8(0x32);
+			data << guid << name;
+			SendPacket(&data);
+			return;
+		}
+
+		// correct capitalization
+		CapitalizeString(name);
+		objmgr.RenamePlayerInfo(pi, pi->name, name.c_str());
+		// If we're here, the name is okay.
+		free(pi->name);
+		pi->name = strdup(name.c_str());
+
+		CharacterDatabase.Execute("UPDATE characters SET name = '%s' WHERE guid = '%u'", CharacterDatabase.EscapeString(name).c_str(), playerGuid);
+	}
+	Field* fields = result->Fetch();
+	uint32 player_bytes2 = fields[0].GetUInt32();
+	player_bytes2 &= ~0xFF;
+	player_bytes2 |= facialHair;
+	CharacterDatabase.Execute("UPDATE characters SET gender = '%u', bytes = '%u', bytes2 = '%u', customizable = '0' WHERE guid = '%u'", gender, skin | (face << 8) | (hairStyle << 16) | (hairColor << 24), player_bytes2, playerGuid);
+	delete result;
+
+	//WorldPacket data(SMSG_CHAR_CUSTOMIZE, recv_data.size() + 1);
+	data << uint8(0);
+	data << guid;
+	data << name;
+	data << uint8(gender);
+	data << uint8(skin);
+	data << uint8(face);
+	data << uint8(hairStyle);
+	data << uint8(hairColor);
+	data << uint8(facialHair);
+	SendPacket(&data);
 }

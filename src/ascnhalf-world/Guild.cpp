@@ -1302,7 +1302,7 @@ void Guild::BuyBankTab(WorldSession * pClient)
 		pTab->pSlots[i] = NULLITEM;
 	
 	pTab->szTabName=NULL;
-	pTab->szTabIcon=NULL;
+	pTab->szTabIcon="";
 
 	m_bankTabs.push_back(pTab);
 	m_bankTabCount++;

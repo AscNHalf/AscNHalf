@@ -147,6 +147,8 @@ const char* spellentryFormat =
 	"u" // RequiredItemFlags
 	"uuu" // 3x Spell Effect
 	"uuu" // 3x Spell Effect Die Sides
+	//"uuu" // 3.3.3
+	//"fff" // 3.3.3
 	"fff" // 3x Spell Effect Real Points per Level
 	"iii" // 3x Spell Effect Base Points
 	"iii" // 3x Spell Effect Mechanic

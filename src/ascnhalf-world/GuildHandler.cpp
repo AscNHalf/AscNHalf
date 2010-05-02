@@ -1129,7 +1129,7 @@ void WorldSession::HandleGuildBankModifyTab(WorldPacket & recv_data)
 		return;
 
 	pTab = _player->m_playerInfo->guild->GetBankTab((uint32)slot);
-	if(pTab==NULL)
+	if(!pTab)
 		return;
 
 	if(_player->m_playerInfo->guild->GetGuildLeader() != _player->GetLowGUID())
@@ -1228,8 +1228,8 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 {
 	uint64 guid;
 	uint8 source_isfrombank;
-	uint32 wtf;
-	uint8 wtf2;
+	uint32 itementry;
+	uint8 autostore;
 	uint32 i;
 
 	Guild * pGuild = _player->m_playerInfo->guild;
@@ -1254,13 +1254,13 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		/* read packet */
 		recv_data >> dest_bank;
 		recv_data >> dest_bankslot;
-		recv_data >> wtf;
+		recv_data >> itementry;
 		recv_data >> source_bank;
 		recv_data >> source_bankslot;
 		
-		recv_data >> wtf;
-        	recv_data >> wtf2;
-        	recv_data >> splitted_count;
+		recv_data >> itementry;
+		recv_data >> autostore;
+		recv_data >> splitted_count;
 
 		/* sanity checks to avoid overflows */
 		if(source_bankslot >= MAX_GUILD_BANK_SLOTS ||
@@ -1383,7 +1383,8 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		uint8 dest_bank;
 		uint8 dest_bankslot;
 		uint8 withdraw_stack=0;
-		uint8 deposit_stack=0;
+		uint32 deposit_stack=0;
+		uint8 tochar;
 		GuildBankTab * pTab;
 		Item* pSourceItem;
 		Item* pDestItem;
@@ -1392,16 +1393,19 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		/* read packet */
 		recv_data >> dest_bank;
 		recv_data >> dest_bankslot;
-		recv_data >> wtf;
-		recv_data >> wtf2;
-		if(wtf2)
+		recv_data >> itementry;
+		recv_data >> autostore;
+		if(autostore)
+		{
 			recv_data >> withdraw_stack;
-
-		recv_data >> source_bagslot;
-		recv_data >> source_slot;
-
-		if(!(source_bagslot == 1 && source_slot==0))
-			recv_data >> wtf2 >> deposit_stack;
+			recv_data >> tochar >> deposit_stack;
+		}
+		else
+		{
+			recv_data >> source_bagslot;
+			recv_data >> source_slot;
+			recv_data >> tochar >> deposit_stack;
+		}
 
 		/* sanity checks to avoid overflows */
 		if(dest_bank >= MAX_GUILD_BANK_TABS)
@@ -1608,6 +1612,7 @@ void WorldSession::HandleGuildBankOpenVault(WorldPacket & recv_data)
 {
 	GameObject* pObj;
 	uint64 guid;
+	uint8 unk; // ?? 0 for main tab, 1 for others?
 
 	if(!_player->IsInWorld() || _player->m_playerInfo->guild==NULL)
 	{
@@ -1616,6 +1621,7 @@ void WorldSession::HandleGuildBankOpenVault(WorldPacket & recv_data)
 	}
 
 	recv_data >> guid;
+	recv_data >> unk;
 	pObj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 	if(pObj==NULL)
 		return;
@@ -1627,11 +1633,13 @@ void WorldSession::HandleGuildBankViewTab(WorldPacket & recv_data)
 {
 	uint64 guid;
 	uint8 tabid;
+	uint8 unk; // ?? 0 for main tab, 1 for others?
 	GuildBankTab * pTab;
 	Guild * pGuild = _player->m_playerInfo->guild;
 
 	recv_data >> guid;
 	recv_data >> tabid;
+	recv_data >> unk;
 
 	//Log.Warning("HandleGuildBankViewTab", "Tab %u", (uint32)tabid);
 
@@ -1662,7 +1670,7 @@ void Guild::SendGuildBankInfo(WorldSession * pClient)
 
 	for(uint32 i = 0; i < m_bankTabCount; ++i)
 	{
-		GuildBankTab * pTab = GetBankTab(i);
+		GuildBankTab* pTab = GetBankTab(i);
 		if(pTab==NULL || !pMember->pRank->CanPerformBankCommand(GR_RIGHT_GUILD_BANK_VIEW_TAB, i))
 		{
 			data << uint16(0);		// shouldn't happen
