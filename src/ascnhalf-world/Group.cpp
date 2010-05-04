@@ -1170,6 +1170,32 @@ void Group::SendPacketToAllInRange(Player* plr, WorldPacket *packet)
 	Unlock();
 }
 
+bool Group::HasDisenchanters()
+{
+	bool allowed = false;
+	GroupMembersSet::iterator itr;
+	m_groupLock.Acquire();
+
+	for( uint32 i = 0; i < m_SubGroupCount; i++ )
+	{
+		if( m_SubGroups[i] != NULL )
+		{
+			for( itr = m_SubGroups[i]->GetGroupMembersBegin(); itr != m_SubGroups[i]->GetGroupMembersEnd(); ++itr )
+			{
+				if( (*itr) != NULL )
+				{
+					if((*itr)->m_loggedInPlayer->HasSpell(13262))
+						allowed = true;
+				}
+			}
+		}
+	}
+
+	m_groupLock.Release();
+	return allowed;
+}
+
+
 /************************************************************************/
 /* Voicechat                                                            */
 /************************************************************************/

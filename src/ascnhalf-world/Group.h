@@ -155,6 +155,7 @@ public:
 	// Destroying/Converting
 	void Disband();
 	Player* FindFirstPlayer();
+	bool HasDisenchanters();
 	
 	// Accessing functions
 	INLINE SubGroup* GetSubGroup(uint32 Id)

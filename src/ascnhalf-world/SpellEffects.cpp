@@ -569,6 +569,20 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 					dmg = ((itm->GetProto()->Damage[0].Min + itm->GetProto()->Damage[0].Max) * 0.2f) + m_spellInfo->EffectBasePoints[i];
 				}
 			}break;
+			
+		case 6343:
+		case 8198:
+		case 8204:
+		case 8205:
+		case 11580:
+		case 11581:
+		case 25264:
+		case 47501:
+		case 47502:
+ 			{
+ 				if(u_caster)
+				damage = float2int32((m_spellInfo->EffectBasePoints[0]+1)+ u_caster->GetAP() * 0.20f);
+ 			}break;
 
 			// Intercept
 		case 20252:
@@ -1708,6 +1722,12 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				}
 		  }
 	}break;
+	
+	case 70769:
+		{
+			if(p_caster != NULL)
+				p_caster->ClearCooldownForSpell(53385);
+		}break;
 	/*************************
 	 * PRIEST SPELLS
 	 *************************

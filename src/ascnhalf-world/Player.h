@@ -1316,6 +1316,7 @@ public:
 	uint64              m_lootGuid;
 	uint64              m_currentLoot;
 	bool                m_insigniaTaken;
+	bool AllowDisenchantLoot();
 
 	/************************************************************************/
 	/* World Session                                                        */

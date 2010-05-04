@@ -751,6 +751,16 @@ void LootRoll::Finalize()
 				hightype = GREED;
 			}
 		}
+		
+		for(std::map<uint32, uint32>::iterator itr = m_DisenchantRolls.begin(); itr != m_DisenchantRolls.end(); ++itr)
+		{
+			if(itr->second > highest)
+			{
+				highest = itr->second;
+				player = itr->first;
+				hightype = DISENCHANT;
+			}
+		}
 	}
 
 	Loot * pLoot = 0;
@@ -820,6 +830,39 @@ void LootRoll::Finalize()
 		_player->GetGroup()->SendPacketToAll(&data);
 	else
 		_player->GetSession()->SendPacket(&data);
+
+	if(hightype == DISENCHANT && _player->AllowDisenchantLoot())	// We need one enchanter in our Group
+	{
+		//generate Disenchantingloot
+		Item * pItem = objmgr.CreateItem( itemid, _player);
+		lootmgr.FillDisenchantingLoot(&pItem->m_loot, pItem->GetEntry());
+		
+		//add loot
+		for(std::vector<__LootItem>::iterator iter=pItem->m_loot.items.begin();iter != pItem->m_loot.items.end();iter++)
+		{
+			itemid =iter->item.itemproto->ItemId;
+			Item * Titem = objmgr.CreateItem( itemid, _player);
+			_player->GetItemInterface()->AddItemToFreeSlot(Titem);
+			Titem->Destructor();
+		}
+		pItem->Destructor();
+		
+		pLoot->items.at(_slotid).iItemsCount=0;
+	
+		//Send "finish" packet
+		data.Initialize(SMSG_LOOT_REMOVED);
+		data << uint8(_slotid);
+		Player* plr;
+		for(LooterSet::iterator itr = pLoot->looters.begin(); itr != pLoot->looters.end(); ++itr)
+		{
+			if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
+				plr->GetSession()->SendPacket(&data);
+		}
+
+		
+		delete this;	//end here and skip the rest
+		return;
+	}
 
 	ItemPrototype* it = ItemPrototypeStorage.LookupEntry(itemid);
 
@@ -899,7 +942,7 @@ void LootRoll::Finalize()
 
 void LootRoll::PlayerRolled(Player* player, uint8 choice)
 {
-	if(m_NeedRolls.find(player->GetLowGUID()) != m_NeedRolls.end() || m_GreedRolls.find(player->GetLowGUID()) != m_GreedRolls.end())
+	if(m_NeedRolls.find(player->GetLowGUID()) != m_NeedRolls.end() || m_GreedRolls.find(player->GetLowGUID()) != m_GreedRolls.end() || m_DisenchantRolls.find(player->GetLowGUID()) != m_DisenchantRolls.end())
 		return; // dont allow cheaters
 
 	mLootLock.Acquire();
@@ -911,21 +954,31 @@ void LootRoll::PlayerRolled(Player* player, uint8 choice)
 	data << _guid << _slotid << player->GetGUID();
 	data << _itemid << _randomsuffixid << _randompropertyid;
 
-	if(choice == NEED) {
-		m_NeedRolls.insert( std::make_pair(player->GetLowGUID(), roll) );
-		data << uint8(roll) << uint8(NEED);
-	} 
-	else if(choice == GREED)
-	{
-		m_GreedRolls.insert( std::make_pair(player->GetLowGUID(), roll) );
-		data << uint8(roll) << uint8(GREED);
+	switch(choice)
+ 	{
+	case NEED:
+		{
+			m_NeedRolls.insert( std::make_pair(player->GetLowGUID(), roll) );
+			data << uint8(roll) << uint8(NEED);
+		}
+ 
+	case GREED:
+		{
+			m_GreedRolls.insert( std::make_pair(player->GetLowGUID(), roll) );
+			data << uint8(roll) << uint8(GREED);
 
 	}
-	else
-	{
-		m_passRolls.insert( player->GetLowGUID() );
-		data << uint8(128) << uint8(128);
-	}
+	case DISENCHANT:
+		{ 
+			m_DisenchantRolls.insert( std::make_pair(player->GetLowGUID(), roll) );
+			data << uint8(roll) << uint8(DISENCHANT);
+		}
+	default: //pass
+		{
+			m_passRolls.insert( player->GetLowGUID() );
+			data << uint8(128) << uint8(128);
+		}
+ 	}
 
 	data << uint8(0);
 

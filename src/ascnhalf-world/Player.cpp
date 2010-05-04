@@ -2965,6 +2965,13 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 
 	// obtain player create info
 	info = objmgr.GetPlayerCreateInfo(getRace(), getClass());
+	if(info == NULL)
+	{
+		Log.Error("PlayerCreateInfo", "Character creation failed due to non existant or invalid playercreateinfo.\n");
+		RemovePendingPlayer();
+		return;
+	}
+	
 	assert(info);
 
 	// set level
@@ -6313,7 +6320,7 @@ void Player::SendLoot(uint64 guid, uint32 mapid, uint8 loot_type)
 							if((*itr)->m_loggedInPlayer && (*itr)->m_loggedInPlayer->GetItemInterface()->CanReceiveItem(itemProto, iter->iItemsCount, NULL) == 0)
 							{
 								if( (*itr)->m_loggedInPlayer->m_passOnLoot )
-									iter->roll->PlayerRolled( (*itr)->m_loggedInPlayer, 3 );		// passed
+									iter->roll->PlayerRolled( (*itr)->m_loggedInPlayer, PASS );		// passed
 								else
 									(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data2);
 							}
@@ -12913,4 +12920,17 @@ uint32 Player::GetTotalItemLevel()
 		playertotalitemlevel = previoustil + item->GetProto()->ItemLevel;
 	}
 	return playertotalitemlevel;
+}
+
+bool Player::AllowDisenchantLoot()
+{
+	Group * pGroup = GetGroup();
+	if(pGroup != NULL)
+	{
+		if(pGroup->HasDisenchanters())
+			return true;
+	}
+	
+	BroadcastMessage(MSG_COLOR_RED"You need at least one enchanter in your group. You will just receive the item.");
+	return false;
 }

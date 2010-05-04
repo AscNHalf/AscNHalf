@@ -3181,6 +3181,12 @@ uint8 Spell::CanCast(bool tolerate)
 		// Disarm
 		if( u_caster!= NULL )
 		{
+			if (m_spellInfo->Attributes == ATTRIBUTES_REQ_OOC && u_caster->CombatStatus.IsInCombat())
+			{
+					// Charge In Combat
+					if ((m_spellInfo->Id !=  100 && m_spellInfo->Id != 6178 && m_spellInfo->Id != 11578 ) )
+					return SPELL_FAILED_TARGET_IN_COMBAT;
+			}
 			if( u_caster->disarmed )
 			{
 				if( m_spellInfo->is_melee_spell )
