@@ -21,8 +21,8 @@
 #include "StdAfx.h"
 
 #define BASE_RESOURCES_GAIN 10
-#define RESOURCES_WARNING_THRESHOLD 1800
-#define RESOURCES_WINVAL 2000
+#define RESOURCES_WARNING_THRESHOLD 1400
+#define RESOURCES_WINVAL 1600
 #define RESOURCES_TO_GAIN_BH 200
 #define BASE_BH_GAIN 14
 uint32 buffentrys[3] = {180380,180362,180146};
@@ -535,6 +535,7 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 
 		sEventMgr.RemoveEvents(this);
 		sEventMgr.AddEvent(TO_CBATTLEGROUND(this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "|cffffff00This battleground will close in 2 minutes.");
 
 		/* add the marks of honor to all players */
 		SpellEntry * winner_spell = dbcSpell.LookupEntry(24953);

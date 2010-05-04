@@ -1230,7 +1230,7 @@ void CBattleground::PortPlayer(Player* plr, bool skip_teleport /* = false*/)
 	if(!m_countdownStage)
 	{
 		m_countdownStage = 1;
-		sEventMgr.AddEvent(this, &CBattleground::EventCountdown, EVENT_BATTLEGROUND_COUNTDOWN, 30000, 0, 0);
+		sEventMgr.AddEvent(this, &CBattleground::EventCountdown, EVENT_BATTLEGROUND_COUNTDOWN, 60000, 0,0);
 		sEventMgr.ModifyEventTimeLeft(this, EVENT_BATTLEGROUND_COUNTDOWN, 10000);
 	}
 
@@ -1780,22 +1780,22 @@ void CBattleground::EventCountdown()
 	if(m_countdownStage == 1)
 	{
 		m_countdownStage = 2;
-		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "One minute until the battle for %s begins!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The battle for %s begins in 2 minutes.", GetName() );
 	}
 	else if(m_countdownStage == 2)
 	{
 		m_countdownStage = 3;
-		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Thirty seconds until the battle for %s begins!", GetName() );
-		sEventMgr.ModifyEventTimeAndTimeLeft(this, EVENT_BATTLEGROUND_COUNTDOWN, 15000);
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The battle for %s begins in 1 minute.", GetName() );
+		sEventMgr.ModifyEventTimeAndTimeLeft(this, EVENT_BATTLEGROUND_COUNTDOWN, 30000);
 	}
 	else if(m_countdownStage == 3)
 	{
 		m_countdownStage = 4;
-		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Fifteen seconds until the battle for %s begins!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The battle for %s begins in 30 seconds. Prepare yourselves!", GetName() );
 	}
 	else
 	{
-		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The battle for %s has begun!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Let the battle for %s begin!", GetName() );
 		sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_COUNTDOWN);
 		Start();
 	}

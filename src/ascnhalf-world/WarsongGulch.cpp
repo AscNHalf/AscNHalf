@@ -201,6 +201,7 @@ void WarsongGulch::HookOnAreaTrigger(Player* plr, uint32 id)
 
 			sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_CLOSE);
 			sEventMgr.AddEvent(TO_CBATTLEGROUND(this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1, 0);
+			SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "|cffffff00This battleground will close in 2 minutes.");
 
 			m_mainLock.Acquire();
 			/* add the marks of honor to all players */

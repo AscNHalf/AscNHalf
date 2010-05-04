@@ -1670,6 +1670,7 @@ void AlteracValley::Finish(uint32 losingTeam)
 	m_losingteam = losingTeam;
 	sEventMgr.RemoveEvents(this);
 	sEventMgr.AddEvent(TO_CBATTLEGROUND(this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+	SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "|cffffff00This battleground will close in 2 minutes.");
 
 	/* add the marks of honor to all players */
 	SpellEntry * winner_spell = dbcSpell.LookupEntry(24955);
