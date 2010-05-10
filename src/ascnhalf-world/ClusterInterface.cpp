@@ -19,7 +19,7 @@
   */
 
 #include "StdAfx.h"
-#include "svn_revision.h"
+#include "git_revision.h"
 
 #ifdef CLUSTERING
 
@@ -62,8 +62,8 @@ ClusterInterface::~ClusterInterface()
 string ClusterInterface::GenerateVersionString()
 {
 	std::stringstream ss;
-	ss << "AscNHalf r";
-	ss << BUILD_REVISION;
+	ss << "AscNHalf ";
+	ss << BUILD_HASH;
 	ss << "/";
 	ss << CONFIG;
 	ss << "-";
@@ -71,7 +71,7 @@ string ClusterInterface::GenerateVersionString()
 	ss << "-";
 	ss << ARCH;
 	//char str[200];
-	//snprintf(str, 200, "AscNHalf r%u/%s-%s-%s", BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
+	//snprintf(str, 200, "AscNHalf r%u/%s-%s-%s", BUILD_HASH, CONFIG, PLATFORM_TEXT, ARCH);
 	return ss.str();
 }
 
@@ -145,7 +145,7 @@ void ClusterInterface::HandleAuthRequest(WorldPacket & pck)
 
 	WorldPacket data(ICMSG_AUTH_REPLY, 50);
 	data.append(key, 20);
-	data << uint32(BUILD_REVISION);
+	data << uint32(BUILD_HASH);
 	data << GenerateVersionString();
 	SendPacket(&data);
 
@@ -190,7 +190,7 @@ void ClusterInterface::HandleAuthResult(WorldPacket & pck)
 	}
 
 	WorldPacket data(ICMSG_REGISTER_WORKER, 4 + (sizeof(std::vector<uint32>::size_type) * maps.size()) + (sizeof(std::vector<uint32>::size_type) * instancedmaps.size()));
-	data << uint32(BUILD_REVISION);
+	data << uint32(BUILD_HASH);
 	data << maps;
 	data << instancedmaps;
 	SendPacket(&data);

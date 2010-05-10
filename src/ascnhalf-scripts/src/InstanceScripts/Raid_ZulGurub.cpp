@@ -186,7 +186,7 @@ Jeklik begins the encounter in bat form. In this form she has an AoE silence tha
 She randomly charges people in the group, and summons 6-8 bloodseeker bats once per minute.
 When she drops below 50% HP, she reverts to priest form. Here she casts Shadow Word: Pain, Mind Flay, Chain Mind Flay and Greater Heal. 
 She also summons bomb bats which drop fire bombs on the ground which AOE DoT those inside. 
-¨*/
+ï¿½*/
 
 // High Priestess Venoxis AI
 

@@ -20,7 +20,7 @@
 
 #include "StdAfx.h"
 #include "AuthCodes.h"
-#include "svn_revision.h"
+#include "git_revision.h"
 
 bool ChatHandler::HandleRenameAllCharacter(const char * args, WorldSession * m_session)
 {
@@ -869,9 +869,9 @@ void WorldSession::FullLogin(Player* plr)
 
 	// Send revision (if enabled)
 #ifdef WIN32
-	//_player->BroadcastMessage("Server: %sAscNHalf r%u-%s-Win-%s", MSG_COLOR_WHITE, BUILD_REVISION, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
+	//_player->BroadcastMessage("Server: %sAscNHalf r%u-%s-Win-%s", MSG_COLOR_WHITE, BUILD_HASH, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
 #else
-	//_player->BroadcastMessage("Server: %sAscNHalf r%u-%s-%s", MSG_COLOR_WHITE, BUILD_REVISION, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
+	//_player->BroadcastMessage("Server: %sAscNHalf r%u-%s-%s", MSG_COLOR_WHITE, BUILD_HASH, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
 	//_player->BroadcastMessage("Built at %s on %s by %s@%s", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 #endif
 

@@ -314,11 +314,11 @@ void StatDumper::DumpStats()
     {
         // Dump server information.
 #ifdef WIN32
-		// fprintf(f, "    <platform>%s r%u/%s-Win-%s </platform>\n", sWorld.GetCoreName(), BUILD_REVISION, CONFIG, ARCH); GetCoreName function is not implemented yet on core
-		fprintf(f, "    <platform>%s r%u/%s-Win-%s </platform>\n", "AscNHalf", BUILD_REVISION, CONFIG, ARCH);
+		// fprintf(f, "    <platform>%s r%u/%s-Win-%s </platform>\n", sWorld.GetCoreName(), BUILD_HASH, CONFIG, ARCH); GetCoreName function is not implemented yet on core
+		fprintf(f, "    <platform>%s r%s/%s-Win-%s </platform>\n", "AscNHalf", BUILD_HASH, CONFIG, ARCH);
 #else
-		// fprintf(f, "    <platform>%s r%u/%s-%s </platform>\n", sWorld.GetCoreName(), BUILD_REVISION, PLATFORM_TEXT, ARCH); GetCoreName function is not implemented yet on core
-		fprintf(f, "    <platform>%s r%u/%s-%s </platform>\n", "AscNHalf", BUILD_REVISION, PLATFORM_TEXT, ARCH);
+		// fprintf(f, "    <platform>%s r%u/%s-%s </platform>\n", sWorld.GetCoreName(), BUILD_HASH, PLATFORM_TEXT, ARCH); GetCoreName function is not implemented yet on core
+		fprintf(f, "    <platform>%s r%s/%s-%s </platform>\n", "AscNHalf", BUILD_HASH, PLATFORM_TEXT, ARCH);
 #endif
 
         char uptime[80];

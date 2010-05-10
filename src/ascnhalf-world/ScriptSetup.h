@@ -32,7 +32,7 @@
 
 extern "C" SCRIPT_DECL uint32 _exp_get_version()
 {
-	return MAKE_SCRIPT_VERSION(BUILD_REVISION / 1000, BUILD_REVISION % 1000);
+	return MAKE_SCRIPT_VERSION(BUILD_HASH / 1000, BUILD_HASH % 1000);
 }
 
 #endif

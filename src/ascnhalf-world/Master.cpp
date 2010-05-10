@@ -27,7 +27,7 @@
 #include <sched.h>
 #endif
 
-#include "svn_revision.h"
+#include "git_revision.h"
 
 #include <signal.h>
 
@@ -163,7 +163,7 @@ bool Master::Run(int argc, char ** argv)
 	UNIXTIME = time(NULL);
 	g_localTime = *localtime(&UNIXTIME);
 
-	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
+	printf(BANNER, BUILD_HASH, CONFIG, PLATFORM_TEXT, ARCH);
 	sLog.outString("");
 	//printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 	sLog.outString("==============================================================================");

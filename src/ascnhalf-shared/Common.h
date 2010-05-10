@@ -57,7 +57,7 @@ enum MsTimeVariables
 #endif
 
 #include "ascnhalfConfig.h"
-#include "svn_revision.h"
+#include "git_revision.h"
 
 //#define CONFDIR "../etc" defined through cmake
 
