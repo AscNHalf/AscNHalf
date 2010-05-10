@@ -8,3 +8,4 @@
 *.suo
 *.pch
 *.pidb
+git_revision.h
