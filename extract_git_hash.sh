@@ -13,7 +13,8 @@ echo "#ifndef GIT_REVISION_H" >> git_revision.h
 echo "#define GIT_REVISION_H" >> git_revision.h
 echo "" >> git_revision.h
 echo "static const char * BUILD_TAG = \"ASCNHALF-1.0\";" >> git_revision.h
-echo "static const char * BUILD_REVISION = \""$hash"\";" >> git_revision.h
+echo "static const char * BUILD_HASH = \""$hash"\";" >> git_revision.h
+echo "static int BUILD_REVISION = 200;" >> git_revision.h
 echo "static const char * BUILD_USER = \"$USER\";" >> git_revision.h
 echo "static const char * BUILD_HOST = \"`hostname -f`\";" >> git_revision.h
 echo "" >> git_revision.h
