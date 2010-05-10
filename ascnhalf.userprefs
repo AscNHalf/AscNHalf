@@ -3,13 +3,10 @@
   <MonoDevelop.Ide.Workbench ctype="Workbench">
     <Pads>
       <Pad Id="ProjectPad">
-        <State expanded="True" selected="True">
-          <Node name="ascnhalf" expanded="True">
-            <Node name="src" expanded="True">
-              <Node name="ascnhalf-scripts" expanded="True" />
-            </Node>
-          </Node>
-        </State>
+        <State expanded="True" />
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
