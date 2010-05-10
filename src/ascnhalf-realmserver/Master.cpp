@@ -22,7 +22,7 @@
 #include "../ascnhalf-shared/svn_revision.h"
 #include <Console/CConsole.h>
 
-#define BANNER "AscNHalf r%u/%s-%s-%s :: Realm Server\n"
+#define BANNER "AscNHalf %s / %s-%s-%s :: Realm Server\n"
 
 #ifndef WIN32
 #include <sched.h>

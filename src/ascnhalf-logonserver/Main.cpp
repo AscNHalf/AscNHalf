@@ -26,7 +26,7 @@
 #endif
 #include "../ascnhalf-shared/ascnhalf_getopt.h"
 
-#define BANNER "AscNHalf r%u/%s-%s (%s) :: Logon Server\n"
+#define BANNER "AscNHalf %s / %s-%s (%s) :: Logon Server\n"
 
 
 #ifndef WIN32
