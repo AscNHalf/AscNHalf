@@ -215,8 +215,8 @@ void WSSocket::SendWoWPacket(Session * from, WorldPacket * pck)
 
 void WSSocket::OnConnect()
 {
-	WorldPacket data(ISMSG_AUTH_REQUEST, sizeof(std::string));
-	data << std::string(BUILD_HASH); // erm this is messed up by git.
+	WorldPacket data(ISMSG_AUTH_REQUEST, 4);
+	data << uint32(BUILD_REVISION); // erm this is messed up by git. - fixed using dummy hack
 	SendPacket(&data);
 }
 

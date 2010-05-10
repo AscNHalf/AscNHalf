@@ -62,8 +62,8 @@ ClusterInterface::~ClusterInterface()
 string ClusterInterface::GenerateVersionString()
 {
 	std::stringstream ss;
-	ss << "AscNHalf ";
-	ss << BUILD_HASH;
+	ss << "AscNHalf r";
+	ss << BUILD_REVISION;
 	ss << "/";
 	ss << CONFIG;
 	ss << "-";
@@ -145,7 +145,7 @@ void ClusterInterface::HandleAuthRequest(WorldPacket & pck)
 
 	WorldPacket data(ICMSG_AUTH_REPLY, 50);
 	data.append(key, 20);
-	data << uint32(BUILD_HASH);
+	data << uint32(BUILD_REVISION);
 	data << GenerateVersionString();
 	SendPacket(&data);
 
@@ -190,7 +190,7 @@ void ClusterInterface::HandleAuthResult(WorldPacket & pck)
 	}
 
 	WorldPacket data(ICMSG_REGISTER_WORKER, 4 + (sizeof(std::vector<uint32>::size_type) * maps.size()) + (sizeof(std::vector<uint32>::size_type) * instancedmaps.size()));
-	data << uint32(BUILD_HASH);
+	data << uint32(BUILD_REVISION);
 	data << maps;
 	data << instancedmaps;
 	SendPacket(&data);

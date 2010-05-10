@@ -32,8 +32,8 @@
 #include <svn_revision.h>
 #define SCRIPTLIB_HIPART(x) ((x >> 16))
 #define SCRIPTLIB_LOPART(x) ((x & 0x0000ffff))
-#define SCRIPTLIB_VERSION_MINOR (BUILD_HASH % 1000)
-#define SCRIPTLIB_VERSION_MAJOR (BUILD_HASH / 1000)
+#define SCRIPTLIB_VERSION_MINOR (BUILD_REVISION % 1000)
+#define SCRIPTLIB_VERSION_MAJOR (BUILD_REVISION / 1000)
 
 initialiseSingleton(ScriptMgr);
 initialiseSingleton(HookInterface);
