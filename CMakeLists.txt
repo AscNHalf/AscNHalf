@@ -22,11 +22,11 @@ OPTION(DO_DEV "Enable developer mode" 0)
 OPTION(NO_WARN "Disable all compile warnings" 1)
 
 EXECUTE_PROCESS(
-        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/extract_svn_revision.sh ${CMAKE_CURRENT_SOURCE_DIR} {rev}
-        OUTPUT_VARIABLE SVN_REVISION
+        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/extract_git_hash.sh ${CMAKE_CURRENT_SOURCE_DIR} {rev}
+        OUTPUT_VARIABLE GIT_HASH
 )
 
-message("* AscNHalf Core revision: ${SVN_REVISION}")
+message("* AscNHalf Core hash: ${GIT_HASH}")
 
 
 IF(PREFIX)
