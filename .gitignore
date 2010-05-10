@@ -1,0 +1,9 @@
+*.o
+*.bin
+*.so
+*.a
+*.exe
+*.dll
+*.ncb
+*.suo
+*.pch
