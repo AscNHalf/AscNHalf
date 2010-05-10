@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2857B73E-F847-4B02-9238-064979017E93}") = "ascnhalf", "ascnhalf.cproj", "{7989BE18-30E7-4A84-A352-42DED55924FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7989BE18-30E7-4A84-A352-42DED55924FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7989BE18-30E7-4A84-A352-42DED55924FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7989BE18-30E7-4A84-A352-42DED55924FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7989BE18-30E7-4A84-A352-42DED55924FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ascnhalf.cproj
+	EndGlobalSection
+EndGlobal
