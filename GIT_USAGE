@@ -1,0 +1,22 @@
+# git tutorial
+# not complete
+# by Twl
+
+# Magyar
+
+-- Branchok és merge
+
+Jelenleg 2 branch-unk van, az experimental és a master (alapértelmezett). Az experimental-ba olyan dolgok kerülnek amelyek esetleg nem fordulnak le, fordító függőek vagy az új C++ standard elemeit használják.
+Mikor letöltöd a repo-t (git clone) akkor a master branchot látod. Ha meg szeretnéd tekinteni / dolgozni szeretnél az experimental branch-ban akkor add ki a következő parancsot:
+
+git checkout experimental
+
+ezzel átléptél a másik branchra. Ne felejtsd el, hogy innentől minden add, commit az experimental branch-on kerül végrehajtásra. Ha vissza szeretnél lépni a master branch-ra a következőképp teheted:
+
+git checkout master
+
+ennyi.
+
+# folyt. köv.
+
+# English
