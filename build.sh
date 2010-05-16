@@ -13,7 +13,7 @@ mkdir build
 echo -e "Running cmake...\nPrefix is: $currentdir/build";
 chmod +x ./extract_git_hash.sh
 sleep 2
-cmake -DPREFIX="$currentdir/build" -DDO_MYSQL=1 -DDO_SCRIPTS=0
+cmake -DPREFIX="$currentdir/build" -DDO_MYSQL=1 -DDO_SCRIPTS=1
 if [ "$?" = "0" ]; then echo -e "Cmake finished successfully.\n"
 else
 echo -e "\nCmake returned errors. Aborting.\n";
