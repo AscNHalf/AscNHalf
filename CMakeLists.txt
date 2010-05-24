@@ -20,6 +20,8 @@ OPTION(DO_DEBUG "Debug mode" 0)
 OPTION(DO_WARN "Enable all compile warnings" 0)
 OPTION(DO_DEV "Enable developer mode" 0)
 OPTION(NO_WARN "Disable all compile warnings" 1)
+OPTION(DO_FATAL_ERROR "Define -Wfatal-errors. Stop at first error." 1)
+
 
 EXECUTE_PROCESS(
         COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/extract_git_hash.sh ${CMAKE_CURRENT_SOURCE_DIR} {rev}
@@ -35,6 +37,7 @@ ELSE(PREFIX)
 	EXECUTE_PROCESS(COMMAND pwd OUTPUT_VARIABLE CURRENT_DIR)
     SET(CMAKE_INSTALL_PREFIX ${CURRENT_DIR}/build)
 ENDIF(PREFIX)
+
 
 EXECUTE_PROCESS(COMMAND pwd OUTPUT_VARIABLE CDIR)
 SET(ASCNHALF_SOURCE ${CDIR}/src)
@@ -53,6 +56,11 @@ add_definitions("-DCONFDIR=\"${CONFDIR}\"")
 add_definitions("-DLIBSDIR=\"${LIBSDIR}\"")
 add_definitions("-DBINDIR=\"${BINDIR}\"")
 
+if(DO_FATAL_ERROR)
+message("* Stopping at first error.")
+add_definitions(-Wfatal-errors)
+endif(DO_FATAL_ERROR)
+
 IF(DO_DEV)
 message("* Developer mode: ON")
 add_definitions("-DASCENT_DEV")
@@ -63,6 +71,8 @@ message("* With Script library")
 else(DO_SCRIPTS)
 message("* Without Script library")
 endif(DO_SCRIPTS)
+
+
 message("* Will install to: ${CMAKE_INSTALL_PREFIX}")
 message("* With config dir at: ${CONFDIR}")
 message("* Libs install dir at: ${LIBSDIR}")
@@ -92,7 +102,7 @@ endif(DO_DEBUG)
 
 if(DO_WARN)
     message("* All warnings mode")
-    add_definitions(-Wall -Wfatal-errors -Wextra)
+    add_definitions(-Wall -Wextra)
 endif(DO_WARN)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
@@ -106,6 +116,8 @@ IF(NO_WARN)
 message("* No warnings mode.")
 add_definitions(--no-warnings)
 ENDIF(NO_WARN)
+
+
 
 INCLUDE_DIRECTORIES(
     src/ascnhalf-shared
