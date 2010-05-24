@@ -1085,13 +1085,13 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 		case Z_VERSION_ERROR:		//-6
 		{
 			delete [] data;	 
-			sLog.outString("WORLD WARNING: Decompression of account data %d for %s FAILED.", uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName());
+			sLog.outString("WORLD WARNING: Decompression of account data %d for %s FAILED.", uiID, GetPlayer() ? (GetPlayer()->GetName()) : GetAccountName().c_str());
 			break;
 		}
 
 		default:
 			delete [] data;	 
-			sLog.outString("WORLD WARNING: Decompression gave a unknown error: %x, of account data %d for %s FAILED.", ZlibResult, uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName());
+			sLog.outString("WORLD WARNING: Decompression gave a unknown error: %x, of account data %d for %s FAILED.", ZlibResult, uiID, GetPlayer() ? GetPlayer()->GetName() : GetAccountName().c_str());
 			break;
 		}
 	}
