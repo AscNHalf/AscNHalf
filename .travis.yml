@@ -6,7 +6,7 @@
 language: cpp
 
 install:
- - sudo apt-get install build-essential unzip make cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient15-dev
+ - sudo apt-get install build-essential unzip make cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient-dev
 
 script:
  - ./build_travis.sh
