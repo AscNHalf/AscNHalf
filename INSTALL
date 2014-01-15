@@ -10,7 +10,7 @@ To build on linux, you need a few packages and their dependencies first.
 To install them, under Debian and Ubuntu you can use the following command:
 
 
-sudo apt-get install build-essential unzip make subversion cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient15-dev
+sudo apt-get install build-essential unzip make git-core cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient15-dev
 
 then you need to set executable privileges for our build script:
 
