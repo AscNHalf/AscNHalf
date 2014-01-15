@@ -9,7 +9,7 @@ install:
  - sudo apt-get install build-essential unzip make cmake zlib1g-dev libssl-dev libtool libpcre3-dev mysql-client libmysql++-dev libmysqlclient15-dev
 
 script:
- - ./build.sh
+ - ./build_travis.sh
 
 # Only watch the master branch
 branches:
