@@ -20,4 +20,4 @@ branches:
 notifications:
   irc:
     channels:
-      - "irc.yeahunter.hu#dev"
+      - "flame.yeahunter.hu#dev"
